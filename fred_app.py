@@ -295,17 +295,25 @@ def send_emailjs(email, source, extra=""):
             "template_id": template_id,
             "user_id":     public_key,
             "template_params": {
+                "to_email":   "fredapp@tutamail.com",
                 "from_email": email,
+                "reply_to":   email,
                 "source":     source,
-                "extra":      extra,
+                "message":    extra,
+                "subject":    f"FRED — new {source} submission",
             }
         }
-        requests.post(
+        response = requests.post(
             "https://api.emailjs.com/api/v1.0/email/send",
             json=payload,
-            timeout=5,
+            headers={"Content-Type": "application/json"},
+            timeout=8,
         )
-    except Exception:
+        # Log status to Streamlit console (not shown to parent)
+        if response.status_code != 200:
+            print(f"EmailJS status: {response.status_code} — {response.text}")
+    except Exception as e:
+        print(f"EmailJS error: {e}")
         pass  # Silent — never surface errors to parent
 
 
@@ -513,27 +521,37 @@ def analyse_section_f(f_blocks):
         })
 
     # ── Check 7: Universal provision substitution ─────────────────────────
+    # Note: Warwickshire EHCPs contain a standard disclaimer header:
+    # "The provision set out here is in addition to that which all pupils should have access to"
+    # This is the LA correctly stating the opposite of substitution — must NOT be flagged.
+    # Only flag where universal provision is described AS the specific provision itself.
     universal_pattern = re.compile(
-        r'\b(quality first|universal|whole class|all pupils|classroom support|'
-        r'differentiation|ordinarily available)\b',
+        r'\b(quality first teaching|ordinarily available provision|'
+        r'universal provision|whole school approach|available to all pupils)\b',
         re.IGNORECASE
     )
     m = universal_pattern.search(combined_f)
     if m:
         ctx = combined_f[max(0, m.start()-80):m.end()+80].strip()
-        findings.append({
-            "tier": "red",
-            "title": "Universal provision substituted for specific provision",
-            "extract": ctx[:300],
-            "commentary": (
-                "Section F must contain provision that is specific to this child, "
-                "above and beyond what is available to all pupils. Universal or "
-                "'quality first' provision does not meet the lawful requirement for "
-                "specified provision in an EHCP. This is the most serious Section F failure. "
-                "Challenge and request replacement with individually specified provision."
-            ),
-            "delivery_log_required": True,
-        })
+        # Skip if this is the standard Warwickshire disclaimer header
+        disclaimer = re.compile(
+            r'provision set out here is in addition to that which all pupils',
+            re.IGNORECASE
+        )
+        if not disclaimer.search(ctx):
+            findings.append({
+                "tier": "red",
+                "title": "Universal provision substituted for specific provision",
+                "extract": ctx[:300],
+                "commentary": (
+                    "Section F must contain provision that is specific to this child, "
+                    "above and beyond what is available to all pupils. Universal or "
+                    "'quality first' provision does not meet the lawful requirement for "
+                    "specified provision in an EHCP. This is the most serious Section F failure. "
+                    "Challenge and request replacement with individually specified provision."
+                ),
+                "delivery_log_required": True,
+            })
 
     # ── Check 8: Recommendation laundering ───────────────────────────────
     launder_pattern = re.compile(
@@ -667,7 +685,11 @@ def analyse_section_e(e_blocks):
 
 
 def analyse_section_b(b_blocks, f_blocks):
-    """Cross-reference Section B needs against Section F provision."""
+    """
+    Cross-reference Section B needs against Section F provision.
+    For each need area identified in B, check whether F contains matching provision.
+    Produce a 'what good looks like' summary for each gap found.
+    """
     findings = []
     if not b_blocks:
         return findings
@@ -675,32 +697,118 @@ def analyse_section_b(b_blocks, f_blocks):
     combined_b = "\n\n".join(b_blocks)
     combined_f = "\n\n".join(f_blocks) if f_blocks else ""
 
-    # Check for health needs in B but check C/G
-    health_pattern = re.compile(r'\b(health|medical|physical|therapy|therapist|OT|SALT|speech)\b', re.IGNORECASE)
+    # Define need areas with keywords and what good looks like
+    need_areas = [
+        {
+            "name": "Communication and interaction",
+            "b_keywords": r'\b(communication|speech|language|SALT|interaction|social communication|autism|ASD|pragmatic)\b',
+            "f_keywords": r'\b(speech|language|communication|SALT|social skills|interaction)\b',
+            "what_good_looks_like": (
+                "Section F should specify: the frequency of speech and language therapy or "
+                "targeted communication sessions (e.g. two sessions per week), the duration "
+                "of each session in minutes, the role and qualification of the deliverer "
+                "(e.g. Speech and Language Therapist or trained TA working to a SALT programme), "
+                "and the specific strategies to be used. Generalised statements such as "
+                "'communication support will be provided' are not sufficient."
+            ),
+        },
+        {
+            "name": "Cognition and learning",
+            "b_keywords": r'\b(cognition|learning|literacy|numeracy|reading|writing|dyslexia|processing|memory|attention)\b',
+            "f_keywords": r'\b(literacy|numeracy|reading|writing|learning support|intervention|programme)\b',
+            "what_good_looks_like": (
+                "Section F should specify: named literacy or learning interventions (not generic "
+                "'learning support'), frequency and duration of sessions, the role of the "
+                "deliverer and their relevant training, and measurable targets that link "
+                "directly to Section E outcomes. 'Access to' a resource is not provision."
+            ),
+        },
+        {
+            "name": "Social, emotional and mental health",
+            "b_keywords": r'\b(SEMH|emotional|mental health|anxiety|behaviour|wellbeing|regulation|self.esteem|ADHD|attachment)\b',
+            "f_keywords": r'\b(emotional|SEMH|regulation|therapeutic|counselling|pastoral|wellbeing|anxiety)\b',
+            "what_good_looks_like": (
+                "Section F should specify: named therapeutic or emotional support provision "
+                "(e.g. weekly one-to-one sessions with a trained SEMH TA or school counsellor), "
+                "the frequency and duration, the deliverer's role and relevant training, "
+                "and specific strategies referenced from assessment. 'Pastoral support' "
+                "without specification does not meet the lawful standard."
+            ),
+        },
+        {
+            "name": "Sensory and physical needs",
+            "b_keywords": r'\b(sensory|physical|motor|OT|occupational therapy|fine motor|gross motor|proprioception|vestibular|sensory processing)\b',
+            "f_keywords": r'\b(OT|occupational|sensory|motor|physical|sensory diet|movement break)\b',
+            "what_good_looks_like": (
+                "Section F should specify: named occupational therapy or sensory integration "
+                "provision, frequency and duration of sessions, the role of the deliverer "
+                "(e.g. Occupational Therapist or TA trained to deliver OT programme), "
+                "and the specific programme or strategies. Environmental adjustments should "
+                "be listed specifically, not described as generalised 'reasonable adjustments'."
+            ),
+        },
+    ]
+
+    gaps_found = []
+
+    for area in need_areas:
+        b_match = re.search(area["b_keywords"], combined_b, re.IGNORECASE)
+        f_match = re.search(area["f_keywords"], combined_f, re.IGNORECASE)
+
+        if b_match and not f_match:
+            # Need identified in B with no corresponding provision in F — RED
+            ctx = combined_b[max(0, b_match.start()-60):b_match.end()+120].strip()
+            findings.append({
+                "tier": "red",
+                "title": f"Need identified in Section B with no provision in Section F — {area['name']}",
+                "extract": ctx[:280],
+                "commentary": (
+                    f"Section B identifies {area['name'].lower()} needs but Section F contains "
+                    f"no corresponding provision. Under the Children and Families Act 2014, "
+                    f"every need identified in Section B must be met by provision in Section F. "
+                    f"This gap must be addressed at annual review.\n\n"
+                    f"What good looks like: {area['what_good_looks_like']}"
+                ),
+                "delivery_log_required": True,
+            })
+            gaps_found.append(area["name"])
+
+        elif b_match and f_match:
+            # Need present in B and F — check F provision is specific enough
+            # Grab the F context around the match
+            f_ctx = combined_f[max(0, f_match.start()-60):f_match.end()+120].strip()
+            # Check for vague language in the matched F provision
+            vague = re.search(
+                r'\b(support will be provided|will be supported|will have access|'
+                r'as appropriate|where necessary|as needed)\b',
+                f_ctx, re.IGNORECASE
+            )
+            if vague:
+                findings.append({
+                    "tier": "amber",
+                    "title": f"Section F provision for {area['name']} may lack specificity",
+                    "extract": f_ctx[:280],
+                    "commentary": (
+                        f"Section B identifies {area['name'].lower()} needs and Section F "
+                        f"references corresponding provision, but the language used may be "
+                        f"insufficiently specific to be enforceable.\n\n"
+                        f"What good looks like: {area['what_good_looks_like']}"
+                    ),
+                    "delivery_log_required": False,
+                })
+
+    # Health needs cross-reference
+    health_pattern = re.compile(r'\b(health|medical|therapy|therapist|OT|SALT|physiotherapy)\b', re.IGNORECASE)
     if health_pattern.search(combined_b) and not health_pattern.search(combined_f):
         findings.append({
             "tier": "amber",
-            "title": "Health needs identified in Section B — check Sections C and G",
+            "title": "Health needs in Section B — check Sections C and G for corresponding provision",
             "extract": "",
             "commentary": (
                 "Section B describes health-related needs. Sections C and G should contain "
                 "corresponding health provision and outcomes. If these sections are empty or "
-                "absent, the needs are not being met through the EHCP framework."
-            ),
-            "delivery_log_required": False,
-        })
-
-    # Social care needs
-    social_pattern = re.compile(r'\b(social care|social worker|EHWB|emotional health|wellbeing|pastoral)\b', re.IGNORECASE)
-    if social_pattern.search(combined_b) and not social_pattern.search(combined_f):
-        findings.append({
-            "tier": "amber",
-            "title": "Social or emotional needs identified in Section B — check Sections D and H",
-            "extract": "",
-            "commentary": (
-                "Section B describes social, emotional, or wellbeing needs. Sections D and H "
-                "should contain corresponding social care provision. If absent, raise at "
-                "annual review."
+                "absent, the needs identified in Section B are not being addressed through "
+                "the full EHCP framework. Raise at annual review."
             ),
             "delivery_log_required": False,
         })
@@ -824,103 +932,219 @@ def generate_word_report(findings, child_name="your child", situation="", doc_ty
 
 
 def generate_pdf_report(findings, child_name="your child", situation="", doc_type="EHCP"):
-    """Generate PDF report using ReportLab."""
+    """Generate PDF report using ReportLab — substantial, well-spaced output."""
     buf = BytesIO()
-    doc = SimpleDocTemplate(buf, pagesize=A4,
-                            rightMargin=2*cm, leftMargin=2*cm,
-                            topMargin=2*cm, bottomMargin=2*cm)
+    doc = SimpleDocTemplate(
+        buf, pagesize=A4,
+        rightMargin=2.5*cm, leftMargin=2.5*cm,
+        topMargin=2.5*cm, bottomMargin=2.5*cm,
+        title="FRED Report",
+        author="FRED — Families' Rights and Entitlements Directory",
+    )
 
     styles = getSampleStyleSheet()
-    title_style = ParagraphStyle('title', fontSize=22, alignment=TA_CENTER,
-                                 textColor=colors.HexColor('#1a2744'), spaceAfter=6,
-                                 fontName='Helvetica-Bold')
-    sub_style   = ParagraphStyle('sub', fontSize=11, alignment=TA_CENTER,
-                                 textColor=colors.HexColor('#1a2744'), spaceAfter=20)
-    h1_style    = ParagraphStyle('h1', fontSize=14, fontName='Helvetica-Bold',
-                                 textColor=colors.HexColor('#1a2744'), spaceAfter=8, spaceBefore=14)
-    h2_red      = ParagraphStyle('h2red', fontSize=12, fontName='Helvetica-Bold',
-                                 textColor=colors.HexColor('#C0392B'), spaceAfter=4, spaceBefore=10)
-    h2_amber    = ParagraphStyle('h2amber', fontSize=12, fontName='Helvetica-Bold',
-                                 textColor=colors.HexColor('#D4A017'), spaceAfter=4, spaceBefore=10)
-    h2_green    = ParagraphStyle('h2green', fontSize=12, fontName='Helvetica-Bold',
-                                 textColor=colors.HexColor('#1E8449'), spaceAfter=4, spaceBefore=10)
-    body_style  = ParagraphStyle('body', fontSize=10, spaceAfter=8, leading=14)
-    italic_style= ParagraphStyle('italic', fontSize=10, fontName='Helvetica-Oblique',
-                                 spaceAfter=6, textColor=colors.HexColor('#444'))
-    bold_style  = ParagraphStyle('bold', fontSize=10, fontName='Helvetica-Bold', spaceAfter=6)
+
+    title_style = ParagraphStyle(
+        'fred_title', fontSize=28, alignment=TA_CENTER,
+        textColor=colors.HexColor('#1a2744'),
+        spaceAfter=4, spaceBefore=0,
+        fontName='Helvetica-Bold',
+        leading=34,
+    )
+    sub_style = ParagraphStyle(
+        'fred_sub', fontSize=11, alignment=TA_CENTER,
+        textColor=colors.HexColor('#4a5a7a'),
+        spaceAfter=6, spaceBefore=0,
+        fontName='Helvetica',
+        leading=16,
+    )
+    meta_style = ParagraphStyle(
+        'fred_meta', fontSize=10, alignment=TA_CENTER,
+        textColor=colors.HexColor('#6a7a90'),
+        spaceAfter=20, spaceBefore=0,
+        fontName='Helvetica-Oblique',
+        leading=14,
+    )
+    section_h_style = ParagraphStyle(
+        'fred_section', fontSize=15, fontName='Helvetica-Bold',
+        textColor=colors.HexColor('#1a2744'),
+        spaceAfter=8, spaceBefore=20,
+        leading=20,
+        borderPad=0,
+    )
+    h2_red = ParagraphStyle(
+        'fred_h2red', fontSize=12, fontName='Helvetica-Bold',
+        textColor=colors.HexColor('#C0392B'),
+        spaceAfter=4, spaceBefore=16, leading=16,
+    )
+    h2_amber = ParagraphStyle(
+        'fred_h2amber', fontSize=12, fontName='Helvetica-Bold',
+        textColor=colors.HexColor('#D4A017'),
+        spaceAfter=4, spaceBefore=16, leading=16,
+    )
+    h2_green = ParagraphStyle(
+        'fred_h2green', fontSize=12, fontName='Helvetica-Bold',
+        textColor=colors.HexColor('#1E8449'),
+        spaceAfter=4, spaceBefore=16, leading=16,
+    )
+    finding_title_style = ParagraphStyle(
+        'fred_finding_title', fontSize=11, fontName='Helvetica-Bold',
+        textColor=colors.HexColor('#1a1a2e'),
+        spaceAfter=6, spaceBefore=4, leading=15,
+    )
+    extract_style = ParagraphStyle(
+        'fred_extract', fontSize=10, fontName='Helvetica-Oblique',
+        textColor=colors.HexColor('#555555'),
+        spaceAfter=8, spaceBefore=2, leading=14,
+        leftIndent=12, rightIndent=12,
+    )
+    body_style = ParagraphStyle(
+        'fred_body', fontSize=10, fontName='Helvetica',
+        textColor=colors.HexColor('#1a1a2e'),
+        spaceAfter=10, spaceBefore=0, leading=15,
+    )
+    bold_style = ParagraphStyle(
+        'fred_bold', fontSize=10, fontName='Helvetica-Bold',
+        textColor=colors.HexColor('#1a1a2e'),
+        spaceAfter=8, spaceBefore=4, leading=14,
+    )
+    footer_style = ParagraphStyle(
+        'fred_footer', fontSize=9, fontName='Helvetica-Oblique',
+        textColor=colors.HexColor('#888888'),
+        spaceAfter=0, spaceBefore=8, leading=13, alignment=TA_CENTER,
+    )
 
     story = []
-    story.append(Paragraph("FRED Report", title_style))
+
+    # ── Cover block ───────────────────────────────────────────────────────
+    story.append(Spacer(1, 1*cm))
+    story.append(Paragraph("FRED", title_style))
     story.append(Paragraph("Families' Rights and Entitlements Directory", sub_style))
-    story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor('#d0dae8')))
-    story.append(Spacer(1, 12))
-
-    story.append(Paragraph(f"Document type: {doc_type}", body_style))
+    story.append(Spacer(1, 0.3*cm))
+    story.append(HRFlowable(width="100%", thickness=1.5, color=colors.HexColor('#1a2744'), spaceAfter=8))
+    story.append(Paragraph("EHCP Analysis Report", meta_style))
+    story.append(Paragraph(f"Document type: {doc_type}", meta_style))
     if situation:
-        story.append(Paragraph(f"Context: {situation}", body_style))
+        story.append(Paragraph(f"Context: {situation}", meta_style))
+    story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor('#d0dae8'), spaceAfter=16))
+    story.append(Spacer(1, 0.5*cm))
 
-    story.append(Spacer(1, 8))
-    story.append(Paragraph("Summary", h1_style))
+    # ── Summary ───────────────────────────────────────────────────────────
+    story.append(Paragraph("Summary", section_h_style))
+    story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor('#d0dae8'), spaceAfter=10))
 
     red_n   = sum(1 for f in findings if f["tier"] == "red")
     amber_n = sum(1 for f in findings if f["tier"] == "amber")
     green_n = sum(1 for f in findings if f["tier"] == "green")
+
     story.append(Paragraph(
-        f"This report identified {red_n} lawful requirement(s) not met (Red), "
-        f"{amber_n} best practice gap(s) (Amber), and {green_n} compliant area(s) (Green).",
+        f'<font color="#C0392B"><b>{red_n} Red finding{"s" if red_n != 1 else ""}</b></font> — '
+        f'lawful requirement{"s" if red_n != 1 else ""} not met. Must be addressed at annual review.',
+        body_style
+    ))
+    story.append(Paragraph(
+        f'<font color="#D4A017"><b>{amber_n} Amber finding{"s" if amber_n != 1 else ""}</b></font> — '
+        f'best practice gap{"s" if amber_n != 1 else ""}. Worth raising at annual review.',
+        body_style
+    ))
+    story.append(Paragraph(
+        f'<font color="#1E8449"><b>{green_n} Green finding{"s" if green_n != 1 else ""}</b></font> — '
+        f'compliant. Use as benchmark when challenging non-compliant provision.',
         body_style
     ))
 
+    story.append(Spacer(1, 0.4*cm))
+
+    # Delivery log alert
     needs_log = any(f.get("delivery_log_required") for f in findings)
     if needs_log:
+        story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor('#D4A017'), spaceAfter=6))
         story.append(Paragraph(
-            "⚑  One or more findings require a delivery log. "
-            "If delivery of provision is not logged, it did not happen. "
-            "Request the school's delivery records immediately.",
+            "⚑  Delivery log required",
             bold_style
         ))
+        story.append(Paragraph(
+            "One or more findings require a delivery log. "
+            "If provision has been delivered, there must be a contemporaneous record. "
+            "If it is not logged, it did not happen. "
+            "Request the school's delivery records immediately.",
+            body_style
+        ))
+        story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor('#D4A017'), spaceAfter=10))
 
-    story.append(Spacer(1, 8))
-    story.append(Paragraph("Findings", h1_style))
-    story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor('#d0dae8')))
+    story.append(Spacer(1, 0.6*cm))
+
+    # ── Findings ──────────────────────────────────────────────────────────
+    story.append(Paragraph("Findings", section_h_style))
+    story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor('#d0dae8'), spaceAfter=12))
 
     tier_h_styles = {"red": h2_red, "amber": h2_amber, "green": h2_green}
-    tier_labels   = {"red":   "RED — Lawful Requirement Not Met",
-                     "amber": "AMBER — Best Practice Gap",
-                     "green": "GREEN — Compliant"}
+    tier_labels   = {
+        "red":   "RED — Lawful Requirement Not Met",
+        "amber": "AMBER — Best Practice Gap",
+        "green": "GREEN — Compliant",
+    }
 
-    for finding in findings:
+    for i, finding in enumerate(findings):
         tier = finding["tier"]
-        story.append(Paragraph(tier_labels.get(tier, tier.upper()), tier_h_styles.get(tier, h1_style)))
-        story.append(Paragraph(f"<b>{finding['title']}</b>", body_style))
+        story.append(Paragraph(tier_labels.get(tier, tier.upper()), tier_h_styles.get(tier, body_style)))
+        story.append(Paragraph(finding['title'], finding_title_style))
 
         if finding.get("extract"):
-            story.append(Paragraph(finding["extract"], italic_style))
+            # Escape any XML special chars in extract
+            safe_extract = finding["extract"][:350].replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+            story.append(Paragraph(f'"{safe_extract}"', extract_style))
 
-        story.append(Paragraph(finding["commentary"], body_style))
+        # Split commentary on double newlines for readability
+        commentary_parts = finding["commentary"].split("\n\n")
+        for part in commentary_parts:
+            if part.strip():
+                story.append(Paragraph(part.strip(), body_style))
 
         if finding.get("delivery_log_required"):
             story.append(Paragraph(
-                "Delivery log required: If this provision has been delivered, "
+                "⚑  Delivery log required: if this provision has been delivered, "
                 "there must be a contemporaneous record. Request the delivery log.",
                 bold_style
             ))
-        story.append(Spacer(1, 4))
-        story.append(HRFlowable(width="100%", thickness=0.3, color=colors.HexColor('#e0e8f0')))
 
-    story.append(Spacer(1, 12))
-    story.append(Paragraph("What next?", h1_style))
+        story.append(Spacer(1, 0.3*cm))
+        story.append(HRFlowable(width="100%", thickness=0.3, color=colors.HexColor('#e0e8f0'), spaceAfter=8))
+
+    story.append(Spacer(1, 0.8*cm))
+
+    # ── What next ─────────────────────────────────────────────────────────
+    story.append(Paragraph("What next?", section_h_style))
+    story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor('#d0dae8'), spaceAfter=12))
+
     story.append(Paragraph(
-        "Red findings must be addressed at annual review. "
-        "Amber findings are worth raising. "
-        "Green entries are compliant — use these as benchmarks when challenging non-compliant provision.",
+        "<b>Red findings</b> must be addressed at your annual review. "
+        "Where there are shortcomings in the delivery of specified provision, "
+        "the school has a duty of care — the duty to deliver what is written in the EHCP "
+        "is absolute under the Children and Families Act 2014. It is not discretionary and "
+        "it does not depend on resources. If provision has not been delivered, you have the "
+        "right to ask for evidence of delivery and to request that the annual review formally "
+        "records the gap.",
         body_style
     ))
-    story.append(Spacer(1, 8))
+    story.append(Paragraph(
+        "<b>Amber findings</b> are worth raising. They are not lawful failures but they affect "
+        "the quality and accountability of your child's support.",
+        body_style
+    ))
+    story.append(Paragraph(
+        "<b>Green entries</b> are your benchmarks. Use them when challenging non-compliant provision — "
+        "if one section of the EHCP meets the standard, there is no reason another cannot.",
+        body_style
+    ))
+
+    story.append(Spacer(1, 0.8*cm))
+    story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor('#1a2744'), spaceAfter=8))
     story.append(Paragraph(
         "This report is produced by FRED — Families' Rights and Entitlements Directory. "
-        "It provides lawful analysis, not legal advice.",
-        italic_style
+        "It provides lawful analysis, not legal advice. "
+        "Reference: Children and Families Act 2014 and SEND Code of Practice 2015.",
+        footer_style
     ))
 
     doc.build(story)
@@ -1397,9 +1621,19 @@ def page_full_report():
     st.markdown("---")
     st.markdown("### What next?")
     st.markdown(
-        "Red findings must be addressed at annual review. "
-        "Amber findings are worth raising. "
-        "Green entries are your benchmarks. "
+        "**Red findings** must be addressed at your annual review. "
+        "Where there are shortcomings in the delivery of specified provision, "
+        "the school has a duty of care — the duty to deliver what is written in the EHCP "
+        "is absolute under the Children and Families Act 2014. It is not discretionary and "
+        "it does not depend on resources. If provision has not been delivered, you have the "
+        "right to ask for evidence of delivery and to request that the annual review formally "
+        "records the gap."
+        "\n\n"
+        "**Amber findings** are worth raising. They are not lawful failures but they affect "
+        "the quality and accountability of your child's support."
+        "\n\n"
+        "**Green entries** are your benchmarks. Use them when challenging non-compliant provision — "
+        "if one section of the EHCP meets the standard, there is no reason another cannot."
         "\n\n"
         "Take your report to your annual review meeting. "
         "You can also upload correspondence — emails from school or the LA — "
