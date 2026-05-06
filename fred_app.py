@@ -2,7 +2,7 @@ import streamlit as st
 import fitz  # PyMuPDF
 import re
 import json
-import requests
+import datetime
 from io import BytesIO
 from docx import Document
 from docx.shared import Pt, RGBColor, Inches
@@ -30,6 +30,8 @@ AMBER  = "#D4A017"
 GREEN  = "#1E8449"
 NAVY   = "#1a2744"
 LIGHT  = "#f7f9fc"
+
+GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSeA1F9nEdQWkmplbAh973XKq2EsW0bEkhJiw7drhP7BZaPjKQ/viewform"
 
 # ── CUSTOM CSS ───────────────────────────────────────────────────────────────
 
@@ -283,58 +285,6 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ── EMAILJS ──────────────────────────────────────────────────────────────────
-
-def send_emailjs(email, source, extra_dict=None):
-    """
-    Send via EmailJS using client-side JavaScript injected into the browser.
-    This bypasses Streamlit Cloud network restrictions entirely.
-    EmailJS runs in the parent's browser, not on the server.
-    """
-    import datetime
-    import json as _json
-    if extra_dict is None:
-        extra_dict = {}
-
-    timestamp = datetime.datetime.now().strftime("%d %b %Y %H:%M")
-
-    params = {
-        "name":       email,
-        "email":      email,
-        "user_email": email,
-        "message":    f"Source: {source}",
-        "timestamp":  timestamp,
-        "q1": extra_dict.get("new_info", extra_dict.get("message", "")),
-        "q2": extra_dict.get("tl_clear", ""),
-        "q3": extra_dict.get("layout", ""),
-        "q4": extra_dict.get("would_pay", ""),
-        "q5": extra_dict.get("fair_price", ""),
-        "q6": extra_dict.get("subscribe", ""),
-        "q7": extra_dict.get("personalise", ""),
-        "q8": extra_dict.get("other", ""),
-        "q9": extra_dict.get("notify", extra_dict.get("notify", "")),
-    }
-
-    params_json = _json.dumps(params)
-
-    js = f"""
-    <script>
-    (function() {{
-        var script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js';
-        script.onload = function() {{
-            emailjs.init('ieFEY10YArTGltwrf');
-            emailjs.send('service_8fbqfzn', 'template_44rbysv', {params_json})
-                .then(function() {{
-                    console.log('EmailJS sent OK [{source}]');
-                }}, function(err) {{
-                    console.log('EmailJS error [{source}]:', JSON.stringify(err));
-                }});
-        }};
-        document.head.appendChild(script);
-    }})();
-    </script>
-    """
-    st.components.v1.html(js, height=0, scrolling=False)
 
 
 # ── PDF PARSER ────────────────────────────────────────────────────────────────
@@ -1183,11 +1133,13 @@ def init_state():
         "doc_type": "Final EHCP",
         "situation": "",
         "email_submitted": False,
+        "email_address": "",
         "survey_submitted": False,
         "show_full_report": False,
         "relationship_tone": "neutral",
         "upcoming_dates": "",
         "doc_name": "",
+        "subscribed": False,
     }
     for k, v in defaults.items():
         if k not in st.session_state:
@@ -1515,22 +1467,19 @@ def page_sneak_peek():
 
     st.markdown("## Your report is ready")
     st.markdown(
-        "Here is one real finding from your EHCP analysis. "
-        "This is exactly what the full report looks like — no preview blur, no teaser. "
-        "The most significant finding is shown below."
+        "Here is one real finding from your EHCP — exactly what the full report looks like. "
+        "No blur. No teaser. The most significant finding from your document."
     )
 
-    # Show the top red finding (or first finding if no reds)
     red_findings = [f for f in findings if f["tier"] == "red"]
     preview_finding = red_findings[0] if red_findings else findings[0] if findings else None
 
     if preview_finding:
         st.markdown('<div class="sneak-box">', unsafe_allow_html=True)
-        st.markdown("**Preview finding — from your EHCP:**")
+        st.markdown("**Preview — from your EHCP:**")
         render_finding_card(preview_finding, show_full=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # Summary counts
     red_n   = sum(1 for f in findings if f["tier"] == "red")
     amber_n = sum(1 for f in findings if f["tier"] == "amber")
     green_n = sum(1 for f in findings if f["tier"] == "green")
@@ -1543,35 +1492,44 @@ def page_sneak_peek():
         <span style="color:{AMBER};font-weight:700;">{amber_n} Amber</span> &nbsp;·&nbsp;
         <span style="color:{GREEN};font-weight:700;">{green_n} Green</span>
       </p>
-      <p style="margin:0.5rem 0 0 0;font-size:0.9rem;color:#555;">
-        Upload first. Decide after. Your report is ready before you pay.
-      </p>
     </div>
     """, unsafe_allow_html=True)
 
     st.markdown("---")
-    st.markdown("### Get your full report")
-    st.markdown("Enter your email address below. During beta, full access is free — no card details required. Your email is how we send you your report and keep you updated.")
 
+    # ── Email gate ────────────────────────────────────────────────────────
     if not st.session_state.email_submitted:
-        with st.form("email_capture"):
-            email = st.text_input("Your email address")
-            submitted = st.form_submit_button("Get my full report")
+        st.markdown("### Access your full report")
+        st.markdown(
+            "Enter your email address to access your full report. "
+            "During beta, everything is free — no card details, no obligation."
+        )
+        st.markdown(f"""
+        <div style="background:{NAVY};border-radius:8px;padding:1.5rem 2rem;margin:1rem 0;">
+          <p style="color:#a8b8d8;font-size:0.85rem;margin:0 0 0.3rem;">
+            FRED BETA ACCESS
+          </p>
+          <p style="color:white;font-size:1.1rem;font-weight:600;margin:0 0 1rem;">
+            Your report is waiting. Enter your email to continue.
+          </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        with st.form("email_gate"):
+            email = st.text_input(
+                "Email address",
+                placeholder="your@email.com",
+            )
+            submitted = st.form_submit_button("Access my report →", use_container_width=True)
             if submitted:
-                if email and "@" in email:
-                    send_emailjs(email, "beta_signup", {"message": f"Beta signup — doc: {st.session_state.doc_name}"})
+                if email and "@" in email and "." in email:
                     st.session_state.email_submitted = True
-                    st.session_state.show_full_report = True
+                    st.session_state.email_address   = email
+                    print(f"FRED BETA SIGNUP: {email} — doc: {st.session_state.doc_name}")
                     st.rerun()
                 else:
                     st.error("Please enter a valid email address.")
     else:
-        if st.button("View my full report"):
-            st.session_state.show_full_report = True
-            st.session_state.stage = "full_report"
-            st.rerun()
-
-    if st.session_state.show_full_report and st.session_state.email_submitted:
         st.session_state.stage = "full_report"
         st.rerun()
 
@@ -1658,11 +1616,62 @@ def page_full_report():
         "\n\n"
         "**Green entries** are your benchmarks. Use them when challenging non-compliant provision — "
         "if one section of the EHCP meets the standard, there is no reason another cannot."
-        "\n\n"
-        "Take your report to your annual review meeting. "
-        "You can also upload correspondence — emails from school or the LA — "
-        "and FRED will analyse them for you."
     )
+
+    # ── Subscriber prompt ─────────────────────────────────────────────────
+    st.markdown("---")
+    if not st.session_state.subscribed:
+        st.markdown(f"""
+        <div style="background:{NAVY};border-radius:8px;padding:2rem;margin:1rem 0;text-align:center;">
+          <p style="color:#a8b8d8;font-size:0.85rem;margin:0 0 0.4rem;letter-spacing:0.1em;text-transform:uppercase;">
+            FRED BETA — FREE ACCESS
+          </p>
+          <p style="color:white;font-size:1.3rem;font-weight:700;margin:0 0 0.6rem;">
+            Want the full FRED experience?
+          </p>
+          <p style="color:#c8d8f0;font-size:1rem;margin:0 0 1.2rem;max-width:480px;margin-left:auto;margin-right:auto;">
+            Subscribe free during beta and unlock correspondence analysis,
+            email drafting, meeting preparation, document vault, and more.
+          </p>
+          <p style="color:#a8b8d8;font-size:0.85rem;margin:0;">
+            Already registered as {st.session_state.email_address if st.session_state.email_address else "a beta tester"}
+          </p>
+        </div>
+        """, unsafe_allow_html=True)
+        col1, col2, col3 = st.columns([1,1,1])
+        with col2:
+            if st.button("Subscribe free — unlock everything", use_container_width=True):
+                st.session_state.subscribed = True
+                st.session_state.stage = "subscriber"
+                st.rerun()
+    else:
+        if st.button("Go to my FRED workspace →"):
+            st.session_state.stage = "subscriber"
+            st.rerun()
+
+    # ── Google Form feedback ──────────────────────────────────────────────
+    st.markdown("---")
+    st.markdown("### Help us build FRED properly")
+    st.markdown(
+        "Two minutes. Completely optional. "
+        "Your feedback shapes what FRED becomes."
+    )
+    st.markdown(f"""
+    <a href="{GOOGLE_FORM}" target="_blank" style="
+        display:inline-block;
+        background:{NAVY};
+        color:white;
+        padding:0.7rem 1.8rem;
+        border-radius:4px;
+        text-decoration:none;
+        font-family:'Source Sans 3',sans-serif;
+        font-weight:600;
+        font-size:0.95rem;
+    ">Leave feedback →</a>
+    <p style="font-size:0.8rem;color:#888;margin-top:0.5rem;">
+        Opens in a new tab. Takes 2 minutes.
+    </p>
+    """, unsafe_allow_html=True)
 
     # Downloads
     st.markdown("---")
@@ -1700,9 +1709,7 @@ def page_full_report():
         "Subscriptions open at launch."
     )
 
-    if not st.session_state.survey_submitted:
-        st.markdown("---")
-        page_survey()
+
 
 
 def page_survey():
@@ -1739,7 +1746,7 @@ def page_survey():
                 "would_pay": q4, "fair_price": q5, "subscribe": q6,
                 "personalise": q7, "other": q8, "notify": notify,
             }
-            email_to_send = notify_email if notify_email else survey_email if survey_email else "no-email@fred.invalid"
+            email_to_send = notify_email if notify_email else "no-email@fred.invalid"
             send_emailjs(email_to_send, "survey", extra_dict)
             st.session_state.survey_submitted = True
             st.success("Thank you. Your feedback helps us build FRED properly.")
@@ -1933,10 +1940,167 @@ def analyse_correspondence(text, tone):
     return findings[:3]  # Three finding maximum
 
 
+def page_subscriber():
+    """
+    The subscriber environment — feels like a different product.
+    Beta: all features accessible, no payment required.
+    """
+    name = st.session_state.email_address if st.session_state.email_address else "there"
+
+    st.markdown(f"""
+    <div style="background:{NAVY};border-radius:8px;padding:2rem;margin-bottom:1.5rem;">
+      <p style="color:#a8b8d8;font-size:0.85rem;margin:0 0 0.3rem;letter-spacing:0.1em;text-transform:uppercase;">
+        FRED BETA — SUBSCRIBER WORKSPACE
+      </p>
+      <h2 style="color:white;margin:0 0 0.4rem;font-family:'Playfair Display',serif;">
+        Welcome to FRED
+      </h2>
+      <p style="color:#c8d8f0;margin:0;font-size:0.95rem;">
+        Everything is unlocked. You have full access during beta.
+      </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Workspace tabs
+    tab1, tab2, tab3 = st.tabs(["📄 My Report", "✉️ Correspondence", "📋 Meeting Prep"])
+
+    with tab1:
+        st.markdown("### Your EHCP report")
+        if st.session_state.findings:
+            st.markdown("Your report is ready. Use the buttons below to download it.")
+            col1, col2 = st.columns(2)
+            with col1:
+                word_buf = generate_word_report(
+                    st.session_state.findings,
+                    doc_type=st.session_state.doc_type,
+                    situation=st.session_state.situation
+                )
+                st.download_button(
+                    "Download as Word",
+                    data=word_buf,
+                    file_name="FRED_report.docx",
+                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                )
+            with col2:
+                pdf_buf = generate_pdf_report(
+                    st.session_state.findings,
+                    doc_type=st.session_state.doc_type,
+                    situation=st.session_state.situation
+                )
+                st.download_button(
+                    "Download as PDF",
+                    data=pdf_buf,
+                    file_name="FRED_report.pdf",
+                    mime="application/pdf",
+                )
+            st.markdown("---")
+            st.markdown("### All findings")
+            for finding in st.session_state.findings:
+                render_finding_card(finding, show_full=True)
+        else:
+            st.info("No report yet. Go back to the home page and upload your EHCP.")
+            if st.button("Upload an EHCP"):
+                st.session_state.stage = "upload"
+                st.rerun()
+
+    with tab2:
+        st.markdown("### Correspondence analysis")
+        st.markdown(
+            "Upload emails from school or the LA. FRED will read them for you — "
+            "tone, intent, gaps, and what to do next."
+        )
+        email1 = st.file_uploader("Most recent email (PDF or Word)", type=["pdf", "docx"], key="sub_email1")
+        email2 = st.file_uploader("Previous email — optional", type=["pdf", "docx"], key="sub_email2")
+
+        tone_q = st.radio(
+            "How is the school engaging right now?",
+            ["Genuinely trying to help", "Going through the motions", "Actively avoiding or obstructing"],
+            help="You know the relationship. FRED doesn't. Your answer calibrates the analysis."
+        )
+
+        if st.button("Analyse correspondence") and email1:
+            with st.spinner("Reading correspondence…"):
+                text1 = extract_text_from_pdf(email1) if email1.name.endswith(".pdf") else extract_text_from_docx(email1)
+                text2 = ""
+                if email2:
+                    text2 = extract_text_from_pdf(email2) if email2.name.endswith(".pdf") else extract_text_from_docx(email2)
+                briefing = analyse_correspondence(text1 + "\n\n" + text2, tone_q)
+
+            st.markdown("### Briefing")
+            for item in briefing:
+                st.markdown(f"""
+                <div class="finding-{item['tier']}">
+                  <span class="badge-{item['tier']}">{item['label']}</span>
+                  <p style="font-weight:700;margin:0.4rem 0 0.3rem;">{item['title']}</p>
+                  <p style="margin:0;font-size:0.95rem;">{item['detail']}</p>
+                </div>
+                """, unsafe_allow_html=True)
+
+            st.markdown("---")
+            st.info(
+                "Hold is a valid strategic choice. "
+                "Sometimes the most powerful response is a short warm acknowledgement "
+                "that signals knowledge without displaying it."
+            )
+
+    with tab3:
+        st.markdown("### Meeting preparation")
+        st.markdown(
+            "Use this before your annual review or any meeting with school or the LA."
+        )
+
+        upcoming = st.session_state.get("upcoming_dates", "")
+        if upcoming:
+            st.info(f"Upcoming date noted: {upcoming}")
+
+        st.markdown("**Before the meeting — check these:**")
+        checklist = [
+            "Request the agenda in writing at least five working days before",
+            "Ask for the delivery log for each provision in Section F",
+            "Confirm who will be attending and in what capacity",
+            "Take a copy of the EHCP and this report",
+            "Note the date, time, and attendees at the start of the meeting",
+            "Request that minutes are circulated within five working days",
+            "Follow up any verbal agreements in writing within 24 hours",
+        ]
+        for item in checklist:
+            st.checkbox(item, key=f"check_{item[:20]}")
+
+        st.markdown("---")
+        st.markdown("**After the meeting:**")
+        post = st.text_area(
+            "Note anything agreed verbally that needs to be confirmed in writing",
+            placeholder="e.g. SENCO agreed to provide weekly session records from next term...",
+            height=100,
+        )
+        if post:
+            st.success(
+                "Noted. Follow this up in writing within 24 hours. "
+                "Subject line: 'Confirmation of agreements — [date] meeting'. "
+                "Copy in the SENCO and the LA caseworker if present."
+            )
+
+    st.markdown("---")
+    st.markdown(f"""
+    <a href="{GOOGLE_FORM_URL}" target="_blank" style="
+        display:inline-block;
+        background:#e8eef8;
+        color:{NAVY};
+        padding:0.6rem 1.4rem;
+        border-radius:4px;
+        text-decoration:none;
+        font-family:'Source Sans 3',sans-serif;
+        font-weight:600;
+        font-size:0.9rem;
+    ">Leave feedback on FRED →</a>
+    """, unsafe_allow_html=True)
+
+
+
 # ── NAVIGATION ────────────────────────────────────────────────────────────────
 
 def render_nav():
-    col1, col2, col3, col4 = st.columns([1, 1, 1, 4])
+    col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 3])
     with col1:
         if st.button("Home"):
             st.session_state.stage = "landing"
@@ -1947,6 +2111,11 @@ def render_nav():
                 st.session_state.stage = "full_report"
                 st.rerun()
     with col3:
+        if st.session_state.subscribed:
+            if st.button("My workspace"):
+                st.session_state.stage = "subscriber"
+                st.rerun()
+    with col4:
         if st.button("Correspondence"):
             st.session_state.stage = "correspondence"
             st.rerun()
@@ -1969,6 +2138,8 @@ elif stage == "sneak_peek":
     page_sneak_peek()
 elif stage == "full_report":
     page_full_report()
+elif stage == "subscriber":
+    page_subscriber()
 elif stage == "correspondence":
     page_correspondence()
 else:
