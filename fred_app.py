@@ -284,24 +284,41 @@ st.markdown(f"""
 
 # ── EMAILJS ──────────────────────────────────────────────────────────────────
 
-def send_emailjs(email, source, extra=""):
-    """Fire EmailJS silently. Parent never sees this."""
+def send_emailjs(email, source, extra_dict=None):
+    """
+    Fire EmailJS using variable names that match template_44rbysv exactly.
+    Template vars: {{name}}, {{email}}, {{user_email}}, {{message}},
+                   {{timestamp}}, {{q1}} through {{q9}}
+    """
+    import datetime
+    if extra_dict is None:
+        extra_dict = {}
     try:
         service_id  = st.secrets.get("EMAILJS_SERVICE_ID", "service_8fbqfzn")
         template_id = st.secrets.get("EMAILJS_TEMPLATE_ID", "template_44rbysv")
         public_key  = st.secrets.get("EMAILJS_PUBLIC_KEY",  "ieFEY10YArTGltwrf")
+        timestamp = datetime.datetime.now().strftime("%d %b %Y %H:%M")
+        params = {
+            "name":       email,
+            "email":      email,
+            "user_email": email,
+            "message":    f"Source: {source}",
+            "timestamp":  timestamp,
+            "q1": extra_dict.get("new_info", ""),
+            "q2": extra_dict.get("tl_clear", ""),
+            "q3": extra_dict.get("layout", ""),
+            "q4": extra_dict.get("would_pay", ""),
+            "q5": extra_dict.get("fair_price", ""),
+            "q6": extra_dict.get("subscribe", ""),
+            "q7": extra_dict.get("personalise", ""),
+            "q8": extra_dict.get("other", ""),
+            "q9": extra_dict.get("notify", ""),
+        }
         payload = {
-            "service_id":  service_id,
-            "template_id": template_id,
-            "user_id":     public_key,
-            "template_params": {
-                "to_email":   "fredapp@tutamail.com",
-                "from_email": email,
-                "reply_to":   email,
-                "source":     source,
-                "message":    extra,
-                "subject":    f"FRED — new {source} submission",
-            }
+            "service_id":      service_id,
+            "template_id":     template_id,
+            "user_id":         public_key,
+            "template_params": params,
         }
         response = requests.post(
             "https://api.emailjs.com/api/v1.0/email/send",
@@ -309,12 +326,9 @@ def send_emailjs(email, source, extra=""):
             headers={"Content-Type": "application/json"},
             timeout=8,
         )
-        # Log status to Streamlit console (not shown to parent)
-        if response.status_code != 200:
-            print(f"EmailJS status: {response.status_code} — {response.text}")
+        print(f"EmailJS [{source}]: {response.status_code} — {response.text}")
     except Exception as e:
-        print(f"EmailJS error: {e}")
-        pass  # Silent — never surface errors to parent
+        print(f"EmailJS error ({source}): {e}")
 
 
 # ── PDF PARSER ────────────────────────────────────────────────────────────────
@@ -1386,7 +1400,7 @@ def page_landing():
         notify = st.radio("Would you like to be notified when FRED launches?", ["Yes, notify me", "No thank you"])
         submitted = st.form_submit_button("Submit")
         if submitted and survey_email:
-            send_emailjs(survey_email, "landing_survey", f"notify={notify}")
+            send_emailjs(survey_email, "landing_survey", {"notify": notify})
             st.success("Thank you. No obligation — we'll only contact you about the launch.")
 
 
@@ -1535,7 +1549,7 @@ def page_sneak_peek():
             submitted = st.form_submit_button("Get my full report")
             if submitted:
                 if email and "@" in email:
-                    send_emailjs(email, "beta_signup", f"doc={st.session_state.doc_name}")
+                    send_emailjs(email, "beta_signup", {"message": f"Beta signup — doc: {st.session_state.doc_name}"})
                     st.session_state.email_submitted = True
                     st.session_state.show_full_report = True
                     st.rerun()
@@ -1710,13 +1724,13 @@ def page_survey():
 
         submitted = st.form_submit_button("Submit feedback")
         if submitted:
-            extra = json.dumps({
+            extra_dict = {
                 "new_info": q1, "tl_clear": q2, "layout": q3,
                 "would_pay": q4, "fair_price": q5, "subscribe": q6,
                 "personalise": q7, "other": q8, "notify": notify,
-            })
-            email_to_send = notify_email if notify_email else "survey_only@noemail.invalid"
-            send_emailjs(email_to_send, "survey", extra)
+            }
+            email_to_send = notify_email if notify_email else survey_email if survey_email else "no-email@fred.invalid"
+            send_emailjs(email_to_send, "survey", extra_dict)
             st.session_state.survey_submitted = True
             st.success("Thank you. Your feedback helps us build FRED properly.")
 
