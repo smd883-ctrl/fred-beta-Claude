@@ -286,49 +286,55 @@ st.markdown(f"""
 
 def send_emailjs(email, source, extra_dict=None):
     """
-    Fire EmailJS using variable names that match template_44rbysv exactly.
-    Template vars: {{name}}, {{email}}, {{user_email}}, {{message}},
-                   {{timestamp}}, {{q1}} through {{q9}}
+    Send via EmailJS using client-side JavaScript injected into the browser.
+    This bypasses Streamlit Cloud network restrictions entirely.
+    EmailJS runs in the parent's browser, not on the server.
     """
     import datetime
+    import json as _json
     if extra_dict is None:
         extra_dict = {}
-    try:
-        service_id  = st.secrets.get("EMAILJS_SERVICE_ID", "service_8fbqfzn")
-        template_id = st.secrets.get("EMAILJS_TEMPLATE_ID", "template_44rbysv")
-        public_key  = st.secrets.get("EMAILJS_PUBLIC_KEY",  "ieFEY10YArTGltwrf")
-        timestamp = datetime.datetime.now().strftime("%d %b %Y %H:%M")
-        params = {
-            "name":       email,
-            "email":      email,
-            "user_email": email,
-            "message":    f"Source: {source}",
-            "timestamp":  timestamp,
-            "q1": extra_dict.get("new_info", ""),
-            "q2": extra_dict.get("tl_clear", ""),
-            "q3": extra_dict.get("layout", ""),
-            "q4": extra_dict.get("would_pay", ""),
-            "q5": extra_dict.get("fair_price", ""),
-            "q6": extra_dict.get("subscribe", ""),
-            "q7": extra_dict.get("personalise", ""),
-            "q8": extra_dict.get("other", ""),
-            "q9": extra_dict.get("notify", ""),
-        }
-        payload = {
-            "service_id":      service_id,
-            "template_id":     template_id,
-            "user_id":         public_key,
-            "template_params": params,
-        }
-        response = requests.post(
-            "https://api.emailjs.com/api/v1.0/email/send",
-            json=payload,
-            headers={"Content-Type": "application/json"},
-            timeout=8,
-        )
-        print(f"EmailJS [{source}]: {response.status_code} — {response.text}")
-    except Exception as e:
-        print(f"EmailJS error ({source}): {e}")
+
+    timestamp = datetime.datetime.now().strftime("%d %b %Y %H:%M")
+
+    params = {
+        "name":       email,
+        "email":      email,
+        "user_email": email,
+        "message":    f"Source: {source}",
+        "timestamp":  timestamp,
+        "q1": extra_dict.get("new_info", extra_dict.get("message", "")),
+        "q2": extra_dict.get("tl_clear", ""),
+        "q3": extra_dict.get("layout", ""),
+        "q4": extra_dict.get("would_pay", ""),
+        "q5": extra_dict.get("fair_price", ""),
+        "q6": extra_dict.get("subscribe", ""),
+        "q7": extra_dict.get("personalise", ""),
+        "q8": extra_dict.get("other", ""),
+        "q9": extra_dict.get("notify", extra_dict.get("notify", "")),
+    }
+
+    params_json = _json.dumps(params)
+
+    js = f"""
+    <script>
+    (function() {{
+        var script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js';
+        script.onload = function() {{
+            emailjs.init('ieFEY10YArTGltwrf');
+            emailjs.send('service_8fbqfzn', 'template_44rbysv', {params_json})
+                .then(function() {{
+                    console.log('EmailJS sent OK [{source}]');
+                }}, function(err) {{
+                    console.log('EmailJS error [{source}]:', JSON.stringify(err));
+                }});
+        }};
+        document.head.appendChild(script);
+    }})();
+    </script>
+    """
+    st.components.v1.html(js, height=0, scrolling=False)
 
 
 # ── PDF PARSER ────────────────────────────────────────────────────────────────
@@ -1438,6 +1444,10 @@ def page_upload():
             key="extra_upload"
         )
 
+    # ── Analyse button sits directly below upload zone ──
+    st.markdown("<br>", unsafe_allow_html=True)
+    analyse_clicked = st.button("Analyse my documents", use_container_width=False, key="analyse_top")
+
     st.markdown("---")
     st.markdown("### A few quick questions")
     st.markdown("These help FRED tailor the analysis. Answer what you can — nothing here is mandatory.")
@@ -1468,7 +1478,7 @@ def page_upload():
 
     st.markdown("---")
 
-    if st.button("Analyse my documents", use_container_width=False):
+    if analyse_clicked:
         if main_file is None:
             st.error("Please upload your EHCP to continue.")
         else:
