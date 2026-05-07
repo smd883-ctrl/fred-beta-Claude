@@ -1338,7 +1338,7 @@ def page_landing():
     faqs = [
         ("When do I pay?", "After you see one real finding from your EHCP, before you access the full report. You upload first — your report is ready before you pay."),
         ("Is this legal advice?", "No. FRED provides lawful analysis — it tells you what the law requires. It does not tell you what to do about it. That decision is yours."),
-        ("What documents do I need?", "Your child's EHCP is essential. Everything else — EP reports, OT reports, correspondence — adds to the analysis but is not required to start."),
+        ("What documents do I need?", "Upload whatever you have. An EP report, OT report, school correspondence, diagnosis letter — FRED will work with any of these. If you don't have an EHCP yet, upload what you do have and FRED will advise on next steps to ensure the right support is in place for your child."),
         ("What is an EHCP?", "An Education, Health and Care Plan is a legally binding document setting out a child's needs and the provision that must be made. The word 'must' in that sentence is important."),
         ("What if I only have a draft EHCP?", "FRED analyses draft and final EHCPs differently. For a draft, FRED highlights what should be strengthened before the document is finalised. For a final EHCP, FRED references your rights and the duty to deliver."),
         ("Is my data private?", "Yes. Your documents are used only for your analysis. They are not shared, stored beyond your session, or used to train any system."),
@@ -1354,7 +1354,7 @@ def page_landing():
     st.markdown("### Want to shape what FRED becomes?")
     st.markdown("We're in beta. Leave your thoughts — takes two minutes.")
     st.markdown(f"""
-    <a href="{GOOGLE_FORM}" target="_blank" style="
+    <a href="https://docs.google.com/forms/d/e/1FAIpQLSeA1F9nEdQWkmplbAh973XKq2EsW0bEkhJiw7drhP7BZaPjKQ/viewform" target="_blank" style="
         display:inline-block;
         background:#1a2744;
         color:white;
@@ -1385,11 +1385,11 @@ def page_explainer():
 
 def page_upload():
     st.markdown("## Upload your documents")
-    st.markdown("Upload your child's EHCP below. You can add further documents — EP report, OT report, school policy — using the expander beneath.")
+    st.markdown("Upload whatever documents you have — EHCP, EP report, OT report, school correspondence, diagnosis letter. You don't need everything. FRED will work with what you've got.")
 
     # Main upload
     main_file = st.file_uploader(
-        "Upload EHCP (PDF or Word document)",
+        "Upload your document (PDF or Word)",
         type=["pdf", "docx"],
         key="main_upload"
     )
@@ -1412,8 +1412,8 @@ def page_upload():
     st.markdown("These help FRED tailor the analysis. Answer what you can — nothing here is mandatory.")
 
     doc_type = st.radio(
-        "Is this a draft or final EHCP?",
-        ["Draft EHCP", "Final EHCP"],
+        "What are you uploading?",
+        ["Draft EHCP", "Final EHCP", "EP report", "OT report", "School correspondence", "Other"],
         index=1,
         horizontal=True,
     )
