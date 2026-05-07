@@ -1350,16 +1350,23 @@ def page_landing():
 
     st.markdown("<hr class='section-divider'>", unsafe_allow_html=True)
 
-    # Survey
-    st.markdown("### Interested in FRED?")
-    st.markdown("We're in beta. Leave your email and we'll let you know when we launch.")
-    with st.form("landing_survey", clear_on_submit=True):
-        survey_email = st.text_input("Your email address")
-        notify = st.radio("Would you like to be notified when FRED launches?", ["Yes, notify me", "No thank you"])
-        submitted = st.form_submit_button("Submit")
-        if submitted and survey_email:
-            send_emailjs(survey_email, "landing_survey", {"notify": notify})
-            st.success("Thank you. No obligation — we'll only contact you about the launch.")
+    # Google Form feedback link — replaces old landing survey
+    st.markdown("### Want to shape what FRED becomes?")
+    st.markdown("We're in beta. Leave your thoughts — takes two minutes.")
+    st.markdown(f"""
+    <a href="{GOOGLE_FORM}" target="_blank" style="
+        display:inline-block;
+        background:#1a2744;
+        color:white;
+        padding:0.7rem 1.8rem;
+        border-radius:4px;
+        text-decoration:none;
+        font-family:'Source Sans 3',sans-serif;
+        font-weight:600;
+        font-size:0.95rem;
+    ">Share your thoughts →</a>
+    <p style="font-size:0.8rem;color:#888;margin-top:0.5rem;">Opens in a new tab. No obligation.</p>
+    """, unsafe_allow_html=True)
 
 
 def page_explainer():
@@ -1423,7 +1430,7 @@ def page_upload():
     )
 
     relationship_tone = st.select_slider(
-        "How would you describe your current relationship with the school?",
+        "How would you describe your current relationship with the school? (We use this to help shape the tone of any suggested emails)",
         options=["Very difficult", "Difficult", "Neutral", "Generally positive", "Very positive"],
         value="Neutral",
     )
@@ -1657,7 +1664,7 @@ def page_full_report():
         "Your feedback shapes what FRED becomes."
     )
     st.markdown(f"""
-    <a href="{GOOGLE_FORM}" target="_blank" style="
+    <a href="https://docs.google.com/forms/d/e/1FAIpQLSeA1F9nEdQWkmplbAh973XKq2EsW0bEkhJiw7drhP7BZaPjKQ/viewform" target="_blank" style="
         display:inline-block;
         background:{NAVY};
         color:white;
@@ -2082,7 +2089,7 @@ def page_subscriber():
 
     st.markdown("---")
     st.markdown(f"""
-    <a href="{GOOGLE_FORM_URL}" target="_blank" style="
+    <a href="https://docs.google.com/forms/d/e/1FAIpQLSeA1F9nEdQWkmplbAh973XKq2EsW0bEkhJiw7drhP7BZaPjKQ/viewform" target="_blank" style="
         display:inline-block;
         background:#e8eef8;
         color:{NAVY};
