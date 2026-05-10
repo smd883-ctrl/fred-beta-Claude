@@ -1761,190 +1761,739 @@ def page_survey():
 
 # ── CORRESPONDENCE MODULE ─────────────────────────────────────────────────────
 
+# ── CORRESPONDENCE PATTERN LIBRARY ───────────────────────────────────────────
+# Built from real tribunal bundle — Duffy v Brookhurst Primary School 2019
+
+CORRESPONDENCE_PATTERNS = [
+    {
+        "id": "resources_defence",
+        "name": "The Resources Defence",
+        "tier": "red",
+        "triggers": r"\b(resources|cost involved|beyond its requirements|school budget|cannot fund|not funded|staffing constraints|financial)\b",
+        "explanation": "The school is suggesting that cost or resources limit what they can provide. The duty to deliver specified EHCP provision is absolute under the Children and Families Act 2014. It does not depend on the school's budget. Where additional funding is needed, the responsibility lies with the LA.",
+        "fred_question": "Ask the school in writing to identify which provisions in Section F they are delivering and which they are not delivering due to resource constraints. Any gap becomes a matter for the LA to fund.",
+    },
+    {
+        "id": "relationship_threat",
+        "name": "The Relationship Breakdown Threat",
+        "tier": "red",
+        "triggers": r"\b(placement.*fail|break.*down|irrevocably|if.*situation.*not.*change|not.*engage|refuse.*communicate|consequences)\b",
+        "explanation": "The school is implying that asserting your rights will damage the placement. This inverts responsibility. The duty to deliver provision exists regardless of whether parents are in dispute. A threat of placement breakdown in response to a parent exercising their rights is pressure, not professional dialogue.",
+        "fred_question": "Note the date and exact wording. Respond in writing acknowledging receipt only. Do not respond to the threat. Ask instead for written confirmation of what provision is currently being delivered and what the support plan is.",
+    },
+    {
+        "id": "best_interests_redirect",
+        "name": "The Best Interests Redirect",
+        "tier": "amber",
+        "triggers": r"\b(best interest|not right for|another.*placement|more.*suitable|alternative.*provision|better.*placed|different.*school)\b",
+        "explanation": "The school is using welfare language to suggest your child would be better placed elsewhere. Any professional opinion about placement must be made through the EHCP review process with evidence — not in correspondence responding to a complaint.",
+        "fred_question": "Ask what evidence base supports this view, who assessed it, and whether it has been formally submitted to the LA as part of the EHCP review process.",
+    },
+    {
+        "id": "blip_normalisation",
+        "name": "The Blip Normalisation",
+        "tier": "amber",
+        "triggers": r"\b(only a blip|usual for his age|usual for her age|all children|typical.*behaviour|normal.*development|peers.*same|nothing.*unusual)\b",
+        "explanation": "The school is comparing your child to neurotypical peers to minimise the significance of an incident. Your child has an EHCP precisely because their needs are not the same as their peers. 'Usual for their age' is not a relevant benchmark.",
+        "fred_question": "Ask the school to confirm whether this assessment was made with reference to your child's EHCP profile and diagnosis. Ask them to reconsider in light of Section B of the plan.",
+    },
+    {
+        "id": "complaint_deflection",
+        "name": "The Complaint Policy Deflection",
+        "tier": "amber",
+        "triggers": r"\b(complaints policy|complaints procedure|formal complaint|pursue.*further|following.*legal.*advice|refer you to)\b",
+        "explanation": "The school is directing you to the complaints procedure rather than engaging with the substance. The complaints procedure does not pause statutory obligations or EHCP timelines. It is a separate process.",
+        "fred_question": "Note that the complaints procedure and the statutory EHCP process are separate. Continue through the EHCP route in parallel. Respond confirming you have noted the reference and are continuing to seek resolution of the provision concern.",
+    },
+    {
+        "id": "good_week_signal",
+        "name": "The Good Week Signal",
+        "tier": "amber",
+        "triggers": r"\b(good week|positive week|doing well|made good progress|responding well|settled week|happy in school)\b",
+        "explanation": "Positive weekly summaries create a paper trail that can contradict the severity of your child's needs if an incident occurs in the same period. A log that records only positives is not an accurate delivery record.",
+        "fred_question": "Ask for the full incident record alongside positive weekly summaries. If both a positive summary and a behavioural incident occurred in the same week, ask the school to explain the discrepancy.",
+    },
+    {
+        "id": "reintegration_promise",
+        "name": "The Reintegration Promise Without a Plan",
+        "tier": "red",
+        "triggers": r"\b(reintegration|return.*plan|back.*school|phased.*return|managed.*return|support.*return)\b",
+        "explanation": "A verbal or vague reintegration promise is not a reintegration plan. A child with an EHCP who has been excluded requires a documented reintegration plan that references the EHCP provision. Without it there is no Do stage.",
+        "fred_question": "Request the written reintegration plan within five working days, referencing the EHCP explicitly. If no written plan exists, confirm that in writing and ask when one will be provided.",
+    },
+    {
+        "id": "staffing_change",
+        "name": "Unstated Staffing Change",
+        "tier": "red",
+        "triggers": r"\b(new.*staff|change.*support|different.*adult|new.*TA|new.*teaching assistant|cover|temporary|supply)\b",
+        "explanation": "For a child with ASD or similar needs, key adult relationships are often specified in the EHCP. A staffing change affecting 1:1 support is a provision change. It should not happen without parents being informed and without a transition plan.",
+        "fred_question": "Ask the school to confirm in writing whether any staffing changes affecting your child's 1:1 support have been made since the last annual review, and what transition planning was put in place.",
+    },
+    {
+        "id": "legal_misrepresentation",
+        "name": "Legal Obligation Misrepresented",
+        "tier": "red",
+        "triggers": r"\b(no legal obligation|not required by law|not a legal requirement|beyond what is required|not legally obliged|discretionary)\b",
+        "explanation": "The school may be correctly stating there is no obligation to provide 'the best possible education' — but this is not the relevant obligation. The obligation under the Children and Families Act 2014 is to deliver every provision specified in Section F. That obligation is absolute, not discretionary.",
+        "fred_question": "Ask the school to confirm delivery of each named provision in Section F. The question is not whether they are providing the best possible education — it is whether they are delivering what the EHCP specifies.",
+    },
+    {
+        "id": "homeschool_discrepancy",
+        "name": "Home/School Discrepancy Used Against Parents",
+        "tier": "amber",
+        "triggers": r"\b(home.*school.*different|parents.*expectations|at home.*different|parental.*concern|parents.*report|home.*school.*gap)\b",
+        "explanation": "The school is using differences between home and school presentation to question parental credibility. A child who presents differently at home and at school may be experiencing a stress response that is discharged at home. This is a clinical question, not a credibility question.",
+        "fred_question": "Ask the school what steps they have taken to investigate the home/school discrepancy as a clinical question. Ask whether it has been formally assessed and what the findings were.",
+    },
+    {
+        "id": "reassurance_without_evidence",
+        "name": "Reassurance Without Evidence",
+        "tier": "amber",
+        "triggers": r"\b(we are not concerned|no concerns at this time|fully supported|meeting his needs|meeting her needs|you would be our first|runs continuously|we monitor closely)\b",
+        "explanation": "The correspondence contains reassurance language without documentary support. Reassurance is not evidence. An assertion that provision is in place or that needs are being met requires a delivery log, not a statement of confidence.",
+        "fred_question": "Ask what the evidence base is for this statement. Request the delivery log for the relevant provision over the past half term. If no log exists, note that in writing.",
+    },
+    {
+        "id": "implicit_admission",
+        "name": "Implicit Admission of Current Gap",
+        "tier": "amber",
+        "triggers": r"\b(going forward|in future|we will ensure|we have identified|we are working to improve|we recognise|we are reviewing|steps have been taken)\b",
+        "explanation": "This language implies current practice is inadequate while presenting future improvement as reassurance. A commitment to improve in future is an admission of a current gap. Note the date — this correspondence is evidence that the gap existed at this point.",
+        "fred_question": "Ask the school to confirm in writing what the current position is — not what it will be. Note that this correspondence has been retained and dated.",
+    },
+]
+
+ENVIRONMENT_TRIGGERS = {
+    "food hall": "food hall / canteen",
+    "canteen": "food hall / canteen",
+    "dining hall": "food hall / canteen",
+    "dining room": "food hall / canteen",
+    "lunch hall": "food hall / canteen",
+    "corridor": "corridor / transition space",
+    "hallway": "corridor / transition space",
+    "playground": "playground / outdoor space",
+    "outside": "playground / outdoor space",
+    "assembly": "assembly hall",
+    "hall": "assembly hall",
+    "classroom": "classroom environment",
+    "gym": "sports hall / gym",
+    "sports hall": "sports hall / gym",
+    "pe": "sports hall / gym",
+    "toilet": "toilet facilities",
+    "bathroom": "toilet facilities",
+    "bus": "school transport",
+    "minibus": "school transport",
+}
+
+SENSORY_CHECKLIST = {
+    "food hall / canteen": [
+        ("Sound", [
+            "Overall noise level — crowded dining hall acoustics",
+            "Cutlery, chair scraping, tray noise",
+            "Echo and reverberation in the space",
+            "Kitchen extraction fans and cooking sounds",
+            "Unpredictable loud sounds — dropped trays, shouting",
+        ]),
+        ("Light", [
+            "Strip lighting or fluorescent flicker",
+            "Overall brightness",
+            "Glare from windows or surfaces",
+        ]),
+        ("Smell", [
+            "Food odours — specific foods that may be aversive",
+            "Cleaning products",
+            "Accumulated smell of multiple food types",
+        ]),
+        ("Physical", [
+            "Crowding — proximity to other pupils",
+            "Queue management — unpredictable movement",
+            "Seating — choice or assigned, proximity to others",
+            "Clear exit route visible",
+        ]),
+        ("Timing", [
+            "Hunger state on arrival — time since last food",
+            "Blood sugar — snack provided before lunch?",
+            "Preceding activity — what happened immediately before",
+        ]),
+        ("Predictability", [
+            "Does the child know what food is available before arriving",
+            "Consistent routine day to day",
+            "Visual support for the lunch process",
+        ]),
+    ],
+    "corridor / transition space": [
+        ("Sound", [
+            "Noise level during transition — multiple classes moving",
+            "Unpredictable sounds — lockers, doors, shouting",
+            "Echo in narrow spaces",
+        ]),
+        ("Physical", [
+            "Crowding during peak transition times",
+            "Physical contact from other pupils",
+            "Width of corridor — personal space available",
+        ]),
+        ("Predictability", [
+            "Consistency of route taken",
+            "Whether the child knows destination in advance",
+            "Early departure to avoid peak crowding",
+            "Named adult support during transition",
+        ]),
+    ],
+    "playground / outdoor space": [
+        ("Sound", [
+            "Unpredictable noise — shouting, ball games",
+            "Wind noise",
+        ]),
+        ("Social", [
+            "Unstructured peer interaction — no adult mediation",
+            "Safe space available if overwhelmed",
+            "Structured activity available as alternative",
+        ]),
+        ("Sensory", [
+            "Bright sunlight — visual sensitivity",
+            "Temperature extremes",
+            "Physical play — proprioceptive seeking or avoiding",
+        ]),
+    ],
+}
+
+DEFAULT_CHECKLIST = [
+    ("Sound", ["Overall noise level", "Unpredictable sounds", "Echo or reverberation"]),
+    ("Light", ["Brightness", "Fluorescent lighting", "Glare"]),
+    ("Smell", ["Specific odours that may be aversive"]),
+    ("Physical", ["Crowding", "Personal space", "Exit routes"]),
+    ("Predictability", ["Routine consistency", "Advance warning of changes"]),
+    ("Timing", ["Time of day", "Preceding activity", "Hunger or fatigue state"]),
+]
+
+
+def detect_environment(text):
+    text_lower = text.lower()
+    for trigger, env_name in ENVIRONMENT_TRIGGERS.items():
+        if trigger in text_lower:
+            return env_name
+    return None
+
+
+def get_checklist(env_name):
+    return SENSORY_CHECKLIST.get(env_name, DEFAULT_CHECKLIST)
+
+
+def detect_patterns(text):
+    matched = []
+    for pattern in CORRESPONDENCE_PATTERNS:
+        if re.search(pattern["triggers"], text, re.IGNORECASE):
+            m = re.search(pattern["triggers"], text, re.IGNORECASE)
+            ctx = ""
+            if m:
+                ctx = text[max(0, m.start()-100):m.end()+120].strip()
+            matched.append({**pattern, "extract": ctx[:250]})
+    # Sort: red first, amber second
+    order = {"red": 0, "amber": 1, "green": 2}
+    matched.sort(key=lambda x: order.get(x["tier"], 3))
+    return matched
+
+
+def analyse_policy(policy_text):
+    findings = []
+    audit_pattern = re.compile(
+        r"\b(will conduct|will undertake|will carry out|will review|annual.*audit|"
+        r"acoustic.*survey|accessibility.*audit|risk.*assessment.*will|will.*assess|plan to|intend to)\b",
+        re.IGNORECASE
+    )
+    for m in audit_pattern.finditer(policy_text):
+        ctx = policy_text[max(0, m.start()-60):m.end()+100].strip()
+        findings.append({
+            "tier": "amber",
+            "title": "Policy commitment — check whether actioned",
+            "extract": ctx[:280],
+            "commentary": (
+                "This policy commits to an action — audit, survey, or review. "
+                "Ask the school for evidence it has been completed and the date it was last carried out. "
+                "If it has not been done, this is a gap between policy commitment and practice."
+            ),
+        })
+        break  # One instance is enough
+
+    year_pattern = re.compile(r"\b(20\d{2})\b")
+    years = [int(y) for y in year_pattern.findall(policy_text)]
+    current_year = datetime.datetime.now().year
+    if years:
+        most_recent = max(years)
+        age = current_year - most_recent
+        if age >= 2:
+            findings.append({
+                "tier": "amber",
+                "title": f"Policy is {age} years old — commitments may be overdue",
+                "extract": f"Most recent year reference: {most_recent}",
+                "commentary": (
+                    f"This policy was last updated in {most_recent}. Any commitments — "
+                    f"audits, assessments, training — should have been actioned in the "
+                    f"intervening {age} years. Ask for evidence of actions taken since that date."
+                ),
+            })
+
+    if re.search(r"\b(acoustic|strip light|fluorescent|sensory|ear defender|quiet area|calm space|accessibility)\b", policy_text, re.IGNORECASE):
+        findings.append({
+            "tier": "green",
+            "title": "Policy references sensory or accessibility provision",
+            "extract": "",
+            "commentary": (
+                "The policy references sensory or accessibility provision. "
+                "Cross-reference this against your child's EHCP Section F. "
+                "If the policy commits to provision that is absent from Section F, "
+                "that gap is evidenced by the school's own document."
+            ),
+        })
+
+    if re.search(r"\b(staff.*training|trained.*staff|autism.*training|SEND.*training|awareness.*training)\b", policy_text, re.IGNORECASE):
+        findings.append({
+            "tier": "amber",
+            "title": "Policy commits to staff training — ask for evidence",
+            "extract": "",
+            "commentary": (
+                "The policy references staff training in relation to SEND or specific needs. "
+                "Ask the school to confirm what training has been provided to staff working "
+                "directly with your child, and when it was last updated."
+            ),
+        })
+
+    return findings
+
+
+def render_pattern_card(p, index):
+    tier = p["tier"]
+    tier_label = "RED — Lawful concern" if tier == "red" else "AMBER — Pattern detected"
+    st.markdown(f"""
+    <div class="finding-{tier}" style="margin-bottom:1.2rem;">
+      <span class="badge-{tier}">{tier_label}</span>
+      <p style="font-weight:700;margin:0.5rem 0 0.3rem;font-size:1rem;">{p['name']}</p>
+      <p style="margin:0 0 0.6rem;font-size:0.93rem;line-height:1.6;">{p['explanation']}</p>
+      <div style="background:rgba(0,0,0,0.04);border-radius:4px;padding:0.6rem 0.8rem;margin-bottom:0.4rem;">
+        <p style="font-weight:700;margin:0 0 0.2rem;font-size:0.88rem;text-transform:uppercase;letter-spacing:0.05em;">The question to ask:</p>
+        <p style="margin:0;font-size:0.93rem;font-style:italic;">{p['fred_question']}</p>
+      </div>
+      {f'<p style="font-size:0.82rem;color:#666;margin:0.4rem 0 0;border-left:3px solid #ddd;padding-left:0.6rem;">{p["extract"]}…</p>' if p.get("extract") else ""}
+    </div>
+    """, unsafe_allow_html=True)
+
+
+def generate_amendment_word(environment, confirmed_items, today):
+    """Generate Word document for amendment request."""
+    doc = Document()
+    title = doc.add_heading("EHCP Amendment Request", 0)
+    title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+    doc.add_paragraph(f"Date: {today}")
+    doc.add_paragraph(f"Re: Request to amend Section B and Section F — {environment}")
+    doc.add_paragraph("")
+
+    doc.add_paragraph("Dear [SENCO name],")
+    doc.add_paragraph("")
+    doc.add_paragraph(
+        f"I am writing to request a formal amendment to my child's Education, Health and Care Plan, "
+        f"specifically to Sections B and F, following observations made in the {environment} environment."
+    )
+    doc.add_paragraph("")
+    doc.add_paragraph("The following factors have been identified through observation:")
+
+    for item in confirmed_items:
+        p = doc.add_paragraph(style="List Bullet")
+        p.add_run(item)
+
+    doc.add_paragraph("")
+    doc.add_paragraph(
+        "These observations correspond to needs already described in Section B of the current plan. "
+        "The current Section F does not specify provision for this environment in sufficient detail "
+        "to be enforceable. I am requesting that the following be added to Section F:"
+    )
+
+    additions = doc.add_paragraph(style="List Bullet")
+    additions.add_run(f"Specific provision for the {environment} environment, including named adjustments")
+    doc.add_paragraph(style="List Bullet").add_run("Named arrangements to be in place on every occasion my child uses this space")
+    doc.add_paragraph(style="List Bullet").add_run("A half-termly review mechanism to confirm adjustments are in place")
+
+    doc.add_paragraph("")
+    doc.add_paragraph(
+        "I would be grateful for written confirmation that this request has been received "
+        "and will be considered at the earliest opportunity."
+    )
+    doc.add_paragraph("")
+    doc.add_paragraph("Yours sincerely,")
+    doc.add_paragraph("[Your name]")
+    doc.add_paragraph(f"[Date: {today}]")
+
+    buf = BytesIO()
+    doc.save(buf)
+    buf.seek(0)
+    return buf
+
+
 def page_correspondence():
+    """Enhanced correspondence intelligence — polished for tester release."""
+
+    # ── Empty state / intro ───────────────────────────────────────────────────
     st.markdown("## Correspondence analysis")
-    st.markdown(
-        "Upload up to two recent emails from the school or LA. "
-        "FRED will analyse them for you — tone, intent, gaps, and what to do next. "
-        "This feature is part of the subscription. It is included in beta."
-    )
 
-    email1 = st.file_uploader("Most recent email (PDF or Word)", type=["pdf", "docx"], key="email1")
-    email2 = st.file_uploader("Previous email (optional)", type=["pdf", "docx"], key="email2")
+    # Link back to report
+    if st.session_state.get("findings"):
+        st.markdown(
+            f"<a href='#' onclick='void(0)' style='font-size:0.85rem;color:{NAVY};'>← View my EHCP report</a>",
+            unsafe_allow_html=True
+        )
+        if st.button("← Back to my EHCP report", key="back_to_report"):
+            st.session_state.stage = "full_report"
+            st.rerun()
 
+    st.markdown(f"""
+    <div style="background:#f0f4fa;border-radius:8px;padding:1.2rem 1.5rem;margin-bottom:1.5rem;">
+      <p style="margin:0;font-size:0.97rem;line-height:1.7;">
+        Upload a letter or email from school or the LA and FRED will read it for you —
+        identifying patterns, root causes, and the right question to ask next.
+        This is different from your EHCP report: the EHCP report analyses the document,
+        correspondence analysis reads the relationship.
+      </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ── Uploads ───────────────────────────────────────────────────────────────
+    st.markdown("### Upload correspondence")
+    col1, col2 = st.columns(2)
+    with col1:
+        email1 = st.file_uploader(
+            "Most recent letter or email (PDF or Word)",
+            type=["pdf", "docx"], key="email1"
+        )
+        email2 = st.file_uploader(
+            "Earlier correspondence — optional",
+            type=["pdf", "docx"], key="email2"
+        )
+    with col2:
+        policy_file = st.file_uploader(
+            "School policy — optional",
+            type=["pdf", "docx"], key="policy_upload",
+            help="Upload the school accessibility, SEN, or behaviour policy. FRED will cross-reference it against the correspondence."
+        )
+        st.markdown(
+            "<p style='font-size:0.85rem;color:#666;margin-top:0.3rem;'>"
+            "Upload the school's accessibility or SEN policy and FRED will check whether "
+            "they have met their own commitments."
+            "</p>",
+            unsafe_allow_html=True
+        )
+
+    st.markdown("---")
+
+    # ── Tone question ─────────────────────────────────────────────────────────
     tone_q = st.radio(
-        "How would you describe how the school is engaging right now?",
-        [
-            "Genuinely trying to help",
-            "Going through the motions",
-            "Actively avoiding or obstructing",
-        ],
-        help="You know the relationship. FRED doesn't. Your answer calibrates the tone of the analysis."
+        "How would you describe how the school is engaging right now? "
+        "(We use this to shape the tone of any suggested next steps)",
+        ["Genuinely trying to help", "Going through the motions", "Actively avoiding or obstructing"],
+        horizontal=True,
     )
 
-    if st.button("Analyse correspondence") and email1:
-        with st.spinner("Reading correspondence…"):
-            if email1.name.endswith(".pdf"):
-                text1 = extract_text_from_pdf(email1)
-            else:
-                text1 = extract_text_from_docx(email1)
+    st.markdown("<br>", unsafe_allow_html=True)
 
-            text2 = ""
-            if email2:
-                if email2.name.endswith(".pdf"):
-                    text2 = extract_text_from_pdf(email2)
-                else:
-                    text2 = extract_text_from_docx(email2)
+    # ── Analyse button ────────────────────────────────────────────────────────
+    analyse = st.button("Analyse correspondence", use_container_width=False, key="analyse_corr")
 
-            combined = text1 + "\n\n" + text2
-            briefing = analyse_correspondence(combined, tone_q)
+    if not email1 and not analyse:
+        st.markdown(
+            "<p style='color:#888;font-size:0.9rem;margin-top:0.5rem;'>"
+            "Upload at least one piece of correspondence to begin."
+            "</p>",
+            unsafe_allow_html=True
+        )
 
-        st.markdown("### Briefing")
-        for item in briefing:
+    if analyse and not email1:
+        st.error("Please upload at least one piece of correspondence to continue.")
+
+    if analyse and email1:
+
+        # Progress steps
+        progress_text = st.empty()
+        progress_text.markdown("*Reading correspondence…*")
+
+        text1 = extract_text_from_pdf(email1) if email1.name.endswith(".pdf") else extract_text_from_docx(email1)
+        text2 = ""
+        if email2:
+            text2 = extract_text_from_pdf(email2) if email2.name.endswith(".pdf") else extract_text_from_docx(email2)
+        combined = text1 + "\n\n" + text2
+
+        progress_text.markdown("*Identifying patterns…*")
+        matched_patterns = detect_patterns(combined)
+
+        progress_text.markdown("*Checking environment…*")
+        environment = detect_environment(combined)
+
+        policy_text = ""
+        policy_findings = []
+        if policy_file:
+            progress_text.markdown("*Reading school policy…*")
+            policy_text = extract_text_from_pdf(policy_file) if policy_file.name.endswith(".pdf") else extract_text_from_docx(policy_file)
+            policy_findings = analyse_policy(policy_text)
+
+        progress_text.empty()
+
+        today = datetime.datetime.now().strftime("%d %B %Y")
+
+        # ── Summary bar ───────────────────────────────────────────────────────
+        red_n   = sum(1 for p in matched_patterns if p["tier"] == "red")
+        amber_n = sum(1 for p in matched_patterns if p["tier"] == "amber")
+
+        if red_n == 0 and amber_n == 0:
+            summary_color = GREEN
+            summary_text = "No major patterns detected in this correspondence."
+        elif red_n > 0:
+            summary_color = RED
+            summary_text = f"{red_n} serious pattern{'s' if red_n > 1 else ''} and {amber_n} amber signal{'s' if amber_n != 1 else ''} detected."
+        else:
+            summary_color = AMBER
+            summary_text = f"{amber_n} pattern{'s' if amber_n > 1 else ''} detected. No immediate lawful concerns."
+
+        st.markdown(f"""
+        <div style="background:{summary_color};border-radius:6px;padding:0.9rem 1.2rem;margin:1rem 0 1.5rem;">
+          <p style="color:white;font-weight:700;margin:0;font-size:1rem;">{summary_text}</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # ── Patterns ──────────────────────────────────────────────────────────
+        st.markdown("### Patterns detected")
+
+        if not matched_patterns:
             st.markdown(f"""
-            <div class="finding-{item['tier']}">
-              <span class="badge-{item['tier']}">{item['label']}</span>
-              <p style="font-weight:700;margin:0.4rem 0 0.3rem;">{item['title']}</p>
-              <p style="margin:0;font-size:0.95rem;">{item['detail']}</p>
+            <div class="finding-green">
+              <span class="badge-green">No recognised patterns</span>
+              <p style="margin:0.5rem 0 0;font-size:0.95rem;">
+                No recognised school correspondence patterns were detected.
+                This may mean the correspondence is straightforward — or that the language
+                used does not match known patterns. Read the correspondence carefully
+                before assuming it is without issue.
+              </p>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            # Show top 5, offer more
+            show_all = st.session_state.get("show_all_patterns", False)
+            display = matched_patterns if show_all else matched_patterns[:5]
+
+            for i, p in enumerate(display):
+                render_pattern_card(p, i)
+
+            if len(matched_patterns) > 5 and not show_all:
+                remaining = len(matched_patterns) - 5
+                if st.button(f"Show {remaining} more pattern{'s' if remaining > 1 else ''}"):
+                    st.session_state.show_all_patterns = True
+                    st.rerun()
+            elif show_all and len(matched_patterns) > 5:
+                if st.button("Show fewer"):
+                    st.session_state.show_all_patterns = False
+                    st.rerun()
+
+        # ── Environment / root cause ──────────────────────────────────────────
+        if environment:
+            st.markdown("---")
+            st.markdown(f"### Root cause — {environment}")
+            st.markdown(f"""
+            <div style="background:#f0f4fa;border-radius:6px;padding:0.9rem 1.2rem;margin-bottom:1rem;">
+              <p style="margin:0;font-size:0.95rem;">
+                The correspondence references <b>{environment}</b> as a context for difficulty.
+                Before responding, use the checklist below to identify what specifically within
+                that environment may be the trigger. Tick everything that applies or has been observed.
+                FRED will generate a root cause summary and — if needed — a draft amendment request.
+              </p>
             </div>
             """, unsafe_allow_html=True)
 
+            checklist = get_checklist(environment)
+            confirmed_items = []
+
+            for category, items in checklist:
+                st.markdown(f"**{category}**")
+                cols = st.columns(2)
+                for idx, item in enumerate(items):
+                    with cols[idx % 2]:
+                        if st.checkbox(item, key=f"chk_{category}_{idx}"):
+                            confirmed_items.append(f"{category}: {item}")
+
+            if confirmed_items:
+                st.markdown("---")
+                st.markdown("### Root cause confirmed")
+
+                st.markdown(f"""
+                <div class="finding-red">
+                  <span class="badge-red">{len(confirmed_items)} factor{'s' if len(confirmed_items) > 1 else ''} confirmed — {environment}</span>
+                  <p style="margin:0.5rem 0 0;font-size:0.95rem;">
+                    These factors should be documented and cross-referenced against Section B and
+                    Section F of the EHCP. If confirmed factors are not addressed in the current
+                    provision, this is evidence for an EHCP amendment.
+                  </p>
+                </div>
+                """, unsafe_allow_html=True)
+
+                # Immediate Do
+                st.markdown("**Immediate steps — check what is already in the EHCP:**")
+                st.markdown(
+                    "<p style='font-size:0.9rem;color:#555;margin-bottom:0.8rem;'>"
+                    "Before requesting an amendment, check whether these provisions — "
+                    "which may already be in Section F — apply specifically to this environment. "
+                    "If they do, ask the school in writing to confirm they are in place."
+                    "</p>",
+                    unsafe_allow_html=True
+                )
+                existing = [
+                    "Ear defenders — access to sensory toolkit",
+                    "Entry to the space before other pupils — to reduce crowding",
+                    "Named trusted adult present during this activity",
+                    "Visual schedule — advance notice of what will happen",
+                    "Safe exit route — agreed way to leave if overwhelmed",
+                    "Snack provision before the activity — if hunger is a factor",
+                    "Quiet alternative — access to a calm space as an option",
+                ]
+                for prov in existing:
+                    st.checkbox(prov, key=f"existing_{prov[:25]}")
+
+                # Amendment request — behind a button
+                st.markdown("---")
+                if st.button("Generate EHCP amendment request", key="gen_amendment"):
+                    st.session_state.show_amendment = True
+
+                if st.session_state.get("show_amendment"):
+                    st.markdown(f"""
+                    <div style="background:{NAVY};border-radius:8px;padding:1.2rem 1.5rem;margin:1rem 0;">
+                      <p style="color:#a8b8d8;font-size:0.8rem;margin:0 0 0.3rem;letter-spacing:0.08em;text-transform:uppercase;">EHCP AMENDMENT FLAG</p>
+                      <p style="color:white;font-weight:700;margin:0 0 0.4rem;font-size:1rem;">New evidence — {environment} — {today}</p>
+                      <p style="color:#c8d8f0;margin:0;font-size:0.9rem;">
+                        The observations above constitute new evidence about your child's sensory needs
+                        in this environment. This should be formally documented and used to inform
+                        the next EHCP review. Edit the draft below before sending.
+                      </p>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                    draft = f"""Dear [SENCO name],
+
+I am writing to request a formal amendment to [child's name]'s Education, Health and Care Plan — specifically to Sections B and F — following observations in the {environment} on {today}.
+
+The following has been identified:
+
+{chr(10).join(f"- {item}" for item in confirmed_items)}
+
+The current Section F does not specify provision for this environment in sufficient detail to be enforceable. I am requesting:
+
+- Specific named provision for the {environment} environment
+- Named arrangements confirmed in writing, in place on every occasion
+- A half-termly review to confirm adjustments remain in place
+
+Please confirm receipt of this request and advise when it will be considered.
+
+Yours sincerely,
+[Your name]
+{today}"""
+
+                    st.text_area("Draft amendment request — edit before sending:", value=draft, height=280, key="amendment_text")
+
+                    # Word download
+                    word_buf = generate_amendment_word(environment, confirmed_items, today)
+                    st.download_button(
+                        "Download as Word document",
+                        data=word_buf,
+                        file_name=f"FRED_amendment_request_{today.replace(' ','_')}.docx",
+                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    )
+
+                    # Log to knowledge bank
+                    if "knowledge_bank" not in st.session_state:
+                        st.session_state.knowledge_bank = []
+                    entry = {
+                        "date": today,
+                        "environment": environment,
+                        "confirmed": confirmed_items,
+                        "amendment_flagged": True,
+                    }
+                    if entry not in st.session_state.knowledge_bank:
+                        st.session_state.knowledge_bank.append(entry)
+                    print(f"FRED AMENDMENT FLAG: {today} — {environment} — {len(confirmed_items)} factors")
+
+        # ── Policy findings ───────────────────────────────────────────────────
+        if policy_findings:
+            st.markdown("---")
+            st.markdown("### School policy cross-reference")
+            st.markdown(
+                "<p style='font-size:0.95rem;margin-bottom:1rem;'>"
+                "FRED has read the uploaded school policy and found the following in relation "
+                "to the correspondence. The school cannot dispute its own policy."
+                "</p>",
+                unsafe_allow_html=True
+            )
+            for f in policy_findings:
+                tier = f["tier"]
+                st.markdown(f"""
+                <div class="finding-{tier}">
+                  <span class="badge-{tier}">POLICY</span>
+                  <p style="font-weight:700;margin:0.4rem 0 0.3rem;">{f['title']}</p>
+                  {f'<p style="font-style:italic;color:#555;font-size:0.88rem;margin:0 0 0.4rem;">"{f["extract"]}"</p>' if f.get("extract") else ""}
+                  <p style="margin:0;font-size:0.93rem;">{f['commentary']}</p>
+                </div>
+                """, unsafe_allow_html=True)
+
+        # ── Tone read ─────────────────────────────────────────────────────────
         st.markdown("---")
-        st.markdown("### What would you like to do?")
+        st.markdown("### Relationship read")
+        tone_notes = {
+            "Genuinely trying to help": (
+                "The school appears to be engaging genuinely. A collaborative tone in your "
+                "response is likely to be more effective than a formal one. Hold findings as "
+                "evidence without deploying them unless the situation changes."
+            ),
+            "Going through the motions": (
+                "The school appears to be going through the motions. Written requests with "
+                "specific reference to EHCP section numbers will be more effective than verbal "
+                "escalation. Put everything in writing and request written responses."
+            ),
+            "Actively avoiding or obstructing": (
+                "The school appears to be avoiding or obstructing. Every communication should "
+                "now be in writing. Reference specific statutory duties by section and Act. "
+                "Consider whether escalation to the LA is appropriate. "
+                "The correspondence trail you are building is evidence."
+            ),
+        }
+        st.info(tone_notes.get(tone_q, ""))
+
+        # ── Hold / next steps ─────────────────────────────────────────────────
+        st.markdown("---")
+        st.markdown("### What next?")
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.button("Draft a response email")
+            if st.button("Hold — save without acting", key="hold_btn"):
+                if "held_findings" not in st.session_state:
+                    st.session_state.held_findings = []
+                st.session_state.held_findings.append({
+                    "date": today,
+                    "patterns": len(matched_patterns),
+                    "environment": environment,
+                    "note": "Held — no action taken"
+                })
+                st.success(
+                    "Held and dated. Holding is a valid strategic choice — "
+                    "sometimes the most powerful response is no response. "
+                    "Note: held findings are stored for this session only. "
+                    "Screenshot or copy the summary before closing your browser."
+                )
         with col2:
-            st.button("Get a briefing note")
+            st.button("Draft a response", key="draft_btn")
         with col3:
-            st.button("Hold — save to vault without acting")
+            st.button("Prepare for a meeting", key="meeting_btn")
 
-        st.info(
-            "Hold is a valid strategic choice. "
-            "FRED saves the finding with a date. You can return to it at any time. "
-            "Sometimes the most powerful response is no response."
+        st.markdown(
+            "<p style='font-size:0.85rem;color:#777;margin-top:0.8rem;'>"
+            "FRED cannot produce strategic silence — but it can note when a situation may call for it. "
+            "A short warm acknowledgement that signals knowledge without displaying it is sometimes "
+            "the most effective response."
+            "</p>",
+            unsafe_allow_html=True
         )
 
-
-def analyse_correspondence(text, tone):
-    """
-    Three-finding briefing from correspondence.
-    Returns list of up to 3 finding dicts for the briefing display.
-    """
-    findings = []
-
-    # Signal 1: Reassurance without evidence
-    reassurance_pattern = re.compile(
-        r'\b(we are not concerned|no concerns|doing well|runs continuously|'
-        r'you would be our first point of contact|we would contact you|'
-        r'fully supported|fully meeting)\b',
-        re.IGNORECASE
-    )
-    m = reassurance_pattern.search(text)
-    if m:
-        ctx = text[max(0, m.start()-100):m.end()+100].strip()
-        findings.append({
-            "tier": "amber",
-            "label": "PATTERN",
-            "title": "Reassurance without evidence",
-            "detail": (
-                f'The correspondence contains reassurance language without documentary support. '
-                f'"{ctx[:200]}…" — '
-                "Reassurance is not evidence. Ask what the evidence base is for this statement."
-            ),
-        })
-
-    # Signal 2: HOY involvement
-    hoy_pattern = re.compile(r'\b(head of year|HOY|form tutor|year team)\b', re.IGNORECASE)
-    if hoy_pattern.search(text):
-        findings.append({
-            "tier": "amber",
-            "label": "SIGNAL",
-            "title": "Head of Year involvement detected",
-            "detail": (
-                "Communications initiated or copied to the Head of Year typically indicate "
-                "a disruption management pathway, not a SEND support pathway. "
-                "Check whether this correspondence references your child's EHCP or their needs, "
-                "or whether it is focused on peer disruption or behaviour."
-            ),
-        })
-
-    # Signal 3: Provision substitution
-    sub_pattern = re.compile(
-        r'\b(ordinarily available|quality first|whole class|classroom support|'
-        r'all our students|all pupils)\b',
-        re.IGNORECASE
-    )
-    m = sub_pattern.search(text)
-    if m:
-        ctx = text[max(0, m.start()-80):m.end()+80].strip()
-        findings.append({
-            "tier": "red",
-            "label": "RED",
-            "title": "Universal provision substituted for specified EHCP provision",
-            "detail": (
-                f'"{ctx[:200]}…" — '
-                "The correspondence describes universal or classroom provision in response "
-                "to a question about your child's EHCP provision. The question was not answered — "
-                "it was redirected. Request a specific answer about the delivery of named provision in Section F."
-            ),
-        })
-
-    # Signal 4: Implicit admission
-    admit_pattern = re.compile(
-        r'\b(we are working to improve|going forward|in future|we will ensure|'
-        r'we have identified|we recognise that|we are reviewing)\b',
-        re.IGNORECASE
-    )
-    m = admit_pattern.search(text)
-    if m:
-        ctx = text[max(0, m.start()-80):m.end()+80].strip()
-        findings.append({
-            "tier": "amber",
-            "label": "SIGNAL",
-            "title": "Implicit admission of current gap",
-            "detail": (
-                f'"{ctx[:200]}…" — '
-                "This language implies that current practice is inadequate while presenting "
-                "future improvement as reassurance. Note the date of this correspondence. "
-                "This is an admission of a current gap, not a resolution of it."
-            ),
-        })
-
-    # Vacuum detection
-    vacuum_pattern = re.compile(
-        r'\b(as discussed|as previously|on a number of occasions|we have tried|'
-        r'we have been working|ongoing concern)\b',
-        re.IGNORECASE
-    )
-    if vacuum_pattern.search(text):
-        findings.append({
-            "tier": "amber",
-            "label": "SIGNAL",
-            "title": "References to undocumented history",
-            "detail": (
-                "The correspondence references previous discussions or attempts without "
-                "providing documentation. Request the records that evidence these conversations. "
-                "If they do not exist, the history did not happen in any lawful sense."
-            ),
-        })
-
-    # Tone note
-    tone_note = {
-        "Genuinely trying to help": "School appears to be engaging genuinely. Hold this finding and use it as context — a school that is trying may respond better to collaborative framing.",
-        "Going through the motions": "School appears to be going through the motions. Written requests with specific reference to EHCP section numbers will be more effective than verbal escalation.",
-        "Actively avoiding or obstructing": "School appears to be avoiding or obstructing. Every communication should be in writing. Reference specific statutory duties. Consider whether escalation to the LA is appropriate.",
-    }.get(tone, "")
-
-    if tone_note:
-        findings.append({
-            "tier": "amber",
-            "label": "TONE",
-            "title": "Relationship read",
-            "detail": tone_note,
-        })
-
-    return findings[:3]  # Three finding maximum
 
 
 def page_subscriber():
@@ -1969,7 +2518,7 @@ def page_subscriber():
     """, unsafe_allow_html=True)
 
     # Workspace tabs
-    tab1, tab2, tab3 = st.tabs(["📄 My Report", "✉️ Correspondence", "📋 Meeting Prep"])
+    tab1, tab2, tab3, tab4 = st.tabs(["📄 My Report", "✉️ Correspondence", "📋 Meeting Prep", "🗂️ Evidence Bank"])
 
     with tab1:
         st.markdown("### Your EHCP report")
@@ -2086,6 +2635,52 @@ def page_subscriber():
                 "Subject line: 'Confirmation of agreements — [date] meeting'. "
                 "Copy in the SENCO and the LA caseworker if present."
             )
+
+    with tab4:
+        st.markdown("### Evidence bank")
+        st.markdown(
+            "FRED records confirmed findings from correspondence analysis here, "
+            "dated and stored for the duration of your session. "
+            "Use these at annual review."
+        )
+        bank = st.session_state.get("knowledge_bank", [])
+        held = st.session_state.get("held_findings", [])
+        if bank:
+            for entry in bank:
+                confirmed_list = entry.get("confirmed", [])
+                items_html = "".join(f'<p style="font-size:0.85rem;margin:0.1rem 0;">• {item}</p>' for item in confirmed_list)
+                amendment_html = "<p style='font-size:0.82rem;font-weight:700;color:#C0392B;margin-top:0.4rem;'>⚑ EHCP amendment flagged</p>" if entry.get("amendment_flagged") else ""
+                st.markdown(f"""
+                <div style="background:white;border:1px solid #d0dae8;border-radius:6px;padding:1rem 1.2rem;margin-bottom:0.8rem;">
+                  <p style="font-weight:700;margin:0 0 0.2rem;">{entry['date']} — {entry['environment']}</p>
+                  <p style="margin:0 0 0.4rem;font-size:0.88rem;color:#555;">{len(confirmed_list)} confirmed factor(s)</p>
+                  {items_html}
+                  {amendment_html}
+                </div>
+                """, unsafe_allow_html=True)
+        elif held:
+            for entry in held:
+                st.markdown(f"""
+                <div style="background:white;border:1px solid #d0dae8;border-radius:6px;padding:1rem 1.2rem;margin-bottom:0.8rem;">
+                  <p style="font-weight:700;margin:0 0 0.2rem;">{entry['date']}</p>
+                  <p style="margin:0;font-size:0.88rem;color:#555;">{entry.get('patterns',0)} pattern(s) — held without action</p>
+                </div>
+                """, unsafe_allow_html=True)
+        else:
+            st.markdown(
+                "<p style='color:#888;font-size:0.9rem;'>"
+                "No evidence entries yet. Confirmed root cause findings from "
+                "correspondence analysis will appear here with dates."
+                "</p>",
+                unsafe_allow_html=True
+            )
+        st.markdown(
+            "<p style='font-size:0.82rem;color:#aaa;margin-top:1rem;'>"
+            "Evidence bank is stored for this session. "
+            "Screenshot entries before closing your browser."
+            "</p>",
+            unsafe_allow_html=True
+        )
 
     st.markdown("---")
     st.markdown(f"""
