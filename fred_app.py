@@ -1474,7 +1474,7 @@ def page_upload():
             "key": "ehcp",
             "label": "EHCP",
             "description": "Essential. FRED analyses Section F provision, Section E outcomes, and Section B needs. Everything else is cross-referenced against this.",
-            "required": True,
+            "required": False,
         },
         {
             "key": "ep_report",
@@ -1597,8 +1597,8 @@ def page_upload():
     st.markdown("---")
 
     if analyse_clicked:
-        if "ehcp" not in vault:
-            st.error("Please upload your EHCP to continue. You can add other documents too — but FRED needs the EHCP to analyse provision.")
+        if not vault:
+            st.error("Please upload at least one document to continue.")
         else:
             with st.spinner("Reading your documents…"):
                 # Combine all vault text for analysis
@@ -2411,29 +2411,75 @@ def page_correspondence():
 
     # ── Uploads ───────────────────────────────────────────────────────────────
     st.markdown("### Upload correspondence")
+
+    input_method = st.radio(
+        "How do you want to add your correspondence?",
+        ["Upload file (PDF or Word)", "Paste text directly"],
+        horizontal=True,
+        key="input_method"
+    )
+
     col1, col2 = st.columns(2)
-    with col1:
-        email1 = st.file_uploader(
-            "Most recent letter or email (PDF or Word)",
-            type=["pdf", "docx"], key="email1"
-        )
-        email2 = st.file_uploader(
-            "Earlier correspondence — optional",
-            type=["pdf", "docx"], key="email2"
-        )
-    with col2:
-        policy_file = st.file_uploader(
-            "School policy — optional",
-            type=["pdf", "docx"], key="policy_upload",
-            help="Upload the school accessibility, SEN, or behaviour policy. FRED will cross-reference it against the correspondence."
-        )
-        st.markdown(
-            "<p style='font-size:0.85rem;color:#666;margin-top:0.3rem;'>"
-            "Upload the school's accessibility or SEN policy and FRED will check whether "
-            "they have met their own commitments."
-            "</p>",
-            unsafe_allow_html=True
-        )
+
+    if input_method == "Upload file (PDF or Word)":
+        with col1:
+            email1 = st.file_uploader(
+                "Most recent letter or email",
+                type=["pdf", "docx"], key="email1"
+            )
+            email2 = st.file_uploader(
+                "Earlier correspondence — optional",
+                type=["pdf", "docx"], key="email2"
+            )
+        with col2:
+            policy_file = st.file_uploader(
+                "School policy — optional",
+                type=["pdf", "docx"], key="policy_upload",
+                help="Upload the school accessibility, SEN, or behaviour policy."
+            )
+            st.markdown(
+                "<p style='font-size:0.82rem;color:#666;margin-top:0.3rem;'>"
+                "Upload the school's accessibility or SEN policy and FRED will check whether "
+                "they have met their own commitments."
+                "</p>", unsafe_allow_html=True
+            )
+        # Set paste vars to empty
+        paste_text1 = ""
+        paste_date1 = ""
+        paste_text2 = ""
+        paste_date2 = ""
+    else:
+        with col1:
+            st.markdown("**Most recent correspondence**")
+            paste_date1 = st.text_input(
+                "Date of this correspondence",
+                placeholder="e.g. 12 May 2025",
+                key="paste_date1"
+            )
+            paste_text1 = st.text_area(
+                "Paste the text here",
+                placeholder="Paste the full text of the email or letter...",
+                height=180,
+                key="paste_text1"
+            )
+        with col2:
+            st.markdown("**Earlier correspondence — optional**")
+            paste_date2 = st.text_input(
+                "Date of this correspondence",
+                placeholder="e.g. 3 April 2025",
+                key="paste_date2"
+            )
+            paste_text2 = st.text_area(
+                "Paste the text here",
+                placeholder="Paste the full text of an earlier email or letter...",
+                height=180,
+                key="paste_text2"
+            )
+        # Set file vars to None
+        email1 = None
+        email2 = None
+        policy_file = None
+
 
     st.markdown("---")
 
@@ -2467,16 +2513,30 @@ def page_correspondence():
     if analyse and not email1:
         st.error("Please upload at least one piece of correspondence to continue.")
 
-    if analyse and email1:
+    has_content = (email1 is not None) or (paste_text1.strip() != "")
+
+    if analyse and not has_content:
+        st.error("Please upload a file or paste some correspondence text to continue.")
+
+    if analyse and has_content:
 
         # Progress steps
         progress_text = st.empty()
         progress_text.markdown("*Reading correspondence…*")
 
-        text1 = extract_text_from_pdf(email1) if email1.name.endswith(".pdf") else extract_text_from_docx(email1)
-        text2 = ""
+        if email1:
+            text1 = extract_text_from_pdf(email1) if email1.name.endswith(".pdf") else extract_text_from_docx(email1)
+        else:
+            date_prefix = f"[Date: {paste_date1}]\n" if paste_date1 else ""
+            text1 = date_prefix + paste_text1
+
         if email2:
             text2 = extract_text_from_pdf(email2) if email2.name.endswith(".pdf") else extract_text_from_docx(email2)
+        elif paste_text2.strip():
+            date_prefix2 = f"[Date: {paste_date2}]\n" if paste_date2 else ""
+            text2 = date_prefix2 + paste_text2
+        else:
+            text2 = ""
         combined = text1 + "\n\n" + text2
 
         progress_text.markdown("*Identifying patterns…*")
@@ -2903,17 +2963,29 @@ def page_subscriber():
                 text2 = ""
                 if email2:
                     text2 = extract_text_from_pdf(email2) if email2.name.endswith(".pdf") else extract_text_from_docx(email2)
-                briefing = analyse_correspondence(text1 + "\n\n" + text2, tone_q)
+                combined = text1 + "\n\n" + text2
+                matched = detect_patterns(combined)
+                tone_rec = detect_tone_recommendation(combined, matched)
 
-            st.markdown("### Briefing")
-            for item in briefing:
-                st.markdown(f"""
-                <div class="finding-{item['tier']}">
-                  <span class="badge-{item['tier']}">{item['label']}</span>
-                  <p style="font-weight:700;margin:0.4rem 0 0.3rem;">{item['title']}</p>
-                  <p style="margin:0;font-size:0.95rem;">{item['detail']}</p>
-                </div>
-                """, unsafe_allow_html=True)
+            st.markdown("### Patterns detected")
+            if matched:
+                for p in matched[:5]:
+                    st.markdown(f"""
+                    <div class="finding-{p['tier']}">
+                      <span class="badge-{p['tier']}">{p['name']}</span>
+                      <p style="margin:0.4rem 0 0.3rem;font-size:0.93rem;">{p['explanation']}</p>
+                      <p style="font-style:italic;font-size:0.88rem;color:#555;margin:0;">{p['fred_question']}</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+            else:
+                st.success("No major patterns detected in this correspondence.")
+
+            st.markdown(f"""
+            <div style="background:#eaf5e0;border-radius:8px;padding:0.8rem 1.1rem;margin-top:1rem;">
+              <p style="font-weight:600;margin:0 0 0.2rem;font-size:0.9rem;">Tone recommendation: {tone_rec['label']}</p>
+              <p style="margin:0;font-size:0.85rem;color:#555;">{tone_rec['reasoning']}</p>
+            </div>
+            """, unsafe_allow_html=True)
 
             st.markdown("---")
             st.info(
