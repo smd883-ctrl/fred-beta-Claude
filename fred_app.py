@@ -8,7 +8,7 @@ from docx import Document
 from docx.shared import Pt, RGBColor, Inches
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from reportlab.lib.pagesizes import A4
-from reportlab.lib import colours
+from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import cm
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable
@@ -940,7 +940,7 @@ def generate_word_report(findings, child_name="your child", situation="", doc_ty
 
     sub = doc.add_paragraph(f"Families' Rights and Entitlements Directory")
     sub.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    sub.runs[0].font.colour.rgb = RGBColor(0x1a, 0x27, 0x44)
+    sub.runs[0].font.color.rgb = RGBColor(0x1a, 0x27, 0x44)
 
     doc.add_paragraph(f"Document type: {doc_type}")
     if situation:
@@ -970,14 +970,14 @@ def generate_word_report(findings, child_name="your child", situation="", doc_ty
     tier_labels = {"red": "RED — Lawful Requirement Not Met",
                    "amber": "AMBER — Best Practice Gap",
                    "green": "GREEN — Compliant"}
-    tier_colours = {"red": RGBColor(0xC0, 0x39, 0x2B),
+    tier_colors = {"red": RGBColor(0xC0, 0x39, 0x2B),
                     "amber": RGBColor(0xD4, 0xA0, 0x17),
                     "green": RGBColor(0x1E, 0x84, 0x49)}
 
     for finding in findings:
         tier = finding["tier"]
         h = doc.add_heading(tier_labels.get(tier, tier.upper()), 2)
-        h.runs[0].font.colour.rgb = tier_colours.get(tier, RGBColor(0, 0, 0))
+        h.runs[0].font.color.rgb = tier_colors.get(tier, RGBColor(0, 0, 0))
 
         doc.add_heading(finding["title"], 3)
 
@@ -1026,71 +1026,71 @@ def generate_pdf_report(findings, child_name="your child", situation="", doc_typ
 
     title_style = ParagraphStyle(
         'fred_title', fontSize=28, alignment=TA_CENTER,
-        textColour=colours.HexColour('#1a2744'),
+        textColor=colors.HexColor('#1a2744'),
         spaceAfter=4, spaceBefore=0,
         fontName='Helvetica-Bold',
         leading=34,
     )
     sub_style = ParagraphStyle(
         'fred_sub', fontSize=11, alignment=TA_CENTER,
-        textColour=colours.HexColour('#4a5a7a'),
+        textColor=colors.HexColor('#4a5a7a'),
         spaceAfter=6, spaceBefore=0,
         fontName='Helvetica',
         leading=16,
     )
     meta_style = ParagraphStyle(
         'fred_meta', fontSize=10, alignment=TA_CENTER,
-        textColour=colours.HexColour('#6a7a90'),
+        textColor=colors.HexColor('#6a7a90'),
         spaceAfter=20, spaceBefore=0,
         fontName='Helvetica-Oblique',
         leading=14,
     )
     section_h_style = ParagraphStyle(
         'fred_section', fontSize=15, fontName='Helvetica-Bold',
-        textColour=colours.HexColour('#1a2744'),
+        textColor=colors.HexColor('#1a2744'),
         spaceAfter=8, spaceBefore=20,
         leading=20,
         borderPad=0,
     )
     h2_red = ParagraphStyle(
         'fred_h2red', fontSize=12, fontName='Helvetica-Bold',
-        textColour=colours.HexColour('#C0392B'),
+        textColor=colors.HexColor('#C0392B'),
         spaceAfter=4, spaceBefore=16, leading=16,
     )
     h2_amber = ParagraphStyle(
         'fred_h2amber', fontSize=12, fontName='Helvetica-Bold',
-        textColour=colours.HexColour('#D4A017'),
+        textColor=colors.HexColor('#D4A017'),
         spaceAfter=4, spaceBefore=16, leading=16,
     )
     h2_green = ParagraphStyle(
         'fred_h2green', fontSize=12, fontName='Helvetica-Bold',
-        textColour=colours.HexColour('#1E8449'),
+        textColor=colors.HexColor('#1E8449'),
         spaceAfter=4, spaceBefore=16, leading=16,
     )
     finding_title_style = ParagraphStyle(
         'fred_finding_title', fontSize=11, fontName='Helvetica-Bold',
-        textColour=colours.HexColour('#1a1a2e'),
+        textColor=colors.HexColor('#1a1a2e'),
         spaceAfter=6, spaceBefore=4, leading=15,
     )
     extract_style = ParagraphStyle(
         'fred_extract', fontSize=10, fontName='Helvetica-Oblique',
-        textColour=colours.HexColour('#555555'),
+        textColor=colors.HexColor('#555555'),
         spaceAfter=8, spaceBefore=2, leading=14,
         leftIndent=12, rightIndent=12,
     )
     body_style = ParagraphStyle(
         'fred_body', fontSize=10, fontName='Helvetica',
-        textColour=colours.HexColour('#1a1a2e'),
+        textColor=colors.HexColor('#1a1a2e'),
         spaceAfter=10, spaceBefore=0, leading=15,
     )
     bold_style = ParagraphStyle(
         'fred_bold', fontSize=10, fontName='Helvetica-Bold',
-        textColour=colours.HexColour('#1a1a2e'),
+        textColor=colors.HexColor('#1a1a2e'),
         spaceAfter=8, spaceBefore=4, leading=14,
     )
     footer_style = ParagraphStyle(
         'fred_footer', fontSize=9, fontName='Helvetica-Oblique',
-        textColour=colours.HexColour('#888888'),
+        textColor=colors.HexColor('#888888'),
         spaceAfter=0, spaceBefore=8, leading=13, alignment=TA_CENTER,
     )
 
@@ -1101,17 +1101,17 @@ def generate_pdf_report(findings, child_name="your child", situation="", doc_typ
     story.append(Paragraph("FRED", title_style))
     story.append(Paragraph("Families' Rights and Entitlements Directory", sub_style))
     story.append(Spacer(1, 0.3*cm))
-    story.append(HRFlowable(width="100%", thickness=1.5, colour=colours.HexColour('#1a2744'), spaceAfter=8))
+    story.append(HRFlowable(width="100%", thickness=1.5, colour=colors.HexColor('#1a2744'), spaceAfter=8))
     story.append(Paragraph("EHCP Analysis Report", meta_style))
     story.append(Paragraph(f"Document type: {doc_type}", meta_style))
     if situation:
         story.append(Paragraph(f"Context: {situation}", meta_style))
-    story.append(HRFlowable(width="100%", thickness=0.5, colour=colours.HexColour('#d0dae8'), spaceAfter=16))
+    story.append(HRFlowable(width="100%", thickness=0.5, colour=colors.HexColor('#d0dae8'), spaceAfter=16))
     story.append(Spacer(1, 0.5*cm))
 
     # ── Summary ───────────────────────────────────────────────────────────
     story.append(Paragraph("Summary", section_h_style))
-    story.append(HRFlowable(width="100%", thickness=0.5, colour=colours.HexColour('#d0dae8'), spaceAfter=10))
+    story.append(HRFlowable(width="100%", thickness=0.5, colour=colors.HexColor('#d0dae8'), spaceAfter=10))
 
     red_n   = sum(1 for f in findings if f["tier"] == "red")
     amber_n = sum(1 for f in findings if f["tier"] == "amber")
@@ -1138,7 +1138,7 @@ def generate_pdf_report(findings, child_name="your child", situation="", doc_typ
     # Delivery log alert
     needs_log = any(f.get("delivery_log_required") for f in findings)
     if needs_log:
-        story.append(HRFlowable(width="100%", thickness=0.5, colour=colours.HexColour('#D4A017'), spaceAfter=6))
+        story.append(HRFlowable(width="100%", thickness=0.5, colour=colors.HexColor('#D4A017'), spaceAfter=6))
         story.append(Paragraph(
             "⚑  Delivery log required",
             bold_style
@@ -1150,13 +1150,13 @@ def generate_pdf_report(findings, child_name="your child", situation="", doc_typ
             "Request the school's delivery records immediately.",
             body_style
         ))
-        story.append(HRFlowable(width="100%", thickness=0.5, colour=colours.HexColour('#D4A017'), spaceAfter=10))
+        story.append(HRFlowable(width="100%", thickness=0.5, colour=colors.HexColor('#D4A017'), spaceAfter=10))
 
     story.append(Spacer(1, 0.6*cm))
 
     # ── Findings ──────────────────────────────────────────────────────────
     story.append(Paragraph("Findings", section_h_style))
-    story.append(HRFlowable(width="100%", thickness=0.5, colour=colours.HexColour('#d0dae8'), spaceAfter=12))
+    story.append(HRFlowable(width="100%", thickness=0.5, colour=colors.HexColor('#d0dae8'), spaceAfter=12))
 
     tier_h_styles = {"red": h2_red, "amber": h2_amber, "green": h2_green}
     tier_labels   = {
@@ -1189,13 +1189,13 @@ def generate_pdf_report(findings, child_name="your child", situation="", doc_typ
             ))
 
         story.append(Spacer(1, 0.3*cm))
-        story.append(HRFlowable(width="100%", thickness=0.3, colour=colours.HexColour('#e0e8f0'), spaceAfter=8))
+        story.append(HRFlowable(width="100%", thickness=0.3, colour=colors.HexColor('#e0e8f0'), spaceAfter=8))
 
     story.append(Spacer(1, 0.8*cm))
 
     # ── What next ─────────────────────────────────────────────────────────
     story.append(Paragraph("What next?", section_h_style))
-    story.append(HRFlowable(width="100%", thickness=0.5, colour=colours.HexColour('#d0dae8'), spaceAfter=12))
+    story.append(HRFlowable(width="100%", thickness=0.5, colour=colors.HexColor('#d0dae8'), spaceAfter=12))
 
     story.append(Paragraph(
         "<b>Red findings</b> must be addressed at your annual review. "
@@ -1219,7 +1219,7 @@ def generate_pdf_report(findings, child_name="your child", situation="", doc_typ
     ))
 
     story.append(Spacer(1, 0.8*cm))
-    story.append(HRFlowable(width="100%", thickness=1, colour=colours.HexColour('#1a2744'), spaceAfter=8))
+    story.append(HRFlowable(width="100%", thickness=1, colour=colors.HexColor('#1a2744'), spaceAfter=8))
     story.append(Paragraph(
         "This report is produced by FRED — Families' Rights and Entitlements Directory. "
         "It provides lawful analysis, not legal advice. "
