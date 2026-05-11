@@ -5,10 +5,10 @@ import json
 import datetime
 from io import BytesIO
 from docx import Document
-from docx.shared import Pt, RGBColor, Inches
+from docx.shared import Pt, RGBColour, Inches
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from reportlab.lib.pagesizes import A4
-from reportlab.lib import colors
+from reportlab.lib import colours
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import cm
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable
@@ -41,8 +41,8 @@ st.markdown(f"""
 
   html, body, [class*="css"] {{
     font-family: 'DM Sans', sans-serif;
-    background-color: #f5f5f0;
-    color: #1a1a2e;
+    background-colour: #f5f5f0;
+    colour: #1a1a2e;
   }}
 
   h1, h2, h3 {{
@@ -53,10 +53,10 @@ st.markdown(f"""
   /* Hero */
   .hero {{
     background: #2d4a2d;
-    color: white;
+    colour: white;
     padding: 3rem 2.5rem 2.8rem;
     border-radius: 16px;
-    text-align: center;
+    text-align: centre;
     margin-bottom: 2rem;
     position: relative;
     overflow: hidden;
@@ -75,7 +75,7 @@ st.markdown(f"""
     font-family: 'DM Serif Display', serif;
     font-size: 4rem;
     margin: 0;
-    color: #e8f5e0;
+    colour: #e8f5e0;
     letter-spacing: 0.06em;
     font-weight: 400;
   }}
@@ -85,7 +85,7 @@ st.markdown(f"""
     font-size: 0.75rem;
     letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: #9dc98a;
+    colour: #9dc98a;
     margin: 0.4rem 0 1rem 0;
     font-weight: 300;
   }}
@@ -94,21 +94,21 @@ st.markdown(f"""
     font-family: 'DM Serif Display', serif;
     font-size: 1.45rem;
     font-weight: 400;
-    color: #e8f5e0;
+    colour: #e8f5e0;
     margin-bottom: 0.5rem;
     line-height: 1.35;
   }}
 
   .hero .origin {{
     font-style: italic;
-    color: #7ab870;
+    colour: #7ab870;
     margin-bottom: 1.4rem;
     font-size: 0.93rem;
     font-weight: 300;
   }}
 
   .hero .sub {{
-    color: #b8d9a8;
+    colour: #b8d9a8;
     max-width: 540px;
     margin: 0 auto 1.4rem auto;
     font-size: 1rem;
@@ -117,7 +117,7 @@ st.markdown(f"""
   }}
 
   .hero .service-line {{
-    color: #7ab870;
+    colour: #7ab870;
     font-size: 0.82rem;
     margin-bottom: 1.8rem;
     letter-spacing: 0.04em;
@@ -127,7 +127,7 @@ st.markdown(f"""
   .cta-button {{
     display: inline-block;
     background: #e8c96a;
-    color: #2d3a1a !important;
+    colour: #2d3a1a !important;
     font-family: 'DM Sans', sans-serif;
     font-weight: 600;
     font-size: 1rem;
@@ -140,14 +140,14 @@ st.markdown(f"""
   }}
 
   .reassurance {{
-    color: #9dc98a;
+    colour: #9dc98a;
     font-size: 0.85rem;
     margin-top: 1rem;
     font-weight: 300;
   }}
 
   .pricing-hint {{
-    color: #7a8fa8;
+    colour: #7a8fa8;
     font-size: 0.82rem;
     margin-top: 0.4rem;
   }}
@@ -155,7 +155,7 @@ st.markdown(f"""
   /* Traffic light badges */
   .badge-red {{
     background: {RED};
-    color: white;
+    colour: white;
     padding: 0.22rem 0.7rem;
     border-radius: 20px;
     font-weight: 500;
@@ -166,7 +166,7 @@ st.markdown(f"""
   }}
   .badge-amber {{
     background: {AMBER};
-    color: white;
+    colour: white;
     padding: 0.22rem 0.7rem;
     border-radius: 20px;
     font-weight: 500;
@@ -177,7 +177,7 @@ st.markdown(f"""
   }}
   .badge-green {{
     background: {GREEN};
-    color: white;
+    colour: white;
     padding: 0.22rem 0.7rem;
     border-radius: 20px;
     font-weight: 500;
@@ -224,7 +224,7 @@ st.markdown(f"""
   .hiw-num {{
     font-family: 'DM Serif Display', serif;
     font-size: 1.3rem;
-    color: #7ab870;
+    colour: #7ab870;
     flex-shrink: 0;
     line-height: 1;
     width: 24px;
@@ -236,7 +236,7 @@ st.markdown(f"""
     border: 0.5px solid #d0ddd0;
     border-radius: 12px;
     padding: 1.4rem 1.2rem;
-    text-align: center;
+    text-align: centre;
     height: 100%;
   }}
   .pricing-card.featured {{
@@ -246,11 +246,11 @@ st.markdown(f"""
     font-family: 'DM Serif Display', serif;
     font-size: 2rem;
     font-weight: 400;
-    color: #2d4a2d;
+    colour: #2d4a2d;
   }}
   .pricing-card .period {{
     font-size: 0.82rem;
-    color: #888;
+    colour: #888;
     font-weight: 300;
   }}
   .pricing-card ul {{
@@ -261,17 +261,17 @@ st.markdown(f"""
     line-height: 2;
     list-style: none;
     font-weight: 300;
-    color: #555;
+    colour: #555;
   }}
   .pricing-card ul li::before {{
     content: '·  ';
-    color: #7ab870;
+    colour: #7ab870;
     font-weight: 700;
   }}
 
   .best-value-tag {{
     background: #2d4a2d;
-    color: #e8f5e0;
+    colour: #e8f5e0;
     font-size: 0.7rem;
     font-weight: 500;
     padding: 0.2rem 0.7rem;
@@ -295,7 +295,7 @@ st.markdown(f"""
   .doc-pill {{
     display: inline-block;
     background: #eaf5e0;
-    color: #2d5a2d;
+    colour: #2d5a2d;
     font-size: 0.78rem;
     padding: 0.28rem 0.8rem;
     border-radius: 20px;
@@ -314,14 +314,14 @@ st.markdown(f"""
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    color: #5a8a5a;
+    colour: #5a8a5a;
     margin-bottom: 0.6rem;
   }}
 
   /* Streamlit button override */
   .stButton > button {{
     background: #2d4a2d;
-    color: white;
+    colour: white;
     border: none;
     border-radius: 40px;
     font-family: 'DM Sans', sans-serif;
@@ -331,13 +331,13 @@ st.markdown(f"""
   }}
   .stButton > button:hover {{
     background: #3d5e3d;
-    color: white;
+    colour: white;
   }}
 
   /* Primary CTA Streamlit button — gold */
   div[data-testid="stButton"] button[kind="primary"] {{
     background: #e8c96a;
-    color: #2d3a1a;
+    colour: #2d3a1a;
     border-radius: 40px;
   }}
 
@@ -787,7 +787,7 @@ def analyse_section_b(b_blocks, f_blocks):
                 "Section F should specify: the frequency of speech and language therapy or "
                 "targeted communication sessions (e.g. two sessions per week), the duration "
                 "of each session in minutes, the role and qualification of the deliverer "
-                "(e.g. Speech and Language Therapist or trained TA working to a SALT programme), "
+                "(e.g. Speech and Language Therapist or trained TA working to a SALT programmeme), "
                 "and the specific strategies to be used. Generalised statements such as "
                 "'communication support will be provided' are not sufficient."
             ),
@@ -795,7 +795,7 @@ def analyse_section_b(b_blocks, f_blocks):
         {
             "name": "Cognition and learning",
             "b_keywords": r'\b(cognition|learning|literacy|numeracy|reading|writing|dyslexia|processing|memory|attention)\b',
-            "f_keywords": r'\b(literacy|numeracy|reading|writing|learning support|intervention|programme)\b',
+            "f_keywords": r'\b(literacy|numeracy|reading|writing|learning support|intervention|programmeme)\b',
             "what_good_looks_like": (
                 "Section F should specify: named literacy or learning interventions (not generic "
                 "'learning support'), frequency and duration of sessions, the role of the "
@@ -822,8 +822,8 @@ def analyse_section_b(b_blocks, f_blocks):
             "what_good_looks_like": (
                 "Section F should specify: named occupational therapy or sensory integration "
                 "provision, frequency and duration of sessions, the role of the deliverer "
-                "(e.g. Occupational Therapist or TA trained to deliver OT programme), "
-                "and the specific programme or strategies. Environmental adjustments should "
+                "(e.g. Occupational Therapist or TA trained to deliver OT programmeme), "
+                "and the specific programmeme or strategies. Environmental adjustments should "
                 "be listed specifically, not described as generalised 'reasonable adjustments'."
             ),
         },
@@ -940,7 +940,7 @@ def generate_word_report(findings, child_name="your child", situation="", doc_ty
 
     sub = doc.add_paragraph(f"Families' Rights and Entitlements Directory")
     sub.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    sub.runs[0].font.color.rgb = RGBColor(0x1a, 0x27, 0x44)
+    sub.runs[0].font.colour.rgb = RGBColour(0x1a, 0x27, 0x44)
 
     doc.add_paragraph(f"Document type: {doc_type}")
     if situation:
@@ -970,14 +970,14 @@ def generate_word_report(findings, child_name="your child", situation="", doc_ty
     tier_labels = {"red": "RED — Lawful Requirement Not Met",
                    "amber": "AMBER — Best Practice Gap",
                    "green": "GREEN — Compliant"}
-    tier_colours = {"red": RGBColor(0xC0, 0x39, 0x2B),
-                    "amber": RGBColor(0xD4, 0xA0, 0x17),
-                    "green": RGBColor(0x1E, 0x84, 0x49)}
+    tier_colours = {"red": RGBColour(0xC0, 0x39, 0x2B),
+                    "amber": RGBColour(0xD4, 0xA0, 0x17),
+                    "green": RGBColour(0x1E, 0x84, 0x49)}
 
     for finding in findings:
         tier = finding["tier"]
         h = doc.add_heading(tier_labels.get(tier, tier.upper()), 2)
-        h.runs[0].font.color.rgb = tier_colours.get(tier, RGBColor(0, 0, 0))
+        h.runs[0].font.colour.rgb = tier_colours.get(tier, RGBColour(0, 0, 0))
 
         doc.add_heading(finding["title"], 3)
 
@@ -1026,71 +1026,71 @@ def generate_pdf_report(findings, child_name="your child", situation="", doc_typ
 
     title_style = ParagraphStyle(
         'fred_title', fontSize=28, alignment=TA_CENTER,
-        textColor=colors.HexColor('#1a2744'),
+        textColour=colours.HexColour('#1a2744'),
         spaceAfter=4, spaceBefore=0,
         fontName='Helvetica-Bold',
         leading=34,
     )
     sub_style = ParagraphStyle(
         'fred_sub', fontSize=11, alignment=TA_CENTER,
-        textColor=colors.HexColor('#4a5a7a'),
+        textColour=colours.HexColour('#4a5a7a'),
         spaceAfter=6, spaceBefore=0,
         fontName='Helvetica',
         leading=16,
     )
     meta_style = ParagraphStyle(
         'fred_meta', fontSize=10, alignment=TA_CENTER,
-        textColor=colors.HexColor('#6a7a90'),
+        textColour=colours.HexColour('#6a7a90'),
         spaceAfter=20, spaceBefore=0,
         fontName='Helvetica-Oblique',
         leading=14,
     )
     section_h_style = ParagraphStyle(
         'fred_section', fontSize=15, fontName='Helvetica-Bold',
-        textColor=colors.HexColor('#1a2744'),
+        textColour=colours.HexColour('#1a2744'),
         spaceAfter=8, spaceBefore=20,
         leading=20,
         borderPad=0,
     )
     h2_red = ParagraphStyle(
         'fred_h2red', fontSize=12, fontName='Helvetica-Bold',
-        textColor=colors.HexColor('#C0392B'),
+        textColour=colours.HexColour('#C0392B'),
         spaceAfter=4, spaceBefore=16, leading=16,
     )
     h2_amber = ParagraphStyle(
         'fred_h2amber', fontSize=12, fontName='Helvetica-Bold',
-        textColor=colors.HexColor('#D4A017'),
+        textColour=colours.HexColour('#D4A017'),
         spaceAfter=4, spaceBefore=16, leading=16,
     )
     h2_green = ParagraphStyle(
         'fred_h2green', fontSize=12, fontName='Helvetica-Bold',
-        textColor=colors.HexColor('#1E8449'),
+        textColour=colours.HexColour('#1E8449'),
         spaceAfter=4, spaceBefore=16, leading=16,
     )
     finding_title_style = ParagraphStyle(
         'fred_finding_title', fontSize=11, fontName='Helvetica-Bold',
-        textColor=colors.HexColor('#1a1a2e'),
+        textColour=colours.HexColour('#1a1a2e'),
         spaceAfter=6, spaceBefore=4, leading=15,
     )
     extract_style = ParagraphStyle(
         'fred_extract', fontSize=10, fontName='Helvetica-Oblique',
-        textColor=colors.HexColor('#555555'),
+        textColour=colours.HexColour('#555555'),
         spaceAfter=8, spaceBefore=2, leading=14,
         leftIndent=12, rightIndent=12,
     )
     body_style = ParagraphStyle(
         'fred_body', fontSize=10, fontName='Helvetica',
-        textColor=colors.HexColor('#1a1a2e'),
+        textColour=colours.HexColour('#1a1a2e'),
         spaceAfter=10, spaceBefore=0, leading=15,
     )
     bold_style = ParagraphStyle(
         'fred_bold', fontSize=10, fontName='Helvetica-Bold',
-        textColor=colors.HexColor('#1a1a2e'),
+        textColour=colours.HexColour('#1a1a2e'),
         spaceAfter=8, spaceBefore=4, leading=14,
     )
     footer_style = ParagraphStyle(
         'fred_footer', fontSize=9, fontName='Helvetica-Oblique',
-        textColor=colors.HexColor('#888888'),
+        textColour=colours.HexColour('#888888'),
         spaceAfter=0, spaceBefore=8, leading=13, alignment=TA_CENTER,
     )
 
@@ -1101,34 +1101,34 @@ def generate_pdf_report(findings, child_name="your child", situation="", doc_typ
     story.append(Paragraph("FRED", title_style))
     story.append(Paragraph("Families' Rights and Entitlements Directory", sub_style))
     story.append(Spacer(1, 0.3*cm))
-    story.append(HRFlowable(width="100%", thickness=1.5, color=colors.HexColor('#1a2744'), spaceAfter=8))
+    story.append(HRFlowable(width="100%", thickness=1.5, colour=colours.HexColour('#1a2744'), spaceAfter=8))
     story.append(Paragraph("EHCP Analysis Report", meta_style))
     story.append(Paragraph(f"Document type: {doc_type}", meta_style))
     if situation:
         story.append(Paragraph(f"Context: {situation}", meta_style))
-    story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor('#d0dae8'), spaceAfter=16))
+    story.append(HRFlowable(width="100%", thickness=0.5, colour=colours.HexColour('#d0dae8'), spaceAfter=16))
     story.append(Spacer(1, 0.5*cm))
 
     # ── Summary ───────────────────────────────────────────────────────────
     story.append(Paragraph("Summary", section_h_style))
-    story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor('#d0dae8'), spaceAfter=10))
+    story.append(HRFlowable(width="100%", thickness=0.5, colour=colours.HexColour('#d0dae8'), spaceAfter=10))
 
     red_n   = sum(1 for f in findings if f["tier"] == "red")
     amber_n = sum(1 for f in findings if f["tier"] == "amber")
     green_n = sum(1 for f in findings if f["tier"] == "green")
 
     story.append(Paragraph(
-        f'<font color="#C0392B"><b>{red_n} Red finding{"s" if red_n != 1 else ""}</b></font> — '
+        f'<font colour="#C0392B"><b>{red_n} Red finding{"s" if red_n != 1 else ""}</b></font> — '
         f'lawful requirement{"s" if red_n != 1 else ""} not met. Must be addressed at annual review.',
         body_style
     ))
     story.append(Paragraph(
-        f'<font color="#D4A017"><b>{amber_n} Amber finding{"s" if amber_n != 1 else ""}</b></font> — '
+        f'<font colour="#D4A017"><b>{amber_n} Amber finding{"s" if amber_n != 1 else ""}</b></font> — '
         f'best practice gap{"s" if amber_n != 1 else ""}. Worth raising at annual review.',
         body_style
     ))
     story.append(Paragraph(
-        f'<font color="#1E8449"><b>{green_n} Green finding{"s" if green_n != 1 else ""}</b></font> — '
+        f'<font colour="#1E8449"><b>{green_n} Green finding{"s" if green_n != 1 else ""}</b></font> — '
         f'compliant. Use as benchmark when challenging non-compliant provision.',
         body_style
     ))
@@ -1138,7 +1138,7 @@ def generate_pdf_report(findings, child_name="your child", situation="", doc_typ
     # Delivery log alert
     needs_log = any(f.get("delivery_log_required") for f in findings)
     if needs_log:
-        story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor('#D4A017'), spaceAfter=6))
+        story.append(HRFlowable(width="100%", thickness=0.5, colour=colours.HexColour('#D4A017'), spaceAfter=6))
         story.append(Paragraph(
             "⚑  Delivery log required",
             bold_style
@@ -1150,13 +1150,13 @@ def generate_pdf_report(findings, child_name="your child", situation="", doc_typ
             "Request the school's delivery records immediately.",
             body_style
         ))
-        story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor('#D4A017'), spaceAfter=10))
+        story.append(HRFlowable(width="100%", thickness=0.5, colour=colours.HexColour('#D4A017'), spaceAfter=10))
 
     story.append(Spacer(1, 0.6*cm))
 
     # ── Findings ──────────────────────────────────────────────────────────
     story.append(Paragraph("Findings", section_h_style))
-    story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor('#d0dae8'), spaceAfter=12))
+    story.append(HRFlowable(width="100%", thickness=0.5, colour=colours.HexColour('#d0dae8'), spaceAfter=12))
 
     tier_h_styles = {"red": h2_red, "amber": h2_amber, "green": h2_green}
     tier_labels   = {
@@ -1189,13 +1189,13 @@ def generate_pdf_report(findings, child_name="your child", situation="", doc_typ
             ))
 
         story.append(Spacer(1, 0.3*cm))
-        story.append(HRFlowable(width="100%", thickness=0.3, color=colors.HexColor('#e0e8f0'), spaceAfter=8))
+        story.append(HRFlowable(width="100%", thickness=0.3, colour=colours.HexColour('#e0e8f0'), spaceAfter=8))
 
     story.append(Spacer(1, 0.8*cm))
 
     # ── What next ─────────────────────────────────────────────────────────
     story.append(Paragraph("What next?", section_h_style))
-    story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor('#d0dae8'), spaceAfter=12))
+    story.append(HRFlowable(width="100%", thickness=0.5, colour=colours.HexColour('#d0dae8'), spaceAfter=12))
 
     story.append(Paragraph(
         "<b>Red findings</b> must be addressed at your annual review. "
@@ -1219,7 +1219,7 @@ def generate_pdf_report(findings, child_name="your child", situation="", doc_typ
     ))
 
     story.append(Spacer(1, 0.8*cm))
-    story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor('#1a2744'), spaceAfter=8))
+    story.append(HRFlowable(width="100%", thickness=1, colour=colours.HexColour('#1a2744'), spaceAfter=8))
     story.append(Paragraph(
         "This report is produced by FRED — Families' Rights and Entitlements Directory. "
         "It provides lawful analysis, not legal advice. "
@@ -1250,6 +1250,11 @@ def init_state():
         "upcoming_dates": "",
         "doc_name": "",
         "subscribed": False,
+        "corr_analysed": False,
+        "show_companion": False,
+        "show_amendment": False,
+        "show_all_patterns": False,
+        "tone_override": None,
         # Document vault — named documents uploaded
         "vault": {},           # {doc_type: {"name": filename, "text": extracted_text}}
         # Correspondence thread — one entry per exchange
@@ -1282,7 +1287,7 @@ def render_finding_card(finding, index=None, show_full=True):
       <p style="font-weight:700;margin:0.4rem 0 0.5rem 0;font-size:1rem;">{finding['title']}</p>
     """
     if finding.get("extract") and show_full:
-        html += f'<p style="font-style:italic;color:#555;font-size:0.9rem;margin:0 0 0.5rem 0;">"{finding["extract"][:280]}…"</p>'
+        html += f'<p style="font-style:italic;colour:#555;font-size:0.9rem;margin:0 0 0.5rem 0;">"{finding["extract"][:280]}…"</p>'
 
     if show_full:
         html += f'<p style="margin:0;font-size:0.95rem;line-height:1.6;">{finding["commentary"]}</p>'
@@ -1350,10 +1355,10 @@ def page_landing():
             st.rerun()
 
     st.markdown("""
-    <p style="text-align:center;color:#6a7a90;font-size:0.9rem;margin-top:0.8rem;">
+    <p style="text-align:centre;colour:#6a7a90;font-size:0.9rem;margin-top:0.8rem;">
       Upload first. Decide after. Your report is ready before you pay.
     </p>
-    <p style="text-align:center;color:#8a9ab0;font-size:0.82rem;">
+    <p style="text-align:centre;colour:#8a9ab0;font-size:0.82rem;">
       From £XX for the full report — or see our subscription plans below
     </p>
     """, unsafe_allow_html=True)
@@ -1361,7 +1366,7 @@ def page_landing():
     st.markdown("<hr class='section-divider'>", unsafe_allow_html=True)
 
     # How it works
-    st.markdown("<h2 style='text-align:center;'>Everything you need to know.</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align:centre;'>Everything you need to know.</h2>", unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
 
     hiw_items = [
@@ -1389,7 +1394,7 @@ def page_landing():
     st.markdown("<hr class='section-divider'>", unsafe_allow_html=True)
 
     # Pricing
-    st.markdown("<h2 style='text-align:center;'>Plans</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align:centre;'>Plans</h2>", unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
 
     p1, p2, p3 = st.columns(3)
@@ -1443,12 +1448,12 @@ def page_landing():
         </div>
         """, unsafe_allow_html=True)
 
-    st.markdown("<br><p style='text-align:center;color:#6a7a90;font-size:0.85rem;'>No hidden charges. Your report is ready before you purchase.</p>", unsafe_allow_html=True)
+    st.markdown("<br><p style='text-align:centre;colour:#6a7a90;font-size:0.85rem;'>No hidden charges. Your report is ready before you purchase.</p>", unsafe_allow_html=True)
 
     st.markdown("<hr class='section-divider'>", unsafe_allow_html=True)
 
     # FAQ
-    st.markdown("<h2 style='text-align:center;'>FAQ</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align:centre;'>FAQ</h2>", unsafe_allow_html=True)
 
     faqs = [
         ("When do I pay?", "After you see one real finding from your EHCP, before you access the full report. You upload first — your report is ready before you pay."),
@@ -1472,7 +1477,7 @@ def page_landing():
     <a href="https://docs.google.com/forms/d/e/1FAIpQLSeA1F9nEdQWkmplbAh973XKq2EsW0bEkhJiw7drhP7BZaPjKQ/viewform" target="_blank" style="
         display:inline-block;
         background:#1a2744;
-        color:white;
+        colour:white;
         padding:0.7rem 1.8rem;
         border-radius:4px;
         text-decoration:none;
@@ -1480,7 +1485,7 @@ def page_landing():
         font-weight:600;
         font-size:0.95rem;
     ">Share your thoughts →</a>
-    <p style="font-size:0.8rem;color:#888;margin-top:0.5rem;">Opens in a new tab. No obligation.</p>
+    <p style="font-size:0.8rem;colour:#888;margin-top:0.5rem;">Opens in a new tab. No obligation.</p>
     """, unsafe_allow_html=True)
 
 
@@ -1508,7 +1513,7 @@ def page_upload():
 
     st.markdown(f"""
     <div style="background:#eaf5e0;border-radius:10px;padding:1rem 1.3rem;margin-bottom:1.5rem;border:0.5px solid #c0ddb0;">
-      <p style="margin:0;font-size:0.95rem;color:#2d4a2d;line-height:1.7;">
+      <p style="margin:0;font-size:0.95rem;colour:#2d4a2d;line-height:1.7;">
         Upload your child's EHCP first. Then add any other documents you have —
         FRED will read them all and refer back to them when you analyse correspondence
         or request an amendment.
@@ -1581,16 +1586,16 @@ def page_upload():
             if already_uploaded or uploaded:
                 st.markdown(f"""
                 <div style="background:#eaf5e0;border-radius:8px;padding:0.6rem 1rem;margin-top:1.6rem;border:0.5px solid #c0ddb0;">
-                  <p style="margin:0;font-size:0.85rem;color:#2d5a2d;font-weight:500;">
+                  <p style="margin:0;font-size:0.85rem;colour:#2d5a2d;font-weight:500;">
                     ✓ FRED has read the {doc['label']}
                   </p>
-                  <p style="margin:0.2rem 0 0;font-size:0.8rem;color:#5a8a5a;">{doc['description']}</p>
+                  <p style="margin:0.2rem 0 0;font-size:0.8rem;colour:#5a8a5a;">{doc['description']}</p>
                 </div>
                 """, unsafe_allow_html=True)
             else:
                 st.markdown(f"""
                 <div style="padding:0.6rem 1rem;margin-top:1.6rem;">
-                  <p style="margin:0;font-size:0.82rem;color:#888;">{doc['description']}</p>
+                  <p style="margin:0;font-size:0.82rem;colour:#888;">{doc['description']}</p>
                 </div>
                 """, unsafe_allow_html=True)
 
@@ -1601,10 +1606,10 @@ def page_upload():
         loaded = ", ".join(DOCUMENT_TYPES[i]["label"] for i, d in enumerate(DOCUMENT_TYPES) if d["key"] in vault)
         st.markdown(f"""
         <div style="background:#2d4a2d;border-radius:10px;padding:0.9rem 1.2rem;margin-bottom:1rem;">
-          <p style="margin:0;font-size:0.88rem;color:#9dc98a;font-weight:500;">
+          <p style="margin:0;font-size:0.88rem;colour:#9dc98a;font-weight:500;">
             FRED is holding: {loaded}
           </p>
-          <p style="margin:0.3rem 0 0;font-size:0.82rem;color:#7ab870;">
+          <p style="margin:0.3rem 0 0;font-size:0.82rem;colour:#7ab870;">
             These will be cross-referenced when you analyse correspondence or request an amendment.
           </p>
         </div>
@@ -1619,7 +1624,7 @@ def page_upload():
     with col_b:
         if vault:
             st.markdown(
-                "<p style='font-size:0.82rem;color:#888;padding-top:0.4rem;'>"
+                "<p style='font-size:0.82rem;colour:#888;padding-top:0.4rem;'>"
                 "To add more documents, upload them above. To replace a document, "
                 "upload a new version — it will overwrite the previous one."
                 "</p>",
@@ -1631,7 +1636,7 @@ def page_upload():
 
     st.markdown("---")
     st.markdown("### A few quick questions")
-    st.markdown("<p style='font-size:0.88rem;color:#666;margin-bottom:1rem;'>These help FRED tailor the analysis. Nothing here is mandatory.</p>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size:0.88rem;colour:#666;margin-bottom:1rem;'>These help FRED tailor the analysis. Nothing here is mandatory.</p>", unsafe_allow_html=True)
 
     doc_type = st.radio(
         "What is the primary document you have uploaded?",
@@ -1708,9 +1713,9 @@ def page_sneak_peek():
     <div style="background:white;border:1px solid #d0dae8;border-radius:8px;padding:1.2rem;margin:1.2rem 0;">
       <p style="margin:0;font-size:1rem;">
         Your full report contains:&nbsp;
-        <span style="color:{RED};font-weight:700;">{red_n} Red</span> &nbsp;·&nbsp;
-        <span style="color:{AMBER};font-weight:700;">{amber_n} Amber</span> &nbsp;·&nbsp;
-        <span style="color:{GREEN};font-weight:700;">{green_n} Green</span>
+        <span style="colour:{RED};font-weight:700;">{red_n} Red</span> &nbsp;·&nbsp;
+        <span style="colour:{AMBER};font-weight:700;">{amber_n} Amber</span> &nbsp;·&nbsp;
+        <span style="colour:{GREEN};font-weight:700;">{green_n} Green</span>
       </p>
     </div>
     """, unsafe_allow_html=True)
@@ -1726,10 +1731,10 @@ def page_sneak_peek():
         )
         st.markdown(f"""
         <div style="background:{NAVY};border-radius:8px;padding:1.5rem 2rem;margin:1rem 0;">
-          <p style="color:#a8b8d8;font-size:0.85rem;margin:0 0 0.3rem;">
+          <p style="colour:#a8b8d8;font-size:0.85rem;margin:0 0 0.3rem;">
             FRED BETA ACCESS
           </p>
-          <p style="color:white;font-size:1.1rem;font-weight:600;margin:0 0 1rem;">
+          <p style="colour:white;font-size:1.1rem;font-weight:600;margin:0 0 1rem;">
             Your report is waiting. Enter your email to continue.
           </p>
         </div>
@@ -1768,7 +1773,7 @@ def page_full_report():
 
     # Parse meta info
     st.markdown(f"""
-    <div style="background:#f0f4fa;border-radius:6px;padding:0.8rem 1.2rem;margin-bottom:1.2rem;font-size:0.9rem;color:#444;">
+    <div style="background:#f0f4fa;border-radius:6px;padding:0.8rem 1.2rem;margin-bottom:1.2rem;font-size:0.9rem;colour:#444;">
       Document type: <b>{doc_type}</b> &nbsp;·&nbsp;
       Section F blocks found: <b>{meta.get('f_blocks_found', 0)}</b> &nbsp;·&nbsp;
       Section E blocks found: <b>{meta.get('e_blocks_found', 0)}</b>
@@ -1780,11 +1785,11 @@ def page_full_report():
     <div style="background:white;border:1px solid #d0dae8;border-radius:8px;padding:1.2rem;margin-bottom:1.5rem;">
       <p style="margin:0;font-size:1.05rem;font-weight:600;">Summary</p>
       <p style="margin:0.5rem 0 0;font-size:0.97rem;">
-        <span style="color:{RED};font-weight:700;">{red_n} Red</span> — lawful requirement(s) not met.
+        <span style="colour:{RED};font-weight:700;">{red_n} Red</span> — lawful requirement(s) not met.
         Must be addressed at annual review.<br>
-        <span style="color:{AMBER};font-weight:700;">{amber_n} Amber</span> — best practice gap(s).
+        <span style="colour:{AMBER};font-weight:700;">{amber_n} Amber</span> — best practice gap(s).
         Worth raising at annual review.<br>
-        <span style="color:{GREEN};font-weight:700;">{green_n} Green</span> — compliant.
+        <span style="colour:{GREEN};font-weight:700;">{green_n} Green</span> — compliant.
         Use as benchmark when challenging non-compliant provision.
       </p>
     </div>
@@ -1842,18 +1847,18 @@ def page_full_report():
     st.markdown("---")
     if not st.session_state.subscribed:
         st.markdown(f"""
-        <div style="background:{NAVY};border-radius:8px;padding:2rem;margin:1rem 0;text-align:center;">
-          <p style="color:#a8b8d8;font-size:0.85rem;margin:0 0 0.4rem;letter-spacing:0.1em;text-transform:uppercase;">
+        <div style="background:{NAVY};border-radius:8px;padding:2rem;margin:1rem 0;text-align:centre;">
+          <p style="colour:#a8b8d8;font-size:0.85rem;margin:0 0 0.4rem;letter-spacing:0.1em;text-transform:uppercase;">
             FRED BETA — FREE ACCESS
           </p>
-          <p style="color:white;font-size:1.3rem;font-weight:700;margin:0 0 0.6rem;">
+          <p style="colour:white;font-size:1.3rem;font-weight:700;margin:0 0 0.6rem;">
             Want the full FRED experience?
           </p>
-          <p style="color:#c8d8f0;font-size:1rem;margin:0 0 1.2rem;max-width:480px;margin-left:auto;margin-right:auto;">
+          <p style="colour:#c8d8f0;font-size:1rem;margin:0 0 1.2rem;max-width:480px;margin-left:auto;margin-right:auto;">
             Subscribe free during beta and unlock correspondence analysis,
             email drafting, meeting preparation, document vault, and more.
           </p>
-          <p style="color:#a8b8d8;font-size:0.85rem;margin:0;">
+          <p style="colour:#a8b8d8;font-size:0.85rem;margin:0;">
             Already registered as {st.session_state.email_address if st.session_state.email_address else "a beta tester"}
           </p>
         </div>
@@ -1880,7 +1885,7 @@ def page_full_report():
     <a href="https://docs.google.com/forms/d/e/1FAIpQLSeA1F9nEdQWkmplbAh973XKq2EsW0bEkhJiw7drhP7BZaPjKQ/viewform" target="_blank" style="
         display:inline-block;
         background:{NAVY};
-        color:white;
+        colour:white;
         padding:0.7rem 1.8rem;
         border-radius:4px;
         text-decoration:none;
@@ -1888,7 +1893,7 @@ def page_full_report():
         font-weight:600;
         font-size:0.95rem;
     ">Leave feedback →</a>
-    <p style="font-size:0.8rem;color:#888;margin-top:0.5rem;">
+    <p style="font-size:0.8rem;colour:#888;margin-top:0.5rem;">
         Opens in a new tab. Takes 2 minutes.
     </p>
     """, unsafe_allow_html=True)
@@ -1916,7 +1921,7 @@ def page_full_report():
         )
 
     st.markdown(
-        "<p style='font-size:0.85rem;color:#888;'>Word is best for Windows/Office users. PDF is best for Apple devices.</p>",
+        "<p style='font-size:0.85rem;colour:#888;'>Word is best for Windows/Office users. PDF is best for Apple devices.</p>",
         unsafe_allow_html=True
     )
 
@@ -2552,7 +2557,7 @@ def render_pattern_card(p, index):
         <p style="font-weight:700;margin:0 0 0.2rem;font-size:0.88rem;text-transform:uppercase;letter-spacing:0.05em;">The question to ask:</p>
         <p style="margin:0;font-size:0.93rem;font-style:italic;">{p['fred_question']}</p>
       </div>
-      {f'<p style="font-size:0.82rem;color:#666;margin:0.4rem 0 0;border-left:3px solid #ddd;padding-left:0.6rem;">{p["extract"]}…</p>' if p.get("extract") else ""}
+      {f'<p style="font-size:0.82rem;colour:#666;margin:0.4rem 0 0;border-left:3px solid #ddd;padding-left:0.6rem;">{p["extract"]}…</p>' if p.get("extract") else ""}
     </div>
     """, unsafe_allow_html=True)
 
@@ -2617,7 +2622,7 @@ def page_correspondence():
     # Link back to report
     if st.session_state.get("findings"):
         st.markdown(
-            f"<a href='#' onclick='void(0)' style='font-size:0.85rem;color:{NAVY};'>← View my EHCP report</a>",
+            f"<a href='#' onclick='void(0)' style='font-size:0.85rem;colour:{NAVY};'>← View my EHCP report</a>",
             unsafe_allow_html=True
         )
         if st.button("← Back to my EHCP report", key="back_to_report"):
@@ -2664,7 +2669,7 @@ def page_correspondence():
                 help="Upload the school accessibility, SEN, or behaviour policy."
             )
             st.markdown(
-                "<p style='font-size:0.82rem;color:#666;margin-top:0.3rem;'>"
+                "<p style='font-size:0.82rem;colour:#666;margin-top:0.3rem;'>"
                 "Upload the school's accessibility or SEN policy and FRED will check whether "
                 "they have met their own commitments."
                 "</p>", unsafe_allow_html=True
@@ -2715,9 +2720,9 @@ def page_correspondence():
     if tone_override:
         st.markdown(f"""
         <div style="background:#eaf5e0;border-radius:8px;padding:0.6rem 1rem;margin-bottom:0.5rem;">
-          <p style="margin:0;font-size:0.85rem;color:#2d5a2d;">
+          <p style="margin:0;font-size:0.85rem;colour:#2d5a2d;">
             Tone set to: <b>{tone_override}</b> —
-            <a href="#" onclick="void(0)" style="color:#5a8a5a;">change</a>
+            <a href="#" onclick="void(0)" style="colour:#5a8a5a;">change</a>
           </p>
         </div>
         """, unsafe_allow_html=True)
@@ -2730,7 +2735,7 @@ def page_correspondence():
 
     if not email1 and not analyse:
         st.markdown(
-            "<p style='color:#888;font-size:0.9rem;margin-top:0.5rem;'>"
+            "<p style='colour:#888;font-size:0.9rem;margin-top:0.5rem;'>"
             "Upload at least one piece of correspondence to begin."
             "</p>",
             unsafe_allow_html=True
@@ -2744,8 +2749,10 @@ def page_correspondence():
     if analyse and not has_content:
         st.error("Please upload a file or paste some correspondence text to continue.")
 
+    # Run analysis only when button clicked, then store in session state
     if analyse and has_content:
-
+        st.session_state.corr_analysed = False  # reset to re-run
+        
         # Progress steps
         progress_text = st.empty()
         progress_text.markdown("*Reading correspondence…*")
@@ -2799,30 +2806,46 @@ def page_correspondence():
 
         today = datetime.datetime.now().strftime("%d %B %Y")
 
-        # Add to thread
+        # Add to thread — deduplicate by content hash
         pattern_names = [p["name"] for p in matched_patterns[:3]]
         summary = f"Email from school — {len(matched_patterns)} pattern(s) detected"
         if environment:
             summary += f" — {environment} referenced"
-        add_to_thread("from_school", summary, matched_patterns, tone_rec)
+        # Only add if this is genuinely new (not a resubmit)
+        existing = st.session_state.get("thread", [])
+        if not existing or existing[-1].get("summary") != summary:
+            add_to_thread("from_school", summary, matched_patterns, tone_rec)
 
-        # ── Summary bar ───────────────────────────────────────────────────────
+    # ── Display results from session state (persists across reruns) ──────────
+    if st.session_state.get("corr_analysed"):
+        matched_patterns = st.session_state.get("all_patterns", [])
+        environment      = st.session_state.get("corr_environment")
+        policy_findings  = st.session_state.get("corr_policy", [])
+        tone_rec         = st.session_state.get("corr_tone_rec", {})
+        similar_past     = st.session_state.get("corr_similar", [])
+        draft_reply      = st.session_state.get("draft_reply", "")
+        top_two          = st.session_state.get("top_two_patterns", [])
+        today            = datetime.datetime.now().strftime("%d %B %Y")
+
+        red_n, amber_n, summary_text, summary_colour = st.session_state.get(
+            "corr_summary_bar", (0, 0, "Analysis complete.", "#2d4a2d")
+        )
         red_n   = sum(1 for p in matched_patterns if p["tier"] == "red")
         amber_n = sum(1 for p in matched_patterns if p["tier"] == "amber")
 
         if red_n == 0 and amber_n == 0:
-            summary_color = GREEN
+            summary_colour = GREEN
             summary_text = "No major patterns detected in this correspondence."
         elif red_n > 0:
-            summary_color = RED
+            summary_colour = RED
             summary_text = f"{red_n} serious pattern{'s' if red_n > 1 else ''} and {amber_n} amber signal{'s' if amber_n != 1 else ''} detected."
         else:
-            summary_color = AMBER
+            summary_colour = AMBER
             summary_text = f"{amber_n} pattern{'s' if amber_n > 1 else ''} detected. No immediate lawful concerns."
 
         st.markdown(f"""
-        <div style="background:{summary_color};border-radius:6px;padding:0.9rem 1.2rem;margin:1rem 0 1.5rem;">
-          <p style="color:white;font-weight:700;margin:0;font-size:1rem;">{summary_text}</p>
+        <div style="background:{summary_colour};border-radius:6px;padding:0.9rem 1.2rem;margin:1rem 0 1.5rem;">
+          <p style="colour:white;font-weight:700;margin:0;font-size:1rem;">{summary_text}</p>
         </div>
         """, unsafe_allow_html=True)
 
@@ -2903,7 +2926,7 @@ def page_correspondence():
                 # Immediate Do
                 st.markdown("**Immediate steps — check what is already in the EHCP:**")
                 st.markdown(
-                    "<p style='font-size:0.9rem;color:#555;margin-bottom:0.8rem;'>"
+                    "<p style='font-size:0.9rem;colour:#555;margin-bottom:0.8rem;'>"
                     "Before requesting an amendment, check whether these provisions — "
                     "which may already be in Section F — apply specifically to this environment. "
                     "If they do, ask the school in writing to confirm they are in place."
@@ -2930,9 +2953,9 @@ def page_correspondence():
                 if st.session_state.get("show_amendment"):
                     st.markdown(f"""
                     <div style="background:{NAVY};border-radius:8px;padding:1.2rem 1.5rem;margin:1rem 0;">
-                      <p style="color:#a8b8d8;font-size:0.8rem;margin:0 0 0.3rem;letter-spacing:0.08em;text-transform:uppercase;">EHCP AMENDMENT FLAG</p>
-                      <p style="color:white;font-weight:700;margin:0 0 0.4rem;font-size:1rem;">New evidence — {environment} — {today}</p>
-                      <p style="color:#c8d8f0;margin:0;font-size:0.9rem;">
+                      <p style="colour:#a8b8d8;font-size:0.8rem;margin:0 0 0.3rem;letter-spacing:0.08em;text-transform:uppercase;">EHCP AMENDMENT FLAG</p>
+                      <p style="colour:white;font-weight:700;margin:0 0 0.4rem;font-size:1rem;">New evidence — {environment} — {today}</p>
+                      <p style="colour:#c8d8f0;margin:0;font-size:0.9rem;">
                         The observations above constitute new evidence about your child's sensory needs
                         in this environment. This should be formally documented and used to inform
                         the next EHCP review. Edit the draft below before sending.
@@ -3001,7 +3024,7 @@ Yours sincerely,
                 <div class="finding-{tier}">
                   <span class="badge-{tier}">POLICY</span>
                   <p style="font-weight:700;margin:0.4rem 0 0.3rem;">{f['title']}</p>
-                  {f'<p style="font-style:italic;color:#555;font-size:0.88rem;margin:0 0 0.4rem;">"{f["extract"]}"</p>' if f.get("extract") else ""}
+                  {f'<p style="font-style:italic;colour:#555;font-size:0.88rem;margin:0 0 0.4rem;">"{f["extract"]}"</p>' if f.get("extract") else ""}
                   <p style="margin:0;font-size:0.93rem;">{f['commentary']}</p>
                 </div>
                 """, unsafe_allow_html=True)
@@ -3010,21 +3033,21 @@ Yours sincerely,
         st.markdown("---")
         st.markdown("### Tone recommendation")
 
-        rec_color = {"formal": "#C0392B", "collaborative": "#1E8449", "neutral": "#D4A017"}
+        rec_colour = {"formal": "#C0392B", "collaborative": "#1E8449", "neutral": "#D4A017"}
         rec_bg    = {"formal": "#fdf4f3", "collaborative": "#f3faf5", "neutral": "#fdf9f0"}
         r = tone_rec["recommendation"]
 
         st.markdown(f"""
-        <div style="border-left:4px solid {rec_color.get(r,'#888')};
+        <div style="border-left:4px solid {rec_colour.get(r,'#888')};
                     background:{rec_bg.get(r,'#f9f9f9')};
                     border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin-bottom:1rem;">
           <p style="font-weight:600;margin:0 0 0.3rem;font-size:0.95rem;">
             FRED recommends: {tone_rec['label']}
           </p>
-          <p style="margin:0;font-size:0.9rem;line-height:1.6;color:#444;">
+          <p style="margin:0;font-size:0.9rem;line-height:1.6;colour:#444;">
             {tone_rec['reasoning']}
           </p>
-          <p style="margin:0.6rem 0 0;font-size:0.78rem;color:#888;">
+          <p style="margin:0.6rem 0 0;font-size:0.78rem;colour:#888;">
             Confidence: {tone_rec['confidence'].title()} —
             based on language patterns in this correspondence.
             This is a recommendation, not an instruction.
@@ -3055,10 +3078,10 @@ Yours sincerely,
         st.markdown("### Draft reply")
 
         st.markdown("""
-        <p style='font-size:0.92rem;color:#444;margin-bottom:0.3rem;'>
+        <p style='font-size:0.92rem;colour:#444;margin-bottom:0.3rem;'>
           This draft email has been generated for you. Please check to ensure it is your voice before sending.
         </p>
-        <p style='font-size:0.85rem;color:#7ab870;margin-bottom:1rem;font-style:italic;'>
+        <p style='font-size:0.85rem;colour:#7ab870;margin-bottom:1rem;font-style:italic;'>
           A focused question in writing is harder to ignore than five.
         </p>
         """, unsafe_allow_html=True)
@@ -3189,325 +3212,26 @@ Yours sincerely,
         }
         closing = closings.get(tone_label, closings["neutral"])
 
-        draft_parts = [opening, intro] + question_lines + [closing]
-        draft_reply = "\n\n".join(draft_parts)
+        # Build full letter with opening
+        if question_lines:
+            draft_parts = [opening, intro] + question_lines + [closing]
+        else:
+            draft_parts = [opening, closing]
+        draft_reply = "\n\n".join(p for p in draft_parts if p.strip())
 
         # Store draft and reserve patterns in session state for meeting companion
-        st.session_state["draft_reply"]      = draft_reply
-        st.session_state["reserve_patterns"] = reserve
-        st.session_state["top_two_patterns"] = top_two
-        st.session_state["all_patterns"]     = matched_patterns
-        st.session_state["correspondence_date"] = paste_date1 if not email1 else "[date]"
-
-        # ── Display and edit ──────────────────────────────────────────────────
-        edited_reply = st.text_area(
-            "Edit before sending:",
-            value=draft_reply,
-            height=300,
-            key="draft_reply_text"
-        )
-
-        # ── Copy, Word, PDF ───────────────────────────────────────────────────
-        col_c1, col_c2, col_c3 = st.columns(3)
-
-        with col_c1:
-            # Copy to clipboard via JS
-            st.markdown(f"""
-            <button onclick="navigator.clipboard.writeText({repr(edited_reply)}).then(()=>
-              document.getElementById('copy_confirm').style.display='block')"
-              style="background:#2d4a2d;color:white;border:none;border-radius:40px;
-                     padding:0.55rem 1.4rem;font-size:0.9rem;cursor:pointer;font-family:sans-serif;">
-              Copy to clipboard
-            </button>
-            <span id="copy_confirm" style="display:none;font-size:0.8rem;color:#7ab870;margin-left:0.5rem;">
-              Copied
-            </span>
-            """, unsafe_allow_html=True)
-
-        with col_c2:
-            # Word download
-            reply_doc = Document()
-            reply_doc.add_heading("Draft reply", 0)
-            for para in edited_reply.split("\n\n"):
-                if para.strip():
-                    reply_doc.add_paragraph(para.strip())
-            reply_doc.add_paragraph("")
-            disc = reply_doc.add_paragraph(
-                "This draft email has been generated for you by FRED — "
-                "Families' Rights and Entitlements Directory. "
-                "Please check to ensure it is your voice before sending."
-            )
-            disc.runs[0].italic = True
-            word_buf = BytesIO()
-            reply_doc.save(word_buf)
-            word_buf.seek(0)
-            st.download_button(
-                "Download as Word",
-                data=word_buf,
-                file_name="FRED_draft_reply.docx",
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                key="download_reply_word"
-            )
-
-        with col_c3:
-            # PDF download
-            pdf_buf = BytesIO()
-            pdf_doc = SimpleDocTemplate(
-                pdf_buf, pagesize=A4,
-                rightMargin=2.5*cm, leftMargin=2.5*cm,
-                topMargin=2.5*cm, bottomMargin=2.5*cm
-            )
-            styles = getSampleStyleSheet()
-            title_s = ParagraphStyle("rt", fontSize=16, fontName="Helvetica-Bold",
-                                     textColor=colors.HexColor("#2d4a2d"),
-                                     spaceAfter=14, leading=20)
-            body_s  = ParagraphStyle("rb", fontSize=10, fontName="Helvetica",
-                                     spaceAfter=10, leading=15)
-            disc_s  = ParagraphStyle("rd", fontSize=9, fontName="Helvetica-Oblique",
-                                     textColor=colors.HexColor("#888"), spaceAfter=0, leading=13)
-            story   = [Paragraph("Draft reply", title_s)]
-            for para in edited_reply.split("\n\n"):
-                if para.strip():
-                    safe = para.strip().replace("&","&amp;").replace("<","&lt;").replace(">","&gt;")
-                    story.append(Paragraph(safe, body_s))
-            story.append(Spacer(1, 0.5*cm))
-            story.append(Paragraph(
-                "This draft email has been generated for you by FRED — "
-                "Families' Rights and Entitlements Directory. "
-                "Please check to ensure it is your voice before sending.",
-                disc_s
-            ))
-            pdf_doc.build(story)
-            pdf_buf.seek(0)
-            st.download_button(
-                "Download as PDF",
-                data=pdf_buf,
-                file_name="FRED_draft_reply.pdf",
-                mime="application/pdf",
-                key="download_reply_pdf"
-            )
-
-        # ── Meeting companion button ──────────────────────────────────────────
-        st.markdown("---")
-        if st.button("Generate meeting companion", key="gen_companion"):
-            st.session_state.show_companion = True
-
-        if st.session_state.get("show_companion"):
-            st.markdown("### Meeting companion")
-            st.markdown(f"""
-            <div style="background:#2d4a2d;border-radius:8px;padding:0.9rem 1.2rem;margin-bottom:1rem;">
-              <p style="color:#9dc98a;font-size:0.75rem;margin:0 0 0.2rem;letter-spacing:0.1em;text-transform:uppercase;">For your eyes before you walk in</p>
-              <p style="color:#e8f5e0;font-weight:600;margin:0;font-size:0.95rem;">Not for sharing. Your preparation document.</p>
-            </div>
-            """, unsafe_allow_html=True)
-
-            today = datetime.datetime.now().strftime("%d %B %Y")
-
-            # Build companion content
-            companion_sections = []
-
-            # Section 1: What you asked
-            if top_two:
-                companion_sections.append(("What you asked — and why", [
-                    f"Your draft reply raises {len(top_two)} specific question(s). "
-                    f"If the school does not answer them directly, that non-response is itself significant.",
-                    *[f"Question {i+1}: {QUESTION_PARAGRAPHS.get(p['id'], p['fred_question'])}"
-                      for i, p in enumerate(top_two)]
-                ]))
-
-            # Section 2: All patterns — including reserve
-            all_p = matched_patterns
-            if all_p:
-                companion_sections.append(("What FRED identified in this correspondence", [
-                    f"FRED identified {len(all_p)} pattern(s) in this email. "
-                    f"Your draft reply addresses the top two. "
-                    f"The remainder are noted here for your awareness."
-                ] + [
-                    f"{'●' if p['tier']=='red' else '○'} {p['name']}: {p['explanation']}"
-                    for p in all_p
-                ]))
-
-            # Section 3: What to say in the room
-            companion_sections.append(("If it comes up in a meeting", [
-                "If the school raises the incident verbally in a meeting, you do not need to "
-                "respond immediately. You can say:",
-                '"I have raised this in writing and I am awaiting a written response. '
-                'I would prefer to discuss it once I have that response."',
-                "This keeps the conversation on the record and prevents verbal agreements "
-                "that are difficult to evidence afterwards.",
-            ]))
-
-            # Section 4: Legal references
-            companion_sections.append(("Legal references", [
-                "Children and Families Act 2014 — Section 42: Duty to secure special "
-                "educational provision.",
-                "SEND Code of Practice 2015 — paragraph 6.56: The graduated approach — "
-                "Assess, Plan, Do, Review — must operate at multiple levels.",
-                "SEND Code of Practice 2015 — paragraph 6.65: Reviews must be based on "
-                "evidence of delivery, not observation alone.",
-                "If provision specified in Section F was not delivered, this is a failure "
-                "of the absolute duty under Section 42. It is not discretionary.",
-            ]))
-
-            # Section 5: If they don't answer
-            companion_sections.append(("If the school does not answer your questions", [
-                "Upload their reply to FRED. FRED will check whether your two questions "
-                "were answered directly.",
-                "If they were not answered, FRED will note that this is the second time "
-                "the question has been raised without a direct response.",
-                "A pattern of non-response is itself evidence. FRED holds it dated.",
-            ]))
-
-            # Render companion
-            for title, points in companion_sections:
-                st.markdown(f"""
-                <div style="background:white;border:0.5px solid #dde8dd;border-radius:10px;
-                            padding:1.1rem 1.3rem;margin-bottom:1rem;">
-                  <p style="font-weight:600;color:#2d4a2d;margin:0 0 0.7rem;font-size:0.97rem;">
-                    {title}
-                  </p>
-                  {"".join(f'<p style="font-size:0.88rem;color:#333;margin:0.3rem 0;line-height:1.6;">{pt}</p>' for pt in points)}
-                </div>
-                """, unsafe_allow_html=True)
-
-            # Companion downloads
-            comp_col1, comp_col2 = st.columns(2)
-
-            with comp_col1:
-                # Word download
-                comp_doc = Document()
-                comp_doc.add_heading("Meeting companion", 0)
-                comp_doc.add_paragraph(
-                    f"Prepared by FRED — {today}. For your eyes before you walk in. Not for sharing."
-                ).runs[0].italic = True
-                comp_doc.add_paragraph("")
-                for title, points in companion_sections:
-                    comp_doc.add_heading(title, 2)
-                    for pt in points:
-                        comp_doc.add_paragraph(pt)
-                    comp_doc.add_paragraph("")
-                comp_buf = BytesIO()
-                comp_doc.save(comp_buf)
-                comp_buf.seek(0)
-                st.download_button(
-                    "Download companion as Word",
-                    data=comp_buf,
-                    file_name="FRED_meeting_companion.docx",
-                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                    key="download_companion_word"
-                )
-
-            with comp_col2:
-                # PDF download
-                comp_pdf_buf = BytesIO()
-                comp_pdf = SimpleDocTemplate(
-                    comp_pdf_buf, pagesize=A4,
-                    rightMargin=2.5*cm, leftMargin=2.5*cm,
-                    topMargin=2.5*cm, bottomMargin=2.5*cm
-                )
-                comp_styles  = getSampleStyleSheet()
-                ct_style = ParagraphStyle("ct", fontSize=16, fontName="Helvetica-Bold",
-                                          textColor=colors.HexColor("#2d4a2d"), spaceAfter=6)
-                cs_style = ParagraphStyle("cs", fontSize=12, fontName="Helvetica-Bold",
-                                          textColor=colors.HexColor("#2d4a2d"), spaceAfter=6, spaceBefore=12)
-                cb_style = ParagraphStyle("cb", fontSize=10, fontName="Helvetica",
-                                          spaceAfter=6, leading=15)
-                cd_style = ParagraphStyle("cd", fontSize=9, fontName="Helvetica-Oblique",
-                                          textColor=colors.HexColor("#888"), spaceAfter=0)
-                comp_story = [
-                    Paragraph("Meeting companion", ct_style),
-                    Paragraph(
-                        f"Prepared by FRED — {today}. For your eyes before you walk in. Not for sharing.",
-                        cd_style
-                    ),
-                    Spacer(1, 0.5*cm),
-                ]
-                for title, points in companion_sections:
-                    comp_story.append(Paragraph(title, cs_style))
-                    comp_story.append(HRFlowable(
-                        width="100%", thickness=0.5,
-                        color=colors.HexColor("#dde8dd"), spaceAfter=6
-                    ))
-                    for pt in points:
-                        safe = pt.replace("&","&amp;").replace("<","&lt;").replace(">","&gt;")
-                        comp_story.append(Paragraph(safe, cb_style))
-                    comp_story.append(Spacer(1, 0.3*cm))
-                comp_pdf.build(comp_story)
-                comp_pdf_buf.seek(0)
-                st.download_button(
-                    "Download companion as PDF",
-                    data=comp_pdf_buf,
-                    file_name="FRED_meeting_companion.pdf",
-                    mime="application/pdf",
-                    key="download_companion_pdf"
-                )
-
-                # ── Thread history — similar past exchanges ───────────────────────────
-        if similar_past:
-            st.markdown("---")
-            st.markdown("### This has happened before")
-            st.markdown(f"""
-            <div style="background:#fff8e8;border-radius:8px;padding:0.9rem 1.2rem;
-                        border:0.5px solid #e8c96a;margin-bottom:1rem;">
-              <p style="font-weight:600;margin:0 0 0.3rem;font-size:0.95rem;color:#2d3a1a;">
-                FRED has found similar patterns in your correspondence history.
-              </p>
-              <p style="margin:0;font-size:0.88rem;color:#555;">
-                The school has used similar language or referenced the same environment before.
-                This matters — repeated patterns that are not resolved are evidence of a
-                systemic failure, not a one-off incident.
-              </p>
-            </div>
-            """, unsafe_allow_html=True)
-
-            for past in similar_past:
-                overlap_text = ", ".join(past["overlap"]) if past.get("overlap") else "Environment match"
-                st.markdown(f"""
-                <div style="background:white;border:0.5px solid #dde8dd;border-radius:8px;
-                            padding:0.8rem 1rem;margin-bottom:0.5rem;">
-                  <p style="font-weight:600;margin:0 0 0.2rem;font-size:0.88rem;">{past['date']}</p>
-                  <p style="margin:0 0 0.2rem;font-size:0.85rem;color:#555;">{past['summary']}</p>
-                  <p style="margin:0;font-size:0.8rem;color:#7ab870;">Match: {overlap_text}</p>
-                  {f'<p style="margin:0.3rem 0 0;font-size:0.8rem;color:#888;">Reply sent: {past["reply_sent"]}</p>' if past.get("reply_sent") else ""}
-                </div>
-                """, unsafe_allow_html=True)
-
-        # ── Hold / next steps ─────────────────────────────────────────────────
-        st.markdown("---")
-        st.markdown("### What next?")
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            if st.button("Hold — save without acting", key="hold_btn"):
-                if "held_findings" not in st.session_state:
-                    st.session_state.held_findings = []
-                st.session_state.held_findings.append({
-                    "date": today,
-                    "patterns": len(matched_patterns),
-                    "environment": environment,
-                    "note": "Held — no action taken"
-                })
-                st.success(
-                    "Held and dated. Holding is a valid strategic choice — "
-                    "sometimes the most powerful response is no response. "
-                    "Note: held findings are stored for this session only. "
-                    "Screenshot or copy the summary before closing your browser."
-                )
-        with col2:
-            st.button("Draft a response", key="draft_btn")
-        with col3:
-            st.button("Prepare for a meeting", key="meeting_btn")
-
-        st.markdown(
-            "<p style='font-size:0.85rem;color:#777;margin-top:0.8rem;'>"
-            "FRED cannot produce strategic silence — but it can note when a situation may call for it. "
-            "A short warm acknowledgement that signals knowledge without displaying it is sometimes "
-            "the most effective response."
-            "</p>",
-            unsafe_allow_html=True
-        )
-
-
-
+        st.session_state["draft_reply"]        = draft_reply
+        st.session_state["reserve_patterns"]   = reserve
+        st.session_state["top_two_patterns"]   = top_two
+        st.session_state["all_patterns"]       = matched_patterns
+        st.session_state["correspondence_date"]= paste_date1 if not email1 else "[date]"
+        st.session_state["corr_summary_bar"]   = (red_n, amber_n, summary_text, summary_colour)
+        st.session_state["corr_environment"]   = environment
+        st.session_state["corr_policy"]        = policy_findings
+        st.session_state["corr_tone_rec"]      = tone_rec
+        st.session_state["corr_similar"]       = similar_past
+        st.session_state["corr_analysed"]      = True
+        st.rerun()
 def page_subscriber():
     """
     The subscriber environment — feels like a different product.
@@ -3517,13 +3241,13 @@ def page_subscriber():
 
     st.markdown(f"""
     <div style="background:{NAVY};border-radius:8px;padding:2rem;margin-bottom:1.5rem;">
-      <p style="color:#a8b8d8;font-size:0.85rem;margin:0 0 0.3rem;letter-spacing:0.1em;text-transform:uppercase;">
+      <p style="colour:#a8b8d8;font-size:0.85rem;margin:0 0 0.3rem;letter-spacing:0.1em;text-transform:uppercase;">
         FRED BETA — SUBSCRIBER WORKSPACE
       </p>
-      <h2 style="color:white;margin:0 0 0.4rem;font-family:'Playfair Display',serif;">
+      <h2 style="colour:white;margin:0 0 0.4rem;font-family:'Playfair Display',serif;">
         Welcome to FRED
       </h2>
-      <p style="color:#c8d8f0;margin:0;font-size:0.95rem;">
+      <p style="colour:#c8d8f0;margin:0;font-size:0.95rem;">
         Everything is unlocked. You have full access during beta.
       </p>
     </div>
@@ -3603,7 +3327,7 @@ def page_subscriber():
                     <div class="finding-{p['tier']}">
                       <span class="badge-{p['tier']}">{p['name']}</span>
                       <p style="margin:0.4rem 0 0.3rem;font-size:0.93rem;">{p['explanation']}</p>
-                      <p style="font-style:italic;font-size:0.88rem;color:#555;margin:0;">{p['fred_question']}</p>
+                      <p style="font-style:italic;font-size:0.88rem;colour:#555;margin:0;">{p['fred_question']}</p>
                     </div>
                     """, unsafe_allow_html=True)
             else:
@@ -3612,7 +3336,7 @@ def page_subscriber():
             st.markdown(f"""
             <div style="background:#eaf5e0;border-radius:8px;padding:0.8rem 1.1rem;margin-top:1rem;">
               <p style="font-weight:600;margin:0 0 0.2rem;font-size:0.9rem;">Tone recommendation: {tone_rec['label']}</p>
-              <p style="margin:0;font-size:0.85rem;color:#555;">{tone_rec['reasoning']}</p>
+              <p style="margin:0;font-size:0.85rem;colour:#555;">{tone_rec['reasoning']}</p>
             </div>
             """, unsafe_allow_html=True)
 
@@ -3673,11 +3397,11 @@ def page_subscriber():
             for entry in bank:
                 confirmed_list = entry.get("confirmed", [])
                 items_html = "".join(f'<p style="font-size:0.85rem;margin:0.1rem 0;">• {item}</p>' for item in confirmed_list)
-                amendment_html = "<p style='font-size:0.82rem;font-weight:700;color:#C0392B;margin-top:0.4rem;'>⚑ EHCP amendment flagged</p>" if entry.get("amendment_flagged") else ""
+                amendment_html = "<p style='font-size:0.82rem;font-weight:700;colour:#C0392B;margin-top:0.4rem;'>⚑ EHCP amendment flagged</p>" if entry.get("amendment_flagged") else ""
                 st.markdown(f"""
                 <div style="background:white;border:1px solid #d0dae8;border-radius:6px;padding:1rem 1.2rem;margin-bottom:0.8rem;">
                   <p style="font-weight:700;margin:0 0 0.2rem;">{entry['date']} — {entry['environment']}</p>
-                  <p style="margin:0 0 0.4rem;font-size:0.88rem;color:#555;">{len(confirmed_list)} confirmed factor(s)</p>
+                  <p style="margin:0 0 0.4rem;font-size:0.88rem;colour:#555;">{len(confirmed_list)} confirmed factor(s)</p>
                   {items_html}
                   {amendment_html}
                 </div>
@@ -3687,19 +3411,19 @@ def page_subscriber():
                 st.markdown(f"""
                 <div style="background:white;border:1px solid #d0dae8;border-radius:6px;padding:1rem 1.2rem;margin-bottom:0.8rem;">
                   <p style="font-weight:700;margin:0 0 0.2rem;">{entry['date']}</p>
-                  <p style="margin:0;font-size:0.88rem;color:#555;">{entry.get('patterns',0)} pattern(s) — held without action</p>
+                  <p style="margin:0;font-size:0.88rem;colour:#555;">{entry.get('patterns',0)} pattern(s) — held without action</p>
                 </div>
                 """, unsafe_allow_html=True)
         else:
             st.markdown(
-                "<p style='color:#888;font-size:0.9rem;'>"
+                "<p style='colour:#888;font-size:0.9rem;'>"
                 "No evidence entries yet. Confirmed root cause findings from "
                 "correspondence analysis will appear here with dates."
                 "</p>",
                 unsafe_allow_html=True
             )
         st.markdown(
-            "<p style='font-size:0.82rem;color:#aaa;margin-top:1rem;'>"
+            "<p style='font-size:0.82rem;colour:#aaa;margin-top:1rem;'>"
             "Evidence bank is stored for this session. "
             "Screenshot entries before closing your browser."
             "</p>",
@@ -3711,7 +3435,7 @@ def page_subscriber():
     <a href="https://docs.google.com/forms/d/e/1FAIpQLSeA1F9nEdQWkmplbAh973XKq2EsW0bEkhJiw7drhP7BZaPjKQ/viewform" target="_blank" style="
         display:inline-block;
         background:#e8eef8;
-        color:{NAVY};
+        colour:{NAVY};
         padding:0.6rem 1.4rem;
         border-radius:4px;
         text-decoration:none;
@@ -3750,7 +3474,7 @@ def render_nav():
 # ── ROUTER ────────────────────────────────────────────────────────────────────
 
 render_nav()
-st.markdown("<hr style='margin:0 0 1.5rem;border-color:#d0dae8;'>", unsafe_allow_html=True)
+st.markdown("<hr style='margin:0 0 1.5rem;border-colour:#d0dae8;'>", unsafe_allow_html=True)
 
 stage = st.session_state.stage
 
