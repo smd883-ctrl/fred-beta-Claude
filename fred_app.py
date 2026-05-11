@@ -37,95 +37,118 @@ GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSeA1F9nEdQWkmplbAh97
 
 st.markdown(f"""
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Sans+3:wght@400;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap');
 
   html, body, [class*="css"] {{
-    font-family: 'Source Sans 3', sans-serif;
-    background-color: {LIGHT};
+    font-family: 'DM Sans', sans-serif;
+    background-color: #f5f5f0;
     color: #1a1a2e;
   }}
 
   h1, h2, h3 {{
-    font-family: 'Playfair Display', serif;
+    font-family: 'DM Serif Display', serif;
+    font-weight: 400;
   }}
 
+  /* Hero */
   .hero {{
-    background: {NAVY};
+    background: #2d4a2d;
     color: white;
-    padding: 3rem 2rem;
-    border-radius: 8px;
+    padding: 3rem 2.5rem 2.8rem;
+    border-radius: 16px;
     text-align: center;
     margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+  }}
+
+  .hero::before {{
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    background: rgba(160,210,130,0.1);
   }}
 
   .hero h1 {{
+    font-family: 'DM Serif Display', serif;
     font-size: 4rem;
     margin: 0;
-    color: white;
-    letter-spacing: 0.12em;
+    color: #e8f5e0;
+    letter-spacing: 0.06em;
+    font-weight: 400;
   }}
 
   .hero .full-name {{
-    font-family: 'Source Sans 3', sans-serif;
-    font-size: 0.9rem;
-    letter-spacing: 0.25em;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: #a8b8d8;
-    margin: 0.3rem 0 0.8rem 0;
+    color: #9dc98a;
+    margin: 0.4rem 0 1rem 0;
+    font-weight: 300;
   }}
 
   .hero .tagline {{
-    font-size: 1.4rem;
-    font-weight: 600;
-    color: white;
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.45rem;
+    font-weight: 400;
+    color: #e8f5e0;
     margin-bottom: 0.5rem;
+    line-height: 1.35;
   }}
 
   .hero .origin {{
     font-style: italic;
-    color: #a8b8d8;
-    margin-bottom: 1.5rem;
-    font-size: 1rem;
+    color: #7ab870;
+    margin-bottom: 1.4rem;
+    font-size: 0.93rem;
+    font-weight: 300;
   }}
 
   .hero .sub {{
-    color: #c8d8f0;
-    max-width: 560px;
-    margin: 0 auto 1.5rem auto;
-    font-size: 1.05rem;
-    line-height: 1.6;
+    color: #b8d9a8;
+    max-width: 540px;
+    margin: 0 auto 1.4rem auto;
+    font-size: 1rem;
+    line-height: 1.7;
+    font-weight: 300;
   }}
 
   .hero .service-line {{
-    color: #a8b8d8;
-    font-size: 0.95rem;
+    color: #7ab870;
+    font-size: 0.82rem;
     margin-bottom: 1.8rem;
+    letter-spacing: 0.04em;
   }}
 
+  /* Gold CTA button */
   .cta-button {{
     display: inline-block;
-    background: white;
-    color: {NAVY} !important;
-    font-family: 'Source Sans 3', sans-serif;
-    font-weight: 700;
-    font-size: 1.1rem;
-    padding: 0.85rem 2.4rem;
-    border-radius: 4px;
+    background: #e8c96a;
+    color: #2d3a1a !important;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 0.8rem 2.2rem;
+    border-radius: 40px;
     text-decoration: none;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.02em;
     cursor: pointer;
     border: none;
   }}
 
   .reassurance {{
-    color: #a8b8d8;
-    font-size: 0.9rem;
+    color: #9dc98a;
+    font-size: 0.85rem;
     margin-top: 1rem;
+    font-weight: 300;
   }}
 
   .pricing-hint {{
     color: #7a8fa8;
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     margin-top: 0.4rem;
   }}
 
@@ -133,150 +156,189 @@ st.markdown(f"""
   .badge-red {{
     background: {RED};
     color: white;
-    padding: 0.25rem 0.75rem;
-    border-radius: 3px;
-    font-weight: 700;
-    font-size: 0.85rem;
+    padding: 0.22rem 0.7rem;
+    border-radius: 20px;
+    font-weight: 500;
+    font-size: 0.78rem;
     display: inline-block;
     margin-bottom: 0.5rem;
+    letter-spacing: 0.03em;
   }}
   .badge-amber {{
     background: {AMBER};
     color: white;
-    padding: 0.25rem 0.75rem;
-    border-radius: 3px;
-    font-weight: 700;
-    font-size: 0.85rem;
+    padding: 0.22rem 0.7rem;
+    border-radius: 20px;
+    font-weight: 500;
+    font-size: 0.78rem;
     display: inline-block;
     margin-bottom: 0.5rem;
+    letter-spacing: 0.03em;
   }}
   .badge-green {{
     background: {GREEN};
     color: white;
-    padding: 0.25rem 0.75rem;
-    border-radius: 3px;
-    font-weight: 700;
-    font-size: 0.85rem;
+    padding: 0.22rem 0.7rem;
+    border-radius: 20px;
+    font-weight: 500;
+    font-size: 0.78rem;
     display: inline-block;
     margin-bottom: 0.5rem;
+    letter-spacing: 0.03em;
   }}
 
   /* Finding cards */
   .finding-red {{
-    border-left: 5px solid {RED};
+    border-left: 4px solid {RED};
     background: #fdf4f3;
     padding: 1rem 1.2rem;
-    border-radius: 0 6px 6px 0;
+    border-radius: 0 8px 8px 0;
     margin-bottom: 1rem;
   }}
   .finding-amber {{
-    border-left: 5px solid {AMBER};
+    border-left: 4px solid {AMBER};
     background: #fdf9f0;
     padding: 1rem 1.2rem;
-    border-radius: 0 6px 6px 0;
+    border-radius: 0 8px 8px 0;
     margin-bottom: 1rem;
   }}
   .finding-green {{
-    border-left: 5px solid {GREEN};
+    border-left: 4px solid {GREEN};
     background: #f3faf5;
     padding: 1rem 1.2rem;
-    border-radius: 0 6px 6px 0;
+    border-radius: 0 8px 8px 0;
     margin-bottom: 1rem;
   }}
 
-  /* How it works bullets */
+  /* How it works */
   .hiw-item {{
     display: flex;
     align-items: flex-start;
     gap: 1rem;
-    margin-bottom: 1rem;
-    padding: 0.8rem 1rem;
+    margin-bottom: 0.8rem;
+    padding: 0.9rem 1rem;
     background: white;
-    border-radius: 6px;
-    border: 1px solid #e0e8f0;
+    border-radius: 10px;
+    border: 0.5px solid #dde8dd;
   }}
-  .hiw-dot {{
-    width: 10px;
-    height: 10px;
-    background: {NAVY};
-    border-radius: 50%;
-    margin-top: 6px;
+  .hiw-num {{
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.3rem;
+    color: #7ab870;
     flex-shrink: 0;
+    line-height: 1;
+    width: 24px;
   }}
 
   /* Pricing cards */
   .pricing-card {{
     background: white;
-    border: 1px solid #d0dae8;
-    border-radius: 8px;
-    padding: 1.5rem;
+    border: 0.5px solid #d0ddd0;
+    border-radius: 12px;
+    padding: 1.4rem 1.2rem;
     text-align: center;
     height: 100%;
   }}
   .pricing-card.featured {{
-    border: 2px solid {NAVY};
-    position: relative;
+    border: 1.5px solid #7ab870;
   }}
   .pricing-card .price {{
+    font-family: 'DM Serif Display', serif;
     font-size: 2rem;
-    font-weight: 700;
-    color: {NAVY};
+    font-weight: 400;
+    color: #2d4a2d;
   }}
   .pricing-card .period {{
-    font-size: 0.85rem;
-    color: #666;
+    font-size: 0.82rem;
+    color: #888;
+    font-weight: 300;
   }}
   .pricing-card ul {{
     text-align: left;
-    padding-left: 1rem;
+    padding-left: 0;
     margin-top: 1rem;
-    font-size: 0.9rem;
-    line-height: 1.8;
+    font-size: 0.88rem;
+    line-height: 2;
+    list-style: none;
+    font-weight: 300;
+    color: #555;
+  }}
+  .pricing-card ul li::before {{
+    content: '·  ';
+    color: #7ab870;
+    font-weight: 700;
   }}
 
   .best-value-tag {{
-    background: {NAVY};
-    color: white;
-    font-size: 0.75rem;
-    font-weight: 700;
-    padding: 0.2rem 0.6rem;
-    border-radius: 2px;
+    background: #2d4a2d;
+    color: #e8f5e0;
+    font-size: 0.7rem;
+    font-weight: 500;
+    padding: 0.2rem 0.7rem;
+    border-radius: 20px;
     display: inline-block;
     margin-bottom: 0.5rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }}
 
-  /* Sneak peek box */
+  /* Sneak peek */
   .sneak-box {{
-    border: 2px dashed {NAVY};
-    border-radius: 8px;
+    border: 1.5px dashed #7ab870;
+    border-radius: 12px;
     padding: 1.5rem;
     background: white;
     margin: 1.5rem 0;
   }}
 
-  /* Section divider */
+  /* Document pills */
+  .doc-pill {{
+    display: inline-block;
+    background: #eaf5e0;
+    color: #2d5a2d;
+    font-size: 0.78rem;
+    padding: 0.28rem 0.8rem;
+    border-radius: 20px;
+    margin: 0.2rem;
+    font-weight: 400;
+  }}
+
   .section-divider {{
     border: none;
-    border-top: 1px solid #d0dae8;
+    border-top: 0.5px solid #dde8dd;
     margin: 2.5rem 0;
   }}
 
-  /* Suppress Streamlit defaults */
+  .section-label {{
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #5a8a5a;
+    margin-bottom: 0.6rem;
+  }}
+
+  /* Streamlit button override */
   .stButton > button {{
-    background: {NAVY};
+    background: #2d4a2d;
     color: white;
     border: none;
-    border-radius: 4px;
-    font-family: 'Source Sans 3', sans-serif;
-    font-weight: 600;
+    border-radius: 40px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
     padding: 0.6rem 1.6rem;
-    font-size: 1rem;
+    font-size: 0.97rem;
   }}
   .stButton > button:hover {{
-    background: #253560;
+    background: #3d5e3d;
     color: white;
+  }}
+
+  /* Primary CTA Streamlit button — gold */
+  div[data-testid="stButton"] button[kind="primary"] {{
+    background: #e8c96a;
+    color: #2d3a1a;
+    border-radius: 40px;
   }}
 
   footer {{visibility: hidden;}}
@@ -1140,6 +1202,11 @@ def init_state():
         "upcoming_dates": "",
         "doc_name": "",
         "subscribed": False,
+        # Document vault — named documents uploaded
+        "vault": {},           # {doc_type: {"name": filename, "text": extracted_text}}
+        # Correspondence thread — one entry per exchange
+        "thread": [],          # [{date, direction, summary, patterns, tone_rec, reply_sent}]
+        "thread_context": "",  # running summary FRED uses when new email arrives
     }
     for k, v in defaults.items():
         if k not in st.session_state:
@@ -1217,11 +1284,11 @@ def page_landing():
     <div class="hero">
       <h1>FRED</h1>
       <p class="full-name">Families' Rights and Entitlements Directory</p>
-      <p class="tagline">Know what your child is entitled to. Know when it's not being delivered.</p>
+      <p class="tagline">Know what your child is entitled to.<br>Know when it's not being delivered.</p>
       <p class="origin">Built by a parent who learned the hard way — so you don't have to.</p>
       <p class="sub">
         FRED analyses your child's EHCP against the Children and Families Act 2014 and the SEND Code of Practice.
-        You get a plain-English report that tells you exactly what's lawfully required, what's missing, and what to do next.
+        Plain-English findings. Red, amber, green. No jargon.
       </p>
       <p class="service-line">One-off report · Annual subscription · Monthly plan</p>
     </div>
@@ -1384,35 +1451,126 @@ def page_explainer():
 
 
 def page_upload():
+    """
+    Document vault upload page.
+    Named document types with plain explanation.
+    Confirmation after each upload.
+    """
     st.markdown("## Upload your documents")
-    st.markdown("Upload whatever documents you have — EHCP, EP report, OT report, school correspondence, diagnosis letter. You don't need everything. FRED will work with what you've got.")
 
-    # Main upload
-    main_file = st.file_uploader(
-        "Upload your document (PDF or Word)",
-        type=["pdf", "docx"],
-        key="main_upload"
-    )
+    st.markdown(f"""
+    <div style="background:#eaf5e0;border-radius:10px;padding:1rem 1.3rem;margin-bottom:1.5rem;border:0.5px solid #c0ddb0;">
+      <p style="margin:0;font-size:0.95rem;color:#2d4a2d;line-height:1.7;">
+        Upload your child's EHCP first. Then add any other documents you have —
+        FRED will read them all and refer back to them when you analyse correspondence
+        or request an amendment.
+      </p>
+    </div>
+    """, unsafe_allow_html=True)
 
-    # Optional additional
-    with st.expander("Add another document (optional)"):
-        st.markdown("You can add an EP report, OT report, diagnosis letter, or school policy. FRED will cross-reference it with the EHCP.")
-        extra_file = st.file_uploader(
-            "Additional document",
-            type=["pdf", "docx"],
-            key="extra_upload"
-        )
+    # ── Named document uploads ────────────────────────────────────────────────
+    DOCUMENT_TYPES = [
+        {
+            "key": "ehcp",
+            "label": "EHCP",
+            "description": "Essential. FRED analyses Section F provision, Section E outcomes, and Section B needs. Everything else is cross-referenced against this.",
+            "required": True,
+        },
+        {
+            "key": "ep_report",
+            "label": "EP report",
+            "description": "FRED checks whether the EP's recommendations have been converted into specified provision in Section F — or whether they have been laundered into vague language.",
+            "required": False,
+        },
+        {
+            "key": "ot_report",
+            "label": "OT report",
+            "description": "FRED checks whether OT recommendations appear in Section F and whether the OT provision loop has been closed — treatment block, discharge, re-referral threshold.",
+            "required": False,
+        },
+        {
+            "key": "sen_policy",
+            "label": "School SEN policy",
+            "description": "FRED cross-references the school's own SEN policy against what is in the EHCP and what the correspondence shows. The school cannot dispute its own policy.",
+            "required": False,
+        },
+        {
+            "key": "accessibility_policy",
+            "label": "School accessibility policy",
+            "description": "FRED checks for unfulfilled commitments — acoustic surveys, staff training, environmental audits — and flags gaps between policy commitment and practice.",
+            "required": False,
+        },
+        {
+            "key": "diagnosis",
+            "label": "Diagnosis letter",
+            "description": "FRED uses this to confirm the need basis for provision and to check whether the diagnosis profile is accurately reflected in Section B.",
+            "required": False,
+        },
+    ]
 
-    # ── Analyse button sits directly below upload zone ──
-    st.markdown("<br>", unsafe_allow_html=True)
+    vault = st.session_state.vault
+    uploaded_count = len(vault)
+
+    for doc in DOCUMENT_TYPES:
+        key  = doc["key"]
+        already_uploaded = key in vault
+
+        col1, col2 = st.columns([2, 3])
+        with col1:
+            label = f"{doc['label']} {'✓' if already_uploaded else '— required' if doc['required'] else '— optional'}"
+            uploaded = st.file_uploader(
+                label,
+                type=["pdf", "docx"],
+                key=f"vault_{key}",
+                help=doc["description"],
+            )
+            if uploaded:
+                text = extract_text_from_pdf(uploaded) if uploaded.name.endswith(".pdf") else extract_text_from_docx(uploaded)
+                vault[key] = {"name": uploaded.name, "text": text}
+                st.session_state.vault = vault
+
+        with col2:
+            if already_uploaded or uploaded:
+                st.markdown(f"""
+                <div style="background:#eaf5e0;border-radius:8px;padding:0.6rem 1rem;margin-top:1.6rem;border:0.5px solid #c0ddb0;">
+                  <p style="margin:0;font-size:0.85rem;color:#2d5a2d;font-weight:500;">
+                    ✓ FRED has read the {doc['label']}
+                  </p>
+                  <p style="margin:0.2rem 0 0;font-size:0.8rem;color:#5a8a5a;">{doc['description']}</p>
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.markdown(f"""
+                <div style="padding:0.6rem 1rem;margin-top:1.6rem;">
+                  <p style="margin:0;font-size:0.82rem;color:#888;">{doc['description']}</p>
+                </div>
+                """, unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # Summary of what's been loaded
+    if vault:
+        loaded = ", ".join(DOCUMENT_TYPES[i]["label"] for i, d in enumerate(DOCUMENT_TYPES) if d["key"] in vault)
+        st.markdown(f"""
+        <div style="background:#2d4a2d;border-radius:10px;padding:0.9rem 1.2rem;margin-bottom:1rem;">
+          <p style="margin:0;font-size:0.88rem;color:#9dc98a;font-weight:500;">
+            FRED is holding: {loaded}
+          </p>
+          <p style="margin:0.3rem 0 0;font-size:0.82rem;color:#7ab870;">
+            These will be cross-referenced when you analyse correspondence or request an amendment.
+          </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # ── Analyse button ────────────────────────────────────────────────────────
     analyse_clicked = st.button("Analyse my documents", use_container_width=False, key="analyse_top")
 
     st.markdown("---")
     st.markdown("### A few quick questions")
-    st.markdown("These help FRED tailor the analysis. Answer what you can — nothing here is mandatory.")
+    st.markdown("<p style='font-size:0.88rem;color:#666;margin-bottom:1rem;'>These help FRED tailor the analysis. Nothing here is mandatory.</p>", unsafe_allow_html=True)
 
     doc_type = st.radio(
-        "What are you uploading?",
+        "What is the primary document you have uploaded?",
         ["Draft EHCP", "Final EHCP", "EP report", "OT report", "School correspondence", "Other"],
         index=1,
         horizontal=True,
@@ -1420,7 +1578,7 @@ def page_upload():
 
     situation = st.text_area(
         "Briefly describe your current situation (optional)",
-        placeholder="For example: annual review coming up in March, school not delivering speech therapy, considering appeal...",
+        placeholder="e.g. Annual review coming up in March, school not delivering speech therapy, considering appeal...",
         height=80,
     )
 
@@ -1430,43 +1588,34 @@ def page_upload():
     )
 
     relationship_tone = st.select_slider(
-        "How would you describe your current relationship with the school? (We use this to help shape the tone of any suggested emails)",
+        "How would you describe your current relationship with the school?",
         options=["Very difficult", "Difficult", "Neutral", "Generally positive", "Very positive"],
         value="Neutral",
+        help="We use this to help shape the tone of any suggested emails."
     )
 
     st.markdown("---")
 
     if analyse_clicked:
-        if main_file is None:
-            st.error("Please upload your EHCP to continue.")
+        if "ehcp" not in vault:
+            st.error("Please upload your EHCP to continue. You can add other documents too — but FRED needs the EHCP to analyse provision.")
         else:
-            with st.spinner("Reading your document…"):
-                if main_file.name.endswith(".pdf"):
-                    full_text = extract_text_from_pdf(main_file)
-                else:
-                    full_text = extract_text_from_docx(main_file)
-
-                extra_text = ""
-                if extra_file is not None:
-                    if extra_file.name.endswith(".pdf"):
-                        extra_text = extract_text_from_pdf(extra_file)
-                    else:
-                        extra_text = extract_text_from_docx(extra_file)
-
-                combined_text = full_text + "\n\n" + extra_text
+            with st.spinner("Reading your documents…"):
+                # Combine all vault text for analysis
+                combined_text = " ".join(v["text"] for v in vault.values())
                 findings, meta = run_full_analysis(combined_text)
 
-            st.session_state.findings         = findings
-            st.session_state.parse_meta       = meta
-            st.session_state.full_text        = combined_text
-            st.session_state.doc_type         = doc_type
-            st.session_state.situation        = situation
-            st.session_state.upcoming_dates   = upcoming_dates
+            st.session_state.findings          = findings
+            st.session_state.parse_meta        = meta
+            st.session_state.full_text         = combined_text
+            st.session_state.doc_type          = doc_type
+            st.session_state.situation         = situation
+            st.session_state.upcoming_dates    = upcoming_dates
             st.session_state.relationship_tone = relationship_tone
-            st.session_state.doc_name         = main_file.name
-            st.session_state.stage            = "sneak_peek"
+            st.session_state.doc_name          = vault.get("ehcp", {}).get("name", "EHCP")
+            st.session_state.stage             = "sneak_peek"
             st.rerun()
+
 
 
 def page_sneak_peek():
@@ -1760,6 +1909,110 @@ def page_survey():
 
 
 # ── CORRESPONDENCE MODULE ─────────────────────────────────────────────────────
+
+def detect_tone_recommendation(text, patterns):
+    """
+    Auto-detect recommended response tone from correspondence language and patterns.
+    Returns dict: {recommendation, reasoning, confidence}
+    """
+    red_count   = sum(1 for p in patterns if p["tier"] == "red")
+    amber_count = sum(1 for p in patterns if p["tier"] == "amber")
+
+    # Signals for formal response
+    formal_signals = re.compile(
+        r"\b(following legal advice|our solicitor|legal services|"
+        r"we are unable|complaints procedure|without prejudice|"
+        r"we must inform|we are not in a position|governing body|"
+        r"we refute|we dispute|we deny|permanent exclusion|"
+        r"fixed term exclusion|resources do not allow)\b",
+        re.IGNORECASE
+    )
+
+    # Signals for collaborative response
+    collab_signals = re.compile(
+        r"\b(we would like to|working together|we appreciate|"
+        r"we understand your concerns|happy to discuss|"
+        r"we are committed|please let us know|we value|"
+        r"thank you for|we recognise|we are sorry|"
+        r"we will look into|we want to support)\b",
+        re.IGNORECASE
+    )
+
+    formal_count = len(formal_signals.findall(text))
+    collab_count = len(collab_signals.findall(text))
+
+    if red_count >= 2 or formal_count >= 2:
+        return {
+            "recommendation": "formal",
+            "label": "Formal written response",
+            "reasoning": (
+                f"The correspondence contains {'serious patterns' if red_count >= 2 else 'formal or legal language'} "
+                f"that suggest the school is managing rather than engaging. "
+                f"A formal written response that references Section F specifically "
+                f"is likely to be more effective than a collaborative one. "
+                f"Put everything in writing and request a written response within five working days."
+            ),
+            "confidence": "high" if red_count >= 2 and formal_count >= 1 else "moderate",
+        }
+    elif collab_count >= 2 and red_count == 0:
+        return {
+            "recommendation": "collaborative",
+            "label": "Collaborative response",
+            "reasoning": (
+                "The language in this correspondence is constructive and appears to be "
+                "engaging with your concerns. A collaborative tone is likely to preserve "
+                "the relationship while still holding the school to account. "
+                "You can be warm and firm at the same time."
+            ),
+            "confidence": "moderate",
+        }
+    else:
+        return {
+            "recommendation": "neutral",
+            "label": "Measured response",
+            "reasoning": (
+                "The correspondence does not show strong signals in either direction. "
+                "A measured written response — factual, specific, referencing the EHCP — "
+                "is appropriate. Neither overly formal nor overly warm."
+            ),
+            "confidence": "low",
+        }
+
+
+def add_to_thread(direction, summary, patterns, tone_rec, reply_sent=""):
+    """Add an exchange to the correspondence thread."""
+    if "thread" not in st.session_state:
+        st.session_state.thread = []
+    entry = {
+        "date": datetime.datetime.now().strftime("%d %B %Y"),
+        "direction": direction,   # "from_school" or "to_school"
+        "summary": summary,
+        "patterns": [p["name"] for p in patterns],
+        "tone_rec": tone_rec.get("recommendation", ""),
+        "reply_sent": reply_sent,
+    }
+    st.session_state.thread.append(entry)
+    # Update running context summary
+    summaries = [f"{e['date']}: {e['summary']}" for e in st.session_state.thread[-5:]]
+    st.session_state.thread_context = " | ".join(summaries)
+
+
+def check_thread_for_similar(patterns, environment):
+    """
+    Check whether current correspondence matches anything in the thread history.
+    Returns a list of similar past entries.
+    """
+    if not st.session_state.get("thread"):
+        return []
+    current_pattern_names = {p["name"] for p in patterns}
+    similar = []
+    for entry in st.session_state.thread[:-1]:  # exclude current
+        past_names = set(entry.get("patterns", []))
+        overlap = current_pattern_names & past_names
+        if overlap or (environment and environment in entry.get("summary", "")):
+            similar.append({**entry, "overlap": list(overlap)})
+    return similar
+
 
 # ── CORRESPONDENCE PATTERN LIBRARY ───────────────────────────────────────────
 # Built from real tribunal bundle — Duffy v Brookhurst Primary School 2019
@@ -2185,12 +2438,18 @@ def page_correspondence():
     st.markdown("---")
 
     # ── Tone question ─────────────────────────────────────────────────────────
-    tone_q = st.radio(
-        "How would you describe how the school is engaging right now? "
-        "(We use this to shape the tone of any suggested next steps)",
-        ["Genuinely trying to help", "Going through the motions", "Actively avoiding or obstructing"],
-        horizontal=True,
-    )
+    # Tone will be auto-detected after analysis — store manual override option
+    tone_override = st.session_state.get("tone_override", None)
+    if tone_override:
+        st.markdown(f"""
+        <div style="background:#eaf5e0;border-radius:8px;padding:0.6rem 1rem;margin-bottom:0.5rem;">
+          <p style="margin:0;font-size:0.85rem;color:#2d5a2d;">
+            Tone set to: <b>{tone_override}</b> —
+            <a href="#" onclick="void(0)" style="color:#5a8a5a;">change</a>
+          </p>
+        </div>
+        """, unsafe_allow_html=True)
+    tone_q = tone_override or "auto"
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -2233,9 +2492,22 @@ def page_correspondence():
             policy_text = extract_text_from_pdf(policy_file) if policy_file.name.endswith(".pdf") else extract_text_from_docx(policy_file)
             policy_findings = analyse_policy(policy_text)
 
+        progress_text.markdown("*Detecting tone…*")
+        tone_rec = detect_tone_recommendation(combined, matched_patterns)
+
+        progress_text.markdown("*Checking correspondence history…*")
+        similar_past = check_thread_for_similar(matched_patterns, environment)
+
         progress_text.empty()
 
         today = datetime.datetime.now().strftime("%d %B %Y")
+
+        # Add to thread
+        pattern_names = [p["name"] for p in matched_patterns[:3]]
+        summary = f"Email from school — {len(matched_patterns)} pattern(s) detected"
+        if environment:
+            summary += f" — {environment} referenced"
+        add_to_thread("from_school", summary, matched_patterns, tone_rec)
 
         # ── Summary bar ───────────────────────────────────────────────────────
         red_n   = sum(1 for p in matched_patterns if p["tier"] == "red")
@@ -2437,28 +2709,79 @@ Yours sincerely,
                 </div>
                 """, unsafe_allow_html=True)
 
-        # ── Tone read ─────────────────────────────────────────────────────────
+        # ── Tone recommendation — auto-detected ──────────────────────────────
         st.markdown("---")
-        st.markdown("### Relationship read")
-        tone_notes = {
-            "Genuinely trying to help": (
-                "The school appears to be engaging genuinely. A collaborative tone in your "
-                "response is likely to be more effective than a formal one. Hold findings as "
-                "evidence without deploying them unless the situation changes."
-            ),
-            "Going through the motions": (
-                "The school appears to be going through the motions. Written requests with "
-                "specific reference to EHCP section numbers will be more effective than verbal "
-                "escalation. Put everything in writing and request written responses."
-            ),
-            "Actively avoiding or obstructing": (
-                "The school appears to be avoiding or obstructing. Every communication should "
-                "now be in writing. Reference specific statutory duties by section and Act. "
-                "Consider whether escalation to the LA is appropriate. "
-                "The correspondence trail you are building is evidence."
-            ),
-        }
-        st.info(tone_notes.get(tone_q, ""))
+        st.markdown("### Tone recommendation")
+
+        rec_color = {"formal": "#C0392B", "collaborative": "#1E8449", "neutral": "#D4A017"}
+        rec_bg    = {"formal": "#fdf4f3", "collaborative": "#f3faf5", "neutral": "#fdf9f0"}
+        r = tone_rec["recommendation"]
+
+        st.markdown(f"""
+        <div style="border-left:4px solid {rec_color.get(r,'#888')};
+                    background:{rec_bg.get(r,'#f9f9f9')};
+                    border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin-bottom:1rem;">
+          <p style="font-weight:600;margin:0 0 0.3rem;font-size:0.95rem;">
+            FRED recommends: {tone_rec['label']}
+          </p>
+          <p style="margin:0;font-size:0.9rem;line-height:1.6;color:#444;">
+            {tone_rec['reasoning']}
+          </p>
+          <p style="margin:0.6rem 0 0;font-size:0.78rem;color:#888;">
+            Confidence: {tone_rec['confidence'].title()} —
+            based on language patterns in this correspondence.
+            This is a recommendation, not an instruction.
+          </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("**Does this match your experience of the relationship?**")
+        tone_confirm = st.radio(
+            "",
+            ["Yes — use recommended tone",
+             "No — it should be more formal",
+             "No — it should be more collaborative",
+             "I'll decide later"],
+            key="tone_confirm",
+            label_visibility="collapsed",
+            horizontal=True,
+        )
+        if "formal" in tone_confirm:
+            st.session_state.tone_override = "formal"
+        elif "collaborative" in tone_confirm:
+            st.session_state.tone_override = "collaborative"
+        elif "Yes" in tone_confirm:
+            st.session_state.tone_override = r
+
+        # ── Thread history — similar past exchanges ───────────────────────────
+        if similar_past:
+            st.markdown("---")
+            st.markdown("### This has happened before")
+            st.markdown(f"""
+            <div style="background:#fff8e8;border-radius:8px;padding:0.9rem 1.2rem;
+                        border:0.5px solid #e8c96a;margin-bottom:1rem;">
+              <p style="font-weight:600;margin:0 0 0.3rem;font-size:0.95rem;color:#2d3a1a;">
+                FRED has found similar patterns in your correspondence history.
+              </p>
+              <p style="margin:0;font-size:0.88rem;color:#555;">
+                The school has used similar language or referenced the same environment before.
+                This matters — repeated patterns that are not resolved are evidence of a
+                systemic failure, not a one-off incident.
+              </p>
+            </div>
+            """, unsafe_allow_html=True)
+
+            for past in similar_past:
+                overlap_text = ", ".join(past["overlap"]) if past.get("overlap") else "Environment match"
+                st.markdown(f"""
+                <div style="background:white;border:0.5px solid #dde8dd;border-radius:8px;
+                            padding:0.8rem 1rem;margin-bottom:0.5rem;">
+                  <p style="font-weight:600;margin:0 0 0.2rem;font-size:0.88rem;">{past['date']}</p>
+                  <p style="margin:0 0 0.2rem;font-size:0.85rem;color:#555;">{past['summary']}</p>
+                  <p style="margin:0;font-size:0.8rem;color:#7ab870;">Match: {overlap_text}</p>
+                  {f'<p style="margin:0.3rem 0 0;font-size:0.8rem;color:#888;">Reply sent: {past["reply_sent"]}</p>' if past.get("reply_sent") else ""}
+                </div>
+                """, unsafe_allow_html=True)
 
         # ── Hold / next steps ─────────────────────────────────────────────────
         st.markdown("---")
