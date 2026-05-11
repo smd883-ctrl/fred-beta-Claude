@@ -3050,128 +3050,399 @@ Yours sincerely,
         elif "Yes" in tone_confirm:
             st.session_state.tone_override = r
 
-        # ── Suggested reply ───────────────────────────────────────────────────
+        # ── Draft reply ───────────────────────────────────────────────────────
         st.markdown("---")
-        st.markdown("### Suggested reply")
-        st.markdown(
-            "<p style='font-size:0.9rem;color:#555;margin-bottom:1rem;'>"
-            "FRED has drafted a response based on the patterns detected. "
-            "The substance is FRED's — the voice is yours. Edit before sending."
-            "</p>",
-            unsafe_allow_html=True
-        )
+        st.markdown("### Draft reply")
 
-        # Build reply from patterns
+        st.markdown("""
+        <p style='font-size:0.92rem;color:#444;margin-bottom:0.3rem;'>
+          This draft email has been generated for you. Please check to ensure it is your voice before sending.
+        </p>
+        <p style='font-size:0.85rem;color:#7ab870;margin-bottom:1rem;font-style:italic;'>
+          A focused question in writing is harder to ignore than five.
+        </p>
+        """, unsafe_allow_html=True)
+
+        # ── Build prioritised two-question draft ──────────────────────────────
         red_patterns   = [p for p in matched_patterns if p["tier"] == "red"]
         amber_patterns = [p for p in matched_patterns if p["tier"] == "amber"]
-        tone_label = st.session_state.get("tone_override", tone_rec.get("recommendation", "neutral"))
+        tone_label     = st.session_state.get("tone_override", tone_rec.get("recommendation", "neutral"))
 
-        opening = {
-            "formal": "Dear [Name],\n\nThank you for your email dated [date]. I am writing to respond formally to the points raised.",
-            "collaborative": "Dear [Name],\n\nThank you for letting us know about the incident on [date]. I wanted to respond to some of the points you have raised.",
-            "neutral": "Dear [Name],\n\nThank you for your email. I would like to respond to several points you have raised.",
-        }.get(tone_label, "Dear [Name],\n\nThank you for your email.")
+        # Priority order for which patterns generate a question in the draft
+        # Everything else goes to meeting companion only
+        PRIORITY_IDS = [
+            "behaviour_framing",
+            "unstructured_time_gap",
+            "ehcp_xref_lunch",
+            "ehcp_xref_lunch_gap",
+            "veiled_threat",
+            "reintegration_promise",
+            "staffing_change",
+            "legal_misrepresentation",
+            "resources_defence",
+            "monitoring_without_action",
+            "home_responsibility_redirect",
+            "reassurance_without_evidence",
+            "implicit_admission",
+        ]
 
-        body_paragraphs = []
-
-        # One paragraph per red pattern — the key questions
-        for p in red_patterns[:4]:
-            if p["id"] == "behaviour_framing":
-                body_paragraphs.append(
-                    "I note that the incident has been described in terms of behaviour and conduct. "
-                    "I would ask that we first establish what provision from Section F of [child's name]'s "
-                    "EHCP was in place at the time of the incident. As you will be aware, the EHCP specifies "
-                    "support requirements during unstructured periods. I would be grateful if you could "
-                    "confirm in writing whether that provision was being delivered at the relevant time, "
-                    "and provide the delivery log for that period."
-                )
-            elif p["id"] == "unstructured_time_gap":
-                body_paragraphs.append(
-                    "The incident occurred during lunchtime — a period that the EHCP specifically "
-                    "identifies as requiring support. I would ask the school to confirm what provision "
-                    "was in place during lunchtime on the day in question, and to provide the relevant "
-                    "delivery records."
-                )
-            elif p["id"] == "veiled_threat":
-                body_paragraphs.append(
-                    "I note the reference to 'next steps in terms of support and provision.' "
-                    "I would ask the school to clarify what this means specifically. "
-                    "Any change to provision or placement must go through the EHCP review process "
-                    "under the Children and Families Act 2014. I would ask for written clarification "
-                    "of what is being proposed and on what basis."
-                )
-            elif p["id"] == "home_responsibility_redirect":
-                body_paragraphs.append(
-                    "I note the request to reinforce expectations at home. I want to be clear that "
-                    "we take our responsibilities as parents seriously. However, the incident occurred "
-                    "on school premises during school hours. The question of what provision was in "
-                    "place at that time is a school responsibility, governed by the EHCP."
-                )
-            elif p["id"] == "monitoring_without_action":
-                body_paragraphs.append(
-                    "I note that the school intends to 'monitor the situation closely.' "
-                    "I would ask for clarification of what specifically will be monitored, "
-                    "what the review mechanism is, who is responsible, and what action will "
-                    "be taken if monitoring identifies further difficulty. "
-                    "I would ask for this in writing."
-                )
-            elif p["id"] in ["ehcp_xref_lunch", "ehcp_xref_lunch_gap"]:
-                body_paragraphs.append(
-                    "I am writing with reference to [child's name]'s EHCP, which specifies provision "
-                    "requirements for unstructured periods including lunchtime. I would ask the school "
-                    "to confirm whether the specified provision was in place at the time of this incident."
-                )
-
-        closing = {
-            "formal": (
-                "I would be grateful for a written response within five working days. "
-                "I am keeping a record of this correspondence.\n\n"
-                "Yours sincerely,\n[Your name]"
+        QUESTION_PARAGRAPHS = {
+            "behaviour_framing": (
+                "I would be grateful if you could confirm in writing what provision from "
+                "Section F of [child's name]'s EHCP was specifically in place at the time of "
+                "this incident, and provide the delivery log for that period. "
+                "I ask because the incident occurred during a time when the EHCP specifies "
+                "support should be in place."
             ),
-            "collaborative": (
-                "I would welcome the opportunity to discuss this further and to work "
-                "together on ensuring the right support is in place.\n\n"
-                "Kind regards,\n[Your name]"
+            "unstructured_time_gap": (
+                "Could you confirm in writing what support was in place during lunchtime on "
+                "the day of this incident, and share the relevant delivery records with me?"
             ),
-            "neutral": (
-                "I look forward to your response.\n\n"
-                "Yours sincerely,\n[Your name]"
+            "ehcp_xref_lunch": (
+                "The EHCP specifies provision during unstructured periods including lunchtime. "
+                "I would ask you to confirm whether that provision was being delivered at the "
+                "time of this incident, and to provide the delivery log."
             ),
-        }.get(tone_label, "Yours sincerely,\n[Your name]")
+            "ehcp_xref_lunch_gap": (
+                "I note that the EHCP does not currently specify provision for lunchtime. "
+                "Given that this incident occurred during that period, I would like to raise "
+                "this at the next annual review as a gap that needs to be addressed."
+            ),
+            "veiled_threat": (
+                "I would ask you to clarify in writing what 'next steps in terms of support "
+                "and provision' means specifically. Any change to provision or placement must "
+                "go through the EHCP review process under the Children and Families Act 2014."
+            ),
+            "reintegration_promise": (
+                "Could you provide the written reintegration plan, specifically referencing "
+                "the provision in Section F of the EHCP? I would ask for this within "
+                "five working days."
+            ),
+            "staffing_change": (
+                "Could you confirm whether there have been any changes to [child's name]'s "
+                "1:1 support since the last annual review, and what transition planning "
+                "was put in place for any such changes?"
+            ),
+            "legal_misrepresentation": (
+                "I would ask the school to confirm delivery of each provision specified in "
+                "Section F of the EHCP. The relevant obligation under the Children and "
+                "Families Act 2014 is to deliver what the EHCP specifies."
+            ),
+            "resources_defence": (
+                "Could you identify in writing which provisions in Section F are currently "
+                "being delivered and whether any are not being delivered due to resource "
+                "constraints? Any such gaps become a matter for the LA to address."
+            ),
+            "monitoring_without_action": (
+                "Could you clarify what specifically will be monitored, what the review "
+                "mechanism is, who is responsible, and what action will be taken if the "
+                "monitoring identifies further difficulty? I would ask for this in writing."
+            ),
+            "home_responsibility_redirect": (
+                "I would like to focus on what provision was in place at school at the time "
+                "of the incident, as this is governed by the EHCP. Could you confirm this "
+                "in writing?"
+            ),
+            "reassurance_without_evidence": (
+                "Could you share the evidence base for the assurances given in your email, "
+                "including the delivery log for the relevant provision over the past half term?"
+            ),
+            "implicit_admission": (
+                "Could you confirm in writing what the current position is — specifically "
+                "what is in place now, rather than what will be put in place going forward?"
+            ),
+        }
 
-        draft_reply = opening + "\n\n" + "\n\n".join(body_paragraphs) + "\n\n" + closing
+        # Select top two priority patterns that have a question
+        priority_sorted = sorted(
+            [p for p in matched_patterns if p["id"] in PRIORITY_IDS],
+            key=lambda x: PRIORITY_IDS.index(x["id"]) if x["id"] in PRIORITY_IDS else 99
+        )
+        top_two = priority_sorted[:2]
+        reserve  = matched_patterns[2:]  # everything else goes to meeting companion
 
+        # Build the letter
+        openings = {
+            "formal": "Dear [Name],\n\nThank you for your email dated [date]. I am writing to follow up on the points raised.",
+            "collaborative": "Dear [Name],\n\nThank you for letting us know about the incident on [date]. I wanted to follow up on a couple of points.",
+            "neutral": "Dear [Name],\n\nThank you for your email dated [date]. I would like to raise a couple of points in response.",
+        }
+        opening = openings.get(tone_label, openings["neutral"])
+
+        # Intro line before questions
+        intro = (
+            "I have a couple of specific questions I would be grateful if you could "
+            "address in writing."
+        )
+
+        # Numbered questions
+        question_lines = []
+        for i, p in enumerate(top_two):
+            q = QUESTION_PARAGRAPHS.get(p["id"], "")
+            if q:
+                question_lines.append(f"{i+1}. {q}")
+
+        closings = {
+            "formal": "I would be grateful for a written response within five working days.\n\nYours sincerely,\n[Your name]",
+            "collaborative": "I look forward to hearing from you.\n\nKind regards,\n[Your name]",
+            "neutral": "I look forward to your response.\n\nYours sincerely,\n[Your name]",
+        }
+        closing = closings.get(tone_label, closings["neutral"])
+
+        draft_parts = [opening, intro] + question_lines + [closing]
+        draft_reply = "\n\n".join(draft_parts)
+
+        # Store draft and reserve patterns in session state for meeting companion
+        st.session_state["draft_reply"]      = draft_reply
+        st.session_state["reserve_patterns"] = reserve
+        st.session_state["top_two_patterns"] = top_two
+        st.session_state["all_patterns"]     = matched_patterns
+        st.session_state["correspondence_date"] = paste_date1 if not email1 else "[date]"
+
+        # ── Display and edit ──────────────────────────────────────────────────
         edited_reply = st.text_area(
-            "Draft reply — edit before sending:",
+            "Edit before sending:",
             value=draft_reply,
-            height=320,
+            height=300,
             key="draft_reply_text"
         )
 
-        # Download as Word
-        if st.button("Download reply as Word", key="download_reply"):
+        # ── Copy, Word, PDF ───────────────────────────────────────────────────
+        col_c1, col_c2, col_c3 = st.columns(3)
+
+        with col_c1:
+            # Copy to clipboard via JS
+            st.markdown(f"""
+            <button onclick="navigator.clipboard.writeText({repr(edited_reply)}).then(()=>
+              document.getElementById('copy_confirm').style.display='block')"
+              style="background:#2d4a2d;color:white;border:none;border-radius:40px;
+                     padding:0.55rem 1.4rem;font-size:0.9rem;cursor:pointer;font-family:sans-serif;">
+              Copy to clipboard
+            </button>
+            <span id="copy_confirm" style="display:none;font-size:0.8rem;color:#7ab870;margin-left:0.5rem;">
+              Copied
+            </span>
+            """, unsafe_allow_html=True)
+
+        with col_c2:
+            # Word download
             reply_doc = Document()
-            reply_doc.add_heading("Draft reply — FRED", 0)
+            reply_doc.add_heading("Draft reply", 0)
             for para in edited_reply.split("\n\n"):
-                reply_doc.add_paragraph(para)
+                if para.strip():
+                    reply_doc.add_paragraph(para.strip())
             reply_doc.add_paragraph("")
-            reply_doc.add_paragraph(
-                "This draft was produced by FRED — Families' Rights and Entitlements Directory. "
-                "Edit before sending. The voice is yours.",
-                style="Normal"
-            ).runs[0].italic = True
-            buf = BytesIO()
-            reply_doc.save(buf)
-            buf.seek(0)
+            disc = reply_doc.add_paragraph(
+                "This draft email has been generated for you by FRED — "
+                "Families' Rights and Entitlements Directory. "
+                "Please check to ensure it is your voice before sending."
+            )
+            disc.runs[0].italic = True
+            word_buf = BytesIO()
+            reply_doc.save(word_buf)
+            word_buf.seek(0)
             st.download_button(
-                "Download as Word document",
-                data=buf,
+                "Download as Word",
+                data=word_buf,
                 file_name="FRED_draft_reply.docx",
                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 key="download_reply_word"
             )
 
-        # ── Thread history — similar past exchanges ───────────────────────────
+        with col_c3:
+            # PDF download
+            pdf_buf = BytesIO()
+            pdf_doc = SimpleDocTemplate(
+                pdf_buf, pagesize=A4,
+                rightMargin=2.5*cm, leftMargin=2.5*cm,
+                topMargin=2.5*cm, bottomMargin=2.5*cm
+            )
+            styles = getSampleStyleSheet()
+            title_s = ParagraphStyle("rt", fontSize=16, fontName="Helvetica-Bold",
+                                     textColor=colors.HexColor("#2d4a2d"),
+                                     spaceAfter=14, leading=20)
+            body_s  = ParagraphStyle("rb", fontSize=10, fontName="Helvetica",
+                                     spaceAfter=10, leading=15)
+            disc_s  = ParagraphStyle("rd", fontSize=9, fontName="Helvetica-Oblique",
+                                     textColor=colors.HexColor("#888"), spaceAfter=0, leading=13)
+            story   = [Paragraph("Draft reply", title_s)]
+            for para in edited_reply.split("\n\n"):
+                if para.strip():
+                    safe = para.strip().replace("&","&amp;").replace("<","&lt;").replace(">","&gt;")
+                    story.append(Paragraph(safe, body_s))
+            story.append(Spacer(1, 0.5*cm))
+            story.append(Paragraph(
+                "This draft email has been generated for you by FRED — "
+                "Families' Rights and Entitlements Directory. "
+                "Please check to ensure it is your voice before sending.",
+                disc_s
+            ))
+            pdf_doc.build(story)
+            pdf_buf.seek(0)
+            st.download_button(
+                "Download as PDF",
+                data=pdf_buf,
+                file_name="FRED_draft_reply.pdf",
+                mime="application/pdf",
+                key="download_reply_pdf"
+            )
+
+        # ── Meeting companion button ──────────────────────────────────────────
+        st.markdown("---")
+        if st.button("Generate meeting companion", key="gen_companion"):
+            st.session_state.show_companion = True
+
+        if st.session_state.get("show_companion"):
+            st.markdown("### Meeting companion")
+            st.markdown(f"""
+            <div style="background:#2d4a2d;border-radius:8px;padding:0.9rem 1.2rem;margin-bottom:1rem;">
+              <p style="color:#9dc98a;font-size:0.75rem;margin:0 0 0.2rem;letter-spacing:0.1em;text-transform:uppercase;">For your eyes before you walk in</p>
+              <p style="color:#e8f5e0;font-weight:600;margin:0;font-size:0.95rem;">Not for sharing. Your preparation document.</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+            today = datetime.datetime.now().strftime("%d %B %Y")
+
+            # Build companion content
+            companion_sections = []
+
+            # Section 1: What you asked
+            if top_two:
+                companion_sections.append(("What you asked — and why", [
+                    f"Your draft reply raises {len(top_two)} specific question(s). "
+                    f"If the school does not answer them directly, that non-response is itself significant.",
+                    *[f"Question {i+1}: {QUESTION_PARAGRAPHS.get(p['id'], p['fred_question'])}"
+                      for i, p in enumerate(top_two)]
+                ]))
+
+            # Section 2: All patterns — including reserve
+            all_p = matched_patterns
+            if all_p:
+                companion_sections.append(("What FRED identified in this correspondence", [
+                    f"FRED identified {len(all_p)} pattern(s) in this email. "
+                    f"Your draft reply addresses the top two. "
+                    f"The remainder are noted here for your awareness."
+                ] + [
+                    f"{'●' if p['tier']=='red' else '○'} {p['name']}: {p['explanation']}"
+                    for p in all_p
+                ]))
+
+            # Section 3: What to say in the room
+            companion_sections.append(("If it comes up in a meeting", [
+                "If the school raises the incident verbally in a meeting, you do not need to "
+                "respond immediately. You can say:",
+                '"I have raised this in writing and I am awaiting a written response. '
+                'I would prefer to discuss it once I have that response."',
+                "This keeps the conversation on the record and prevents verbal agreements "
+                "that are difficult to evidence afterwards.",
+            ]))
+
+            # Section 4: Legal references
+            companion_sections.append(("Legal references", [
+                "Children and Families Act 2014 — Section 42: Duty to secure special "
+                "educational provision.",
+                "SEND Code of Practice 2015 — paragraph 6.56: The graduated approach — "
+                "Assess, Plan, Do, Review — must operate at multiple levels.",
+                "SEND Code of Practice 2015 — paragraph 6.65: Reviews must be based on "
+                "evidence of delivery, not observation alone.",
+                "If provision specified in Section F was not delivered, this is a failure "
+                "of the absolute duty under Section 42. It is not discretionary.",
+            ]))
+
+            # Section 5: If they don't answer
+            companion_sections.append(("If the school does not answer your questions", [
+                "Upload their reply to FRED. FRED will check whether your two questions "
+                "were answered directly.",
+                "If they were not answered, FRED will note that this is the second time "
+                "the question has been raised without a direct response.",
+                "A pattern of non-response is itself evidence. FRED holds it dated.",
+            ]))
+
+            # Render companion
+            for title, points in companion_sections:
+                st.markdown(f"""
+                <div style="background:white;border:0.5px solid #dde8dd;border-radius:10px;
+                            padding:1.1rem 1.3rem;margin-bottom:1rem;">
+                  <p style="font-weight:600;color:#2d4a2d;margin:0 0 0.7rem;font-size:0.97rem;">
+                    {title}
+                  </p>
+                  {"".join(f'<p style="font-size:0.88rem;color:#333;margin:0.3rem 0;line-height:1.6;">{pt}</p>' for pt in points)}
+                </div>
+                """, unsafe_allow_html=True)
+
+            # Companion downloads
+            comp_col1, comp_col2 = st.columns(2)
+
+            with comp_col1:
+                # Word download
+                comp_doc = Document()
+                comp_doc.add_heading("Meeting companion", 0)
+                comp_doc.add_paragraph(
+                    f"Prepared by FRED — {today}. For your eyes before you walk in. Not for sharing."
+                ).runs[0].italic = True
+                comp_doc.add_paragraph("")
+                for title, points in companion_sections:
+                    comp_doc.add_heading(title, 2)
+                    for pt in points:
+                        comp_doc.add_paragraph(pt)
+                    comp_doc.add_paragraph("")
+                comp_buf = BytesIO()
+                comp_doc.save(comp_buf)
+                comp_buf.seek(0)
+                st.download_button(
+                    "Download companion as Word",
+                    data=comp_buf,
+                    file_name="FRED_meeting_companion.docx",
+                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    key="download_companion_word"
+                )
+
+            with comp_col2:
+                # PDF download
+                comp_pdf_buf = BytesIO()
+                comp_pdf = SimpleDocTemplate(
+                    comp_pdf_buf, pagesize=A4,
+                    rightMargin=2.5*cm, leftMargin=2.5*cm,
+                    topMargin=2.5*cm, bottomMargin=2.5*cm
+                )
+                comp_styles  = getSampleStyleSheet()
+                ct_style = ParagraphStyle("ct", fontSize=16, fontName="Helvetica-Bold",
+                                          textColor=colors.HexColor("#2d4a2d"), spaceAfter=6)
+                cs_style = ParagraphStyle("cs", fontSize=12, fontName="Helvetica-Bold",
+                                          textColor=colors.HexColor("#2d4a2d"), spaceAfter=6, spaceBefore=12)
+                cb_style = ParagraphStyle("cb", fontSize=10, fontName="Helvetica",
+                                          spaceAfter=6, leading=15)
+                cd_style = ParagraphStyle("cd", fontSize=9, fontName="Helvetica-Oblique",
+                                          textColor=colors.HexColor("#888"), spaceAfter=0)
+                comp_story = [
+                    Paragraph("Meeting companion", ct_style),
+                    Paragraph(
+                        f"Prepared by FRED — {today}. For your eyes before you walk in. Not for sharing.",
+                        cd_style
+                    ),
+                    Spacer(1, 0.5*cm),
+                ]
+                for title, points in companion_sections:
+                    comp_story.append(Paragraph(title, cs_style))
+                    comp_story.append(HRFlowable(
+                        width="100%", thickness=0.5,
+                        color=colors.HexColor("#dde8dd"), spaceAfter=6
+                    ))
+                    for pt in points:
+                        safe = pt.replace("&","&amp;").replace("<","&lt;").replace(">","&gt;")
+                        comp_story.append(Paragraph(safe, cb_style))
+                    comp_story.append(Spacer(1, 0.3*cm))
+                comp_pdf.build(comp_story)
+                comp_pdf_buf.seek(0)
+                st.download_button(
+                    "Download companion as PDF",
+                    data=comp_pdf_buf,
+                    file_name="FRED_meeting_companion.pdf",
+                    mime="application/pdf",
+                    key="download_companion_pdf"
+                )
+
+                # ── Thread history — similar past exchanges ───────────────────────────
         if similar_past:
             st.markdown("---")
             st.markdown("### This has happened before")
