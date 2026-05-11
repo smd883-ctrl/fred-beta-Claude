@@ -404,6 +404,32 @@ def extract_text_from_docx(uploaded_file):
     except Exception:
         return ""
 
+
+def extract_text_from_txt(uploaded_file):
+    """Extract raw text from plain text file."""
+    try:
+        return uploaded_file.read().decode("utf-8", errors="ignore")
+    except Exception:
+        return ""
+
+
+def extract_text(uploaded_file):
+    """Universal text extractor — routes by file type."""
+    if uploaded_file is None:
+        return ""
+    name = uploaded_file.name.lower()
+    if name.endswith(".pdf"):
+        text = extract_text_from_pdf(uploaded_file)
+        if len(text.strip()) < 50:
+            # PDF extracted too little — likely image-based
+            return "__PDF_EXTRACTION_FAILED__"
+        return text
+    elif name.endswith(".docx"):
+        return extract_text_from_docx(uploaded_file)
+    elif name.endswith(".txt"):
+        return extract_text_from_txt(uploaded_file)
+    return ""
+
 def find_section_blocks(full_text, section_letter):
     """
     Return list of text blocks for a given section letter (e.g. 'F', 'E', 'B').
@@ -1517,8 +1543,8 @@ def page_upload():
             "required": False,
         },
         {
-            "key": "accessibility_policy",
-            "label": "School accessibility policy",
+            "key": "accessibility_plan",
+            "label": "School accessibility plan",
             "description": "FRED checks for unfulfilled commitments — acoustic surveys, staff training, environmental audits — and flags gaps between policy commitment and practice.",
             "required": False,
         },
@@ -1542,7 +1568,7 @@ def page_upload():
             label = f"{doc['label']} {'✓' if already_uploaded else '— required' if doc['required'] else '— optional'}"
             uploaded = st.file_uploader(
                 label,
-                type=["pdf", "docx"],
+                type=["pdf", "docx", "txt"],
                 key=f"vault_{key}",
                 help=doc["description"],
             )
@@ -1583,6 +1609,22 @@ def page_upload():
           </p>
         </div>
         """, unsafe_allow_html=True)
+
+    # ── Vault management ─────────────────────────────────────────────────────
+    col_a, col_b = st.columns([1, 4])
+    with col_a:
+        if st.button("Clear vault — start again", key="clear_vault"):
+            st.session_state.vault = {}
+            st.rerun()
+    with col_b:
+        if vault:
+            st.markdown(
+                "<p style='font-size:0.82rem;color:#888;padding-top:0.4rem;'>"
+                "To add more documents, upload them above. To replace a document, "
+                "upload a new version — it will overwrite the previous one."
+                "</p>",
+                unsafe_allow_html=True
+            )
 
     # ── Analyse button ────────────────────────────────────────────────────────
     analyse_clicked = st.button("Analyse my documents", use_container_width=False, key="analyse_top")
@@ -2609,16 +2651,16 @@ def page_correspondence():
         with col1:
             email1 = st.file_uploader(
                 "Most recent letter or email",
-                type=["pdf", "docx"], key="email1"
+                type=["pdf", "docx", "txt"], key="email1"
             )
             email2 = st.file_uploader(
                 "Earlier correspondence — optional",
-                type=["pdf", "docx"], key="email2"
+                type=["pdf", "docx", "txt"], key="email2"
             )
         with col2:
             policy_file = st.file_uploader(
                 "School policy — optional",
-                type=["pdf", "docx"], key="policy_upload",
+                type=["pdf", "docx", "txt"], key="policy_upload",
                 help="Upload the school accessibility, SEN, or behaviour policy."
             )
             st.markdown(
@@ -2709,13 +2751,23 @@ def page_correspondence():
         progress_text.markdown("*Reading correspondence…*")
 
         if email1:
-            text1 = extract_text_from_pdf(email1) if email1.name.endswith(".pdf") else extract_text_from_docx(email1)
+            text1 = extract_text(email1)
+            if text1 == "__PDF_EXTRACTION_FAILED__":
+                progress_text.empty()
+                st.warning(
+                    "FRED couldn't extract text from this PDF — it may be an image-based file. "
+                    "Try using the 'Paste text directly' option instead, or save the email as a "
+                    "Word document (.docx) and upload that."
+                )
+                st.stop()
         else:
             date_prefix = f"[Date: {paste_date1}]\n" if paste_date1 else ""
             text1 = date_prefix + paste_text1
 
         if email2:
-            text2 = extract_text_from_pdf(email2) if email2.name.endswith(".pdf") else extract_text_from_docx(email2)
+            text2 = extract_text(email2)
+            if text2 == "__PDF_EXTRACTION_FAILED__":
+                text2 = ""
         elif paste_text2.strip():
             date_prefix2 = f"[Date: {paste_date2}]\n" if paste_date2 else ""
             text2 = date_prefix2 + paste_text2
@@ -2998,6 +3050,127 @@ Yours sincerely,
         elif "Yes" in tone_confirm:
             st.session_state.tone_override = r
 
+        # ── Suggested reply ───────────────────────────────────────────────────
+        st.markdown("---")
+        st.markdown("### Suggested reply")
+        st.markdown(
+            "<p style='font-size:0.9rem;color:#555;margin-bottom:1rem;'>"
+            "FRED has drafted a response based on the patterns detected. "
+            "The substance is FRED's — the voice is yours. Edit before sending."
+            "</p>",
+            unsafe_allow_html=True
+        )
+
+        # Build reply from patterns
+        red_patterns   = [p for p in matched_patterns if p["tier"] == "red"]
+        amber_patterns = [p for p in matched_patterns if p["tier"] == "amber"]
+        tone_label = st.session_state.get("tone_override", tone_rec.get("recommendation", "neutral"))
+
+        opening = {
+            "formal": "Dear [Name],\n\nThank you for your email dated [date]. I am writing to respond formally to the points raised.",
+            "collaborative": "Dear [Name],\n\nThank you for letting us know about the incident on [date]. I wanted to respond to some of the points you have raised.",
+            "neutral": "Dear [Name],\n\nThank you for your email. I would like to respond to several points you have raised.",
+        }.get(tone_label, "Dear [Name],\n\nThank you for your email.")
+
+        body_paragraphs = []
+
+        # One paragraph per red pattern — the key questions
+        for p in red_patterns[:4]:
+            if p["id"] == "behaviour_framing":
+                body_paragraphs.append(
+                    "I note that the incident has been described in terms of behaviour and conduct. "
+                    "I would ask that we first establish what provision from Section F of [child's name]'s "
+                    "EHCP was in place at the time of the incident. As you will be aware, the EHCP specifies "
+                    "support requirements during unstructured periods. I would be grateful if you could "
+                    "confirm in writing whether that provision was being delivered at the relevant time, "
+                    "and provide the delivery log for that period."
+                )
+            elif p["id"] == "unstructured_time_gap":
+                body_paragraphs.append(
+                    "The incident occurred during lunchtime — a period that the EHCP specifically "
+                    "identifies as requiring support. I would ask the school to confirm what provision "
+                    "was in place during lunchtime on the day in question, and to provide the relevant "
+                    "delivery records."
+                )
+            elif p["id"] == "veiled_threat":
+                body_paragraphs.append(
+                    "I note the reference to 'next steps in terms of support and provision.' "
+                    "I would ask the school to clarify what this means specifically. "
+                    "Any change to provision or placement must go through the EHCP review process "
+                    "under the Children and Families Act 2014. I would ask for written clarification "
+                    "of what is being proposed and on what basis."
+                )
+            elif p["id"] == "home_responsibility_redirect":
+                body_paragraphs.append(
+                    "I note the request to reinforce expectations at home. I want to be clear that "
+                    "we take our responsibilities as parents seriously. However, the incident occurred "
+                    "on school premises during school hours. The question of what provision was in "
+                    "place at that time is a school responsibility, governed by the EHCP."
+                )
+            elif p["id"] == "monitoring_without_action":
+                body_paragraphs.append(
+                    "I note that the school intends to 'monitor the situation closely.' "
+                    "I would ask for clarification of what specifically will be monitored, "
+                    "what the review mechanism is, who is responsible, and what action will "
+                    "be taken if monitoring identifies further difficulty. "
+                    "I would ask for this in writing."
+                )
+            elif p["id"] in ["ehcp_xref_lunch", "ehcp_xref_lunch_gap"]:
+                body_paragraphs.append(
+                    "I am writing with reference to [child's name]'s EHCP, which specifies provision "
+                    "requirements for unstructured periods including lunchtime. I would ask the school "
+                    "to confirm whether the specified provision was in place at the time of this incident."
+                )
+
+        closing = {
+            "formal": (
+                "I would be grateful for a written response within five working days. "
+                "I am keeping a record of this correspondence.\n\n"
+                "Yours sincerely,\n[Your name]"
+            ),
+            "collaborative": (
+                "I would welcome the opportunity to discuss this further and to work "
+                "together on ensuring the right support is in place.\n\n"
+                "Kind regards,\n[Your name]"
+            ),
+            "neutral": (
+                "I look forward to your response.\n\n"
+                "Yours sincerely,\n[Your name]"
+            ),
+        }.get(tone_label, "Yours sincerely,\n[Your name]")
+
+        draft_reply = opening + "\n\n" + "\n\n".join(body_paragraphs) + "\n\n" + closing
+
+        edited_reply = st.text_area(
+            "Draft reply — edit before sending:",
+            value=draft_reply,
+            height=320,
+            key="draft_reply_text"
+        )
+
+        # Download as Word
+        if st.button("Download reply as Word", key="download_reply"):
+            reply_doc = Document()
+            reply_doc.add_heading("Draft reply — FRED", 0)
+            for para in edited_reply.split("\n\n"):
+                reply_doc.add_paragraph(para)
+            reply_doc.add_paragraph("")
+            reply_doc.add_paragraph(
+                "This draft was produced by FRED — Families' Rights and Entitlements Directory. "
+                "Edit before sending. The voice is yours.",
+                style="Normal"
+            ).runs[0].italic = True
+            buf = BytesIO()
+            reply_doc.save(buf)
+            buf.seek(0)
+            st.download_button(
+                "Download as Word document",
+                data=buf,
+                file_name="FRED_draft_reply.docx",
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                key="download_reply_word"
+            )
+
         # ── Thread history — similar past exchanges ───────────────────────────
         if similar_past:
             st.markdown("---")
@@ -3133,8 +3306,8 @@ def page_subscriber():
             "Upload emails from school or the LA. FRED will read them for you — "
             "tone, intent, gaps, and what to do next."
         )
-        email1 = st.file_uploader("Most recent email (PDF or Word)", type=["pdf", "docx"], key="sub_email1")
-        email2 = st.file_uploader("Previous email — optional", type=["pdf", "docx"], key="sub_email2")
+        email1 = st.file_uploader("Most recent email (PDF or Word)", type=["pdf", "docx", "txt"], key="sub_email1")
+        email2 = st.file_uploader("Previous email — optional", type=["pdf", "docx", "txt"], key="sub_email2")
 
         tone_q = st.radio(
             "How is the school engaging right now?",
