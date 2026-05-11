@@ -5,7 +5,7 @@ import json
 import datetime
 from io import BytesIO
 from docx import Document
-from docx.shared import Pt, RGBColour, Inches
+from docx.shared import Pt, RGBColor, Inches
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colours
@@ -940,7 +940,7 @@ def generate_word_report(findings, child_name="your child", situation="", doc_ty
 
     sub = doc.add_paragraph(f"Families' Rights and Entitlements Directory")
     sub.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    sub.runs[0].font.colour.rgb = RGBColour(0x1a, 0x27, 0x44)
+    sub.runs[0].font.colour.rgb = RGBColor(0x1a, 0x27, 0x44)
 
     doc.add_paragraph(f"Document type: {doc_type}")
     if situation:
@@ -970,14 +970,14 @@ def generate_word_report(findings, child_name="your child", situation="", doc_ty
     tier_labels = {"red": "RED — Lawful Requirement Not Met",
                    "amber": "AMBER — Best Practice Gap",
                    "green": "GREEN — Compliant"}
-    tier_colours = {"red": RGBColour(0xC0, 0x39, 0x2B),
-                    "amber": RGBColour(0xD4, 0xA0, 0x17),
-                    "green": RGBColour(0x1E, 0x84, 0x49)}
+    tier_colours = {"red": RGBColor(0xC0, 0x39, 0x2B),
+                    "amber": RGBColor(0xD4, 0xA0, 0x17),
+                    "green": RGBColor(0x1E, 0x84, 0x49)}
 
     for finding in findings:
         tier = finding["tier"]
         h = doc.add_heading(tier_labels.get(tier, tier.upper()), 2)
-        h.runs[0].font.colour.rgb = tier_colours.get(tier, RGBColour(0, 0, 0))
+        h.runs[0].font.colour.rgb = tier_colours.get(tier, RGBColor(0, 0, 0))
 
         doc.add_heading(finding["title"], 3)
 
