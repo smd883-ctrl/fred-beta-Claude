@@ -363,15 +363,37 @@ PROHIBITED_WORDS = [
 ]
 
 def extract_text_from_pdf(uploaded_file):
-    """Extract raw text from every page of uploaded PDF."""
+    """
+    Extract raw text from every page of uploaded PDF.
+    Tries text extraction first, then falls back to block extraction.
+    Returns extracted text or empty string.
+    """
     try:
         data = uploaded_file.read()
         doc  = fitz.open(stream=data, filetype="pdf")
         pages = []
         for page in doc:
-            pages.append(page.get_text("text"))
-        return "\n".join(pages)
+            # Try standard text extraction
+            text = page.get_text("text")
+            if not text.strip():
+                # Try block extraction as fallback
+                blocks = page.get_text("blocks")
+                text = "\n".join(b[4] for b in blocks if isinstance(b[4], str))
+            if not text.strip():
+                # Try dict extraction as last resort
+                d = page.get_text("dict")
+                words = []
+                for block in d.get("blocks", []):
+                    for line in block.get("lines", []):
+                        for span in line.get("spans", []):
+                            words.append(span.get("text", ""))
+                text = " ".join(words)
+            pages.append(text)
+        result = "\n".join(pages)
+        print(f"PDF extracted: {len(result)} chars from {len(doc)} pages")
+        return result
     except Exception as e:
+        print(f"PDF extraction error: {e}")
         return ""
 
 def extract_text_from_docx(uploaded_file):
@@ -2114,6 +2136,110 @@ CORRESPONDENCE_PATTERNS = [
         "explanation": "This language implies current practice is inadequate while presenting future improvement as reassurance. A commitment to improve in future is an admission of a current gap. Note the date — this correspondence is evidence that the gap existed at this point.",
         "fred_question": "Ask the school to confirm in writing what the current position is — not what it will be. Note that this correspondence has been retained and dated.",
     },
+    {
+        "id": "behaviour_framing",
+        "name": "SEND Need Framed as Behaviour Problem",
+        "tier": "red",
+        "triggers": r"\b(behaviour.*pattern|pattern.*behaviour|conduct|expectations.*behaviour|"
+                    r"struggling to meet expectations|behaviour.*concern|behavioural incident|"
+                    r"standards expected|reminded.*standards|reflect on his behaviour|"
+                    r"reflect on her behaviour|out of circulation|time to reflect)\b",
+        "explanation": (
+            "The school is describing what may be a SEND need as a behaviour problem. "
+            "For a child with an EHCP, any incident during unstructured time — lunchtime, "
+            "break, transitions — must first be examined against what provision was in place "
+            "at that moment. A child with documented sensory or social communication needs "
+            "who becomes dysregulated in an unstructured environment is not misbehaving — "
+            "they are experiencing a provision failure."
+        ),
+        "fred_question": (
+            "Ask the school what provision from Section F was in place during the unstructured "
+            "period when this incident occurred. If 1:1 support, sensory breaks, or structured "
+            "lunchtime activity is specified in the EHCP, ask whether it was being delivered "
+            "at the time of the incident."
+        ),
+    },
+    {
+        "id": "veiled_threat",
+        "name": "Veiled Threat — Next Steps Language",
+        "tier": "red",
+        "triggers": r"\b(next steps|may need to consider|if.*persist|if.*continue|"
+                    r"cannot continue|placement.*appropriate|alternative.*provision|"
+                    r"exploring.*options|reviewing.*placement|not the right environment|"
+                    r"may not be meeting|current environment.*not)\b",
+        "explanation": (
+            "The correspondence contains language that implies escalation — toward exclusion, "
+            "alternative provision, or placement change — dressed as concern. "
+            "'Next steps in terms of support and provision' following a behavioural incident "
+            "is a soft version of a placement threat. Note the date and exact wording. "
+            "This creates a paper trail that the school may use to justify future action."
+        ),
+        "fred_question": (
+            "Ask the school to clarify in writing what 'next steps' means specifically. "
+            "Is the school considering a change to provision, a change to placement, or "
+            "a referral? Each has different statutory implications. "
+            "Any change to provision must go through the EHCP review process."
+        ),
+    },
+    {
+        "id": "home_responsibility_redirect",
+        "name": "Home Responsibility Redirect",
+        "tier": "amber",
+        "triggers": r"\b(reinforce at home|support at home|work with.*at home|"
+                    r"we would ask.*home|parental.*support|home.*behaviour|"
+                    r"consistent.*home|same.*home|boundaries at home|routines at home)\b",
+        "explanation": (
+            "The school is redirecting responsibility for a school-based incident to the home. "
+            "School behaviour during school hours is a school provision question, not a home "
+            "behaviour question. An incident in the dining hall is governed by what provision "
+            "was in place in the dining hall — not by what happens at home."
+        ),
+        "fred_question": (
+            "Note this redirect. Respond by asking what provision was in place at school "
+            "during the incident rather than engaging with the home behaviour framing. "
+            "The EHCP provision is a school responsibility, not a shared one."
+        ),
+    },
+    {
+        "id": "unstructured_time_gap",
+        "name": "Incident During Unstructured Time — Provision Check",
+        "tier": "red",
+        "triggers": r"\b(lunchtime|lunch time|break time|breaktime|unstructured|"
+                    r"less structured|playground|dinner time|free time|between lessons|"
+                    r"transition.*incident|incident.*transition|corridor.*incident)\b",
+        "explanation": (
+            "The incident occurred during an unstructured period — lunchtime, break, or "
+            "transition. For a child with ASD, SEMH needs, or sensory processing difficulties, "
+            "unstructured time is consistently the highest-risk period of the school day. "
+            "The EHCP should specify what support is in place during these periods. "
+            "If it does not, that is a provision gap. If it does and the support was not "
+            "in place, that is a delivery failure."
+        ),
+        "fred_question": (
+            "Ask the school to confirm in writing what provision from Section F is specifically "
+            "in place during lunchtime, break time, and transitions. "
+            "Then ask whether that provision was being delivered at the time of the incident. "
+            "Request the delivery log for the relevant period."
+        ),
+    },
+    {
+        "id": "monitoring_without_action",
+        "name": "Monitor and Observe — No Specified Action",
+        "tier": "amber",
+        "triggers": r"\b(monitor.*closely|continue to monitor|keep an eye|observe.*situation|"
+                    r"watching.*closely|review.*situation|situation.*closely|monitor.*progress)\b",
+        "explanation": (
+            "The school has committed to monitoring without specifying what action will be "
+            "taken or what threshold will trigger a review. 'We will monitor closely' is "
+            "not a provision — it is an observation. Monitoring without a specified response "
+            "plan is not a graduated approach under the SEND Code of Practice."
+        ),
+        "fred_question": (
+            "Ask the school what specifically they will be monitoring, what the review "
+            "mechanism is, who is responsible, and what action will be taken if the "
+            "monitoring identifies further difficulty. Ask for this in writing."
+        ),
+    },
 ]
 
 ENVIRONMENT_TRIGGERS = {
@@ -2232,7 +2358,12 @@ def get_checklist(env_name):
     return SENSORY_CHECKLIST.get(env_name, DEFAULT_CHECKLIST)
 
 
-def detect_patterns(text):
+def detect_patterns(text, ehcp_text=""):
+    """
+    Run all correspondence patterns against text.
+    If EHCP text provided, adds EHCP cross-reference findings.
+    Returns list sorted red first.
+    """
     matched = []
     for pattern in CORRESPONDENCE_PATTERNS:
         if re.search(pattern["triggers"], text, re.IGNORECASE):
@@ -2241,6 +2372,59 @@ def detect_patterns(text):
             if m:
                 ctx = text[max(0, m.start()-100):m.end()+120].strip()
             matched.append({**pattern, "extract": ctx[:250]})
+
+    # EHCP cross-reference — unstructured time
+    if ehcp_text and re.search(
+        r"\b(lunchtime|lunch time|break time|unstructured|dining hall|canteen|playground)\b",
+        text, re.IGNORECASE
+    ):
+        ehcp_lunch = re.search(
+            r"\b(lunchtime|unstructured|break.*supervision|lunch.*support|"
+            r"lunch.*adult|supervision.*lunch|1:1.*lunch|full.time.*support)\b",
+            ehcp_text, re.IGNORECASE
+        )
+        if ehcp_lunch:
+            matched.append({
+                "id": "ehcp_xref_lunch",
+                "name": "EHCP Cross-Reference — Lunchtime Provision",
+                "tier": "red",
+                "triggers": "",
+                "explanation": (
+                    "Your EHCP references provision during lunchtime or unstructured periods. "
+                    "This incident occurred during exactly that period. "
+                    "The question is not whether the behaviour occurred — it is whether the "
+                    "provision specified in the EHCP was being delivered when it did."
+                ),
+                "fred_question": (
+                    "Request the delivery log for lunchtime provision on the day of this incident. "
+                    "Ask the school to confirm in writing whether the named provision from "
+                    "Section F was in place at the time. If it was not, that is a delivery "
+                    "failure, not a behaviour problem."
+                ),
+                "extract": "",
+            })
+        else:
+            matched.append({
+                "id": "ehcp_xref_lunch_gap",
+                "name": "EHCP Gap — No Lunchtime Provision Specified",
+                "tier": "red",
+                "triggers": "",
+                "explanation": (
+                    "This incident occurred during lunchtime but the EHCP does not appear "
+                    "to specify provision for this period. For a child with documented "
+                    "sensory or social communication needs, unstructured lunchtime is a "
+                    "high-risk period. The absence of specified provision is itself a gap "
+                    "that should be addressed at the next annual review."
+                ),
+                "fred_question": (
+                    "At the next annual review, request that Section F is amended to specify "
+                    "what support is in place during all unstructured periods — lunchtime, "
+                    "break, and transitions. Ask the school in writing what support was "
+                    "in place at the time of this incident."
+                ),
+                "extract": "",
+            })
+
     # Sort: red first, amber second
     order = {"red": 0, "amber": 1, "green": 2}
     matched.sort(key=lambda x: order.get(x["tier"], 3))
@@ -2540,7 +2724,8 @@ def page_correspondence():
         combined = text1 + "\n\n" + text2
 
         progress_text.markdown("*Identifying patterns…*")
-        matched_patterns = detect_patterns(combined)
+        ehcp_text = st.session_state.get("vault", {}).get("ehcp", {}).get("text", "")
+        matched_patterns = detect_patterns(combined, ehcp_text)
 
         progress_text.markdown("*Checking environment…*")
         environment = detect_environment(combined)
