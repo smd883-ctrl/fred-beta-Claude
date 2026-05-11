@@ -41,8 +41,8 @@ st.markdown(f"""
 
   html, body, [class*="css"] {{
     font-family: 'DM Sans', sans-serif;
-    background-colour: #f5f5f0;
-    colour: #1a1a2e;
+    background-color: #f5f5f0;
+    color: #1a1a2e;
   }}
 
   h1, h2, h3 {{
@@ -53,10 +53,10 @@ st.markdown(f"""
   /* Hero */
   .hero {{
     background: #2d4a2d;
-    colour: white;
+    color: white;
     padding: 3rem 2.5rem 2.8rem;
     border-radius: 16px;
-    text-align: centre;
+    text-align: center;
     margin-bottom: 2rem;
     position: relative;
     overflow: hidden;
@@ -75,7 +75,7 @@ st.markdown(f"""
     font-family: 'DM Serif Display', serif;
     font-size: 4rem;
     margin: 0;
-    colour: #e8f5e0;
+    color: #e8f5e0;
     letter-spacing: 0.06em;
     font-weight: 400;
   }}
@@ -85,7 +85,7 @@ st.markdown(f"""
     font-size: 0.75rem;
     letter-spacing: 0.22em;
     text-transform: uppercase;
-    colour: #9dc98a;
+    color: #9dc98a;
     margin: 0.4rem 0 1rem 0;
     font-weight: 300;
   }}
@@ -94,21 +94,21 @@ st.markdown(f"""
     font-family: 'DM Serif Display', serif;
     font-size: 1.45rem;
     font-weight: 400;
-    colour: #e8f5e0;
+    color: #e8f5e0;
     margin-bottom: 0.5rem;
     line-height: 1.35;
   }}
 
   .hero .origin {{
     font-style: italic;
-    colour: #7ab870;
+    color: #7ab870;
     margin-bottom: 1.4rem;
     font-size: 0.93rem;
     font-weight: 300;
   }}
 
   .hero .sub {{
-    colour: #b8d9a8;
+    color: #b8d9a8;
     max-width: 540px;
     margin: 0 auto 1.4rem auto;
     font-size: 1rem;
@@ -117,7 +117,7 @@ st.markdown(f"""
   }}
 
   .hero .service-line {{
-    colour: #7ab870;
+    color: #7ab870;
     font-size: 0.82rem;
     margin-bottom: 1.8rem;
     letter-spacing: 0.04em;
@@ -127,7 +127,7 @@ st.markdown(f"""
   .cta-button {{
     display: inline-block;
     background: #e8c96a;
-    colour: #2d3a1a !important;
+    color: #2d3a1a !important;
     font-family: 'DM Sans', sans-serif;
     font-weight: 600;
     font-size: 1rem;
@@ -140,14 +140,14 @@ st.markdown(f"""
   }}
 
   .reassurance {{
-    colour: #9dc98a;
+    color: #9dc98a;
     font-size: 0.85rem;
     margin-top: 1rem;
     font-weight: 300;
   }}
 
   .pricing-hint {{
-    colour: #7a8fa8;
+    color: #7a8fa8;
     font-size: 0.82rem;
     margin-top: 0.4rem;
   }}
@@ -155,7 +155,7 @@ st.markdown(f"""
   /* Traffic light badges */
   .badge-red {{
     background: {RED};
-    colour: white;
+    color: white;
     padding: 0.22rem 0.7rem;
     border-radius: 20px;
     font-weight: 500;
@@ -166,7 +166,7 @@ st.markdown(f"""
   }}
   .badge-amber {{
     background: {AMBER};
-    colour: white;
+    color: white;
     padding: 0.22rem 0.7rem;
     border-radius: 20px;
     font-weight: 500;
@@ -177,7 +177,7 @@ st.markdown(f"""
   }}
   .badge-green {{
     background: {GREEN};
-    colour: white;
+    color: white;
     padding: 0.22rem 0.7rem;
     border-radius: 20px;
     font-weight: 500;
@@ -224,7 +224,7 @@ st.markdown(f"""
   .hiw-num {{
     font-family: 'DM Serif Display', serif;
     font-size: 1.3rem;
-    colour: #7ab870;
+    color: #7ab870;
     flex-shrink: 0;
     line-height: 1;
     width: 24px;
@@ -236,7 +236,7 @@ st.markdown(f"""
     border: 0.5px solid #d0ddd0;
     border-radius: 12px;
     padding: 1.4rem 1.2rem;
-    text-align: centre;
+    text-align: center;
     height: 100%;
   }}
   .pricing-card.featured {{
@@ -246,11 +246,11 @@ st.markdown(f"""
     font-family: 'DM Serif Display', serif;
     font-size: 2rem;
     font-weight: 400;
-    colour: #2d4a2d;
+    color: #2d4a2d;
   }}
   .pricing-card .period {{
     font-size: 0.82rem;
-    colour: #888;
+    color: #888;
     font-weight: 300;
   }}
   .pricing-card ul {{
@@ -261,17 +261,17 @@ st.markdown(f"""
     line-height: 2;
     list-style: none;
     font-weight: 300;
-    colour: #555;
+    color: #555;
   }}
   .pricing-card ul li::before {{
     content: '·  ';
-    colour: #7ab870;
+    color: #7ab870;
     font-weight: 700;
   }}
 
   .best-value-tag {{
     background: #2d4a2d;
-    colour: #e8f5e0;
+    color: #e8f5e0;
     font-size: 0.7rem;
     font-weight: 500;
     padding: 0.2rem 0.7rem;
@@ -295,7 +295,7 @@ st.markdown(f"""
   .doc-pill {{
     display: inline-block;
     background: #eaf5e0;
-    colour: #2d5a2d;
+    color: #2d5a2d;
     font-size: 0.78rem;
     padding: 0.28rem 0.8rem;
     border-radius: 20px;
@@ -314,14 +314,14 @@ st.markdown(f"""
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    colour: #5a8a5a;
+    color: #5a8a5a;
     margin-bottom: 0.6rem;
   }}
 
   /* Streamlit button override */
   .stButton > button {{
     background: #2d4a2d;
-    colour: white;
+    color: white;
     border: none;
     border-radius: 40px;
     font-family: 'DM Sans', sans-serif;
@@ -331,13 +331,13 @@ st.markdown(f"""
   }}
   .stButton > button:hover {{
     background: #3d5e3d;
-    colour: white;
+    color: white;
   }}
 
   /* Primary CTA Streamlit button — gold */
   div[data-testid="stButton"] button[kind="primary"] {{
     background: #e8c96a;
-    colour: #2d3a1a;
+    color: #2d3a1a;
     border-radius: 40px;
   }}
 
@@ -1287,7 +1287,7 @@ def render_finding_card(finding, index=None, show_full=True):
       <p style="font-weight:700;margin:0.4rem 0 0.5rem 0;font-size:1rem;">{finding['title']}</p>
     """
     if finding.get("extract") and show_full:
-        html += f'<p style="font-style:italic;colour:#555;font-size:0.9rem;margin:0 0 0.5rem 0;">"{finding["extract"][:280]}…"</p>'
+        html += f'<p style="font-style:italic;color: #555;font-size:0.9rem;margin:0 0 0.5rem 0;">"{finding["extract"][:280]}…"</p>'
 
     if show_full:
         html += f'<p style="margin:0;font-size:0.95rem;line-height:1.6;">{finding["commentary"]}</p>'
@@ -1355,10 +1355,10 @@ def page_landing():
             st.rerun()
 
     st.markdown("""
-    <p style="text-align:centre;colour:#6a7a90;font-size:0.9rem;margin-top:0.8rem;">
+    <p style="text-align: center;color: #6a7a90;font-size:0.9rem;margin-top:0.8rem;">
       Upload first. Decide after. Your report is ready before you pay.
     </p>
-    <p style="text-align:centre;colour:#8a9ab0;font-size:0.82rem;">
+    <p style="text-align: center;color: #8a9ab0;font-size:0.82rem;">
       From £XX for the full report — or see our subscription plans below
     </p>
     """, unsafe_allow_html=True)
@@ -1366,7 +1366,7 @@ def page_landing():
     st.markdown("<hr class='section-divider'>", unsafe_allow_html=True)
 
     # How it works
-    st.markdown("<h2 style='text-align:centre;'>Everything you need to know.</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center;'>Everything you need to know.</h2>", unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
 
     hiw_items = [
@@ -1394,7 +1394,7 @@ def page_landing():
     st.markdown("<hr class='section-divider'>", unsafe_allow_html=True)
 
     # Pricing
-    st.markdown("<h2 style='text-align:centre;'>Plans</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center;'>Plans</h2>", unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
 
     p1, p2, p3 = st.columns(3)
@@ -1448,12 +1448,12 @@ def page_landing():
         </div>
         """, unsafe_allow_html=True)
 
-    st.markdown("<br><p style='text-align:centre;colour:#6a7a90;font-size:0.85rem;'>No hidden charges. Your report is ready before you purchase.</p>", unsafe_allow_html=True)
+    st.markdown("<br><p style='text-align: center;color: #6a7a90;font-size:0.85rem;'>No hidden charges. Your report is ready before you purchase.</p>", unsafe_allow_html=True)
 
     st.markdown("<hr class='section-divider'>", unsafe_allow_html=True)
 
     # FAQ
-    st.markdown("<h2 style='text-align:centre;'>FAQ</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center;'>FAQ</h2>", unsafe_allow_html=True)
 
     faqs = [
         ("When do I pay?", "After you see one real finding from your EHCP, before you access the full report. You upload first — your report is ready before you pay."),
@@ -1477,7 +1477,7 @@ def page_landing():
     <a href="https://docs.google.com/forms/d/e/1FAIpQLSeA1F9nEdQWkmplbAh973XKq2EsW0bEkhJiw7drhP7BZaPjKQ/viewform" target="_blank" style="
         display:inline-block;
         background:#1a2744;
-        colour:white;
+        color: white;
         padding:0.7rem 1.8rem;
         border-radius:4px;
         text-decoration:none;
@@ -1485,7 +1485,7 @@ def page_landing():
         font-weight:600;
         font-size:0.95rem;
     ">Share your thoughts →</a>
-    <p style="font-size:0.8rem;colour:#888;margin-top:0.5rem;">Opens in a new tab. No obligation.</p>
+    <p style="font-size:0.8rem;color: #888;margin-top:0.5rem;">Opens in a new tab. No obligation.</p>
     """, unsafe_allow_html=True)
 
 
@@ -1513,7 +1513,7 @@ def page_upload():
 
     st.markdown(f"""
     <div style="background:#eaf5e0;border-radius:10px;padding:1rem 1.3rem;margin-bottom:1.5rem;border:0.5px solid #c0ddb0;">
-      <p style="margin:0;font-size:0.95rem;colour:#2d4a2d;line-height:1.7;">
+      <p style="margin:0;font-size:0.95rem;color: #2d4a2d;line-height:1.7;">
         Upload your child's EHCP first. Then add any other documents you have —
         FRED will read them all and refer back to them when you analyse correspondence
         or request an amendment.
@@ -1586,16 +1586,16 @@ def page_upload():
             if already_uploaded or uploaded:
                 st.markdown(f"""
                 <div style="background:#eaf5e0;border-radius:8px;padding:0.6rem 1rem;margin-top:1.6rem;border:0.5px solid #c0ddb0;">
-                  <p style="margin:0;font-size:0.85rem;colour:#2d5a2d;font-weight:500;">
+                  <p style="margin:0;font-size:0.85rem;color: #2d5a2d;font-weight:500;">
                     ✓ FRED has read the {doc['label']}
                   </p>
-                  <p style="margin:0.2rem 0 0;font-size:0.8rem;colour:#5a8a5a;">{doc['description']}</p>
+                  <p style="margin:0.2rem 0 0;font-size:0.8rem;color: #5a8a5a;">{doc['description']}</p>
                 </div>
                 """, unsafe_allow_html=True)
             else:
                 st.markdown(f"""
                 <div style="padding:0.6rem 1rem;margin-top:1.6rem;">
-                  <p style="margin:0;font-size:0.82rem;colour:#888;">{doc['description']}</p>
+                  <p style="margin:0;font-size:0.82rem;color: #888;">{doc['description']}</p>
                 </div>
                 """, unsafe_allow_html=True)
 
@@ -1606,10 +1606,10 @@ def page_upload():
         loaded = ", ".join(DOCUMENT_TYPES[i]["label"] for i, d in enumerate(DOCUMENT_TYPES) if d["key"] in vault)
         st.markdown(f"""
         <div style="background:#2d4a2d;border-radius:10px;padding:0.9rem 1.2rem;margin-bottom:1rem;">
-          <p style="margin:0;font-size:0.88rem;colour:#9dc98a;font-weight:500;">
+          <p style="margin:0;font-size:0.88rem;color: #9dc98a;font-weight:500;">
             FRED is holding: {loaded}
           </p>
-          <p style="margin:0.3rem 0 0;font-size:0.82rem;colour:#7ab870;">
+          <p style="margin:0.3rem 0 0;font-size:0.82rem;color: #7ab870;">
             These will be cross-referenced when you analyse correspondence or request an amendment.
           </p>
         </div>
@@ -1624,7 +1624,7 @@ def page_upload():
     with col_b:
         if vault:
             st.markdown(
-                "<p style='font-size:0.82rem;colour:#888;padding-top:0.4rem;'>"
+                "<p style='font-size:0.82rem;color: #888;padding-top:0.4rem;'>"
                 "To add more documents, upload them above. To replace a document, "
                 "upload a new version — it will overwrite the previous one."
                 "</p>",
@@ -1636,7 +1636,7 @@ def page_upload():
 
     st.markdown("---")
     st.markdown("### A few quick questions")
-    st.markdown("<p style='font-size:0.88rem;colour:#666;margin-bottom:1rem;'>These help FRED tailor the analysis. Nothing here is mandatory.</p>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size:0.88rem;color: #666;margin-bottom:1rem;'>These help FRED tailor the analysis. Nothing here is mandatory.</p>", unsafe_allow_html=True)
 
     doc_type = st.radio(
         "What is the primary document you have uploaded?",
@@ -1713,9 +1713,9 @@ def page_sneak_peek():
     <div style="background:white;border:1px solid #d0dae8;border-radius:8px;padding:1.2rem;margin:1.2rem 0;">
       <p style="margin:0;font-size:1rem;">
         Your full report contains:&nbsp;
-        <span style="colour:{RED};font-weight:700;">{red_n} Red</span> &nbsp;·&nbsp;
-        <span style="colour:{AMBER};font-weight:700;">{amber_n} Amber</span> &nbsp;·&nbsp;
-        <span style="colour:{GREEN};font-weight:700;">{green_n} Green</span>
+        <span style="color:{RED};font-weight:700;">{red_n} Red</span> &nbsp;·&nbsp;
+        <span style="color:{AMBER};font-weight:700;">{amber_n} Amber</span> &nbsp;·&nbsp;
+        <span style="color:{GREEN};font-weight:700;">{green_n} Green</span>
       </p>
     </div>
     """, unsafe_allow_html=True)
@@ -1731,10 +1731,10 @@ def page_sneak_peek():
         )
         st.markdown(f"""
         <div style="background:{NAVY};border-radius:8px;padding:1.5rem 2rem;margin:1rem 0;">
-          <p style="colour:#a8b8d8;font-size:0.85rem;margin:0 0 0.3rem;">
+          <p style="color:#a8b8d8;font-size:0.85rem;margin:0 0 0.3rem;">
             FRED BETA ACCESS
           </p>
-          <p style="colour:white;font-size:1.1rem;font-weight:600;margin:0 0 1rem;">
+          <p style="color:white;font-size:1.1rem;font-weight:600;margin:0 0 1rem;">
             Your report is waiting. Enter your email to continue.
           </p>
         </div>
@@ -1773,7 +1773,7 @@ def page_full_report():
 
     # Parse meta info
     st.markdown(f"""
-    <div style="background:#f0f4fa;border-radius:6px;padding:0.8rem 1.2rem;margin-bottom:1.2rem;font-size:0.9rem;colour:#444;">
+    <div style="background:#f0f4fa;border-radius:6px;padding:0.8rem 1.2rem;margin-bottom:1.2rem;font-size:0.9rem;color: #444;">
       Document type: <b>{doc_type}</b> &nbsp;·&nbsp;
       Section F blocks found: <b>{meta.get('f_blocks_found', 0)}</b> &nbsp;·&nbsp;
       Section E blocks found: <b>{meta.get('e_blocks_found', 0)}</b>
@@ -1785,11 +1785,11 @@ def page_full_report():
     <div style="background:white;border:1px solid #d0dae8;border-radius:8px;padding:1.2rem;margin-bottom:1.5rem;">
       <p style="margin:0;font-size:1.05rem;font-weight:600;">Summary</p>
       <p style="margin:0.5rem 0 0;font-size:0.97rem;">
-        <span style="colour:{RED};font-weight:700;">{red_n} Red</span> — lawful requirement(s) not met.
+        <span style="color:{RED};font-weight:700;">{red_n} Red</span> — lawful requirement(s) not met.
         Must be addressed at annual review.<br>
-        <span style="colour:{AMBER};font-weight:700;">{amber_n} Amber</span> — best practice gap(s).
+        <span style="color:{AMBER};font-weight:700;">{amber_n} Amber</span> — best practice gap(s).
         Worth raising at annual review.<br>
-        <span style="colour:{GREEN};font-weight:700;">{green_n} Green</span> — compliant.
+        <span style="color:{GREEN};font-weight:700;">{green_n} Green</span> — compliant.
         Use as benchmark when challenging non-compliant provision.
       </p>
     </div>
@@ -1847,18 +1847,18 @@ def page_full_report():
     st.markdown("---")
     if not st.session_state.subscribed:
         st.markdown(f"""
-        <div style="background:{NAVY};border-radius:8px;padding:2rem;margin:1rem 0;text-align:centre;">
-          <p style="colour:#a8b8d8;font-size:0.85rem;margin:0 0 0.4rem;letter-spacing:0.1em;text-transform:uppercase;">
+        <div style="background:{NAVY};border-radius:8px;padding:2rem;margin:1rem 0;text-align: center;">
+          <p style="color:#a8b8d8;font-size:0.85rem;margin:0 0 0.4rem;letter-spacing:0.1em;text-transform:uppercase;">
             FRED BETA — FREE ACCESS
           </p>
-          <p style="colour:white;font-size:1.3rem;font-weight:700;margin:0 0 0.6rem;">
+          <p style="color:white;font-size:1.3rem;font-weight:700;margin:0 0 0.6rem;">
             Want the full FRED experience?
           </p>
-          <p style="colour:#c8d8f0;font-size:1rem;margin:0 0 1.2rem;max-width:480px;margin-left:auto;margin-right:auto;">
+          <p style="color:#c8d8f0;font-size:1rem;margin:0 0 1.2rem;max-width:480px;margin-left:auto;margin-right:auto;">
             Subscribe free during beta and unlock correspondence analysis,
             email drafting, meeting preparation, document vault, and more.
           </p>
-          <p style="colour:#a8b8d8;font-size:0.85rem;margin:0;">
+          <p style="color:#a8b8d8;font-size:0.85rem;margin:0;">
             Already registered as {st.session_state.email_address if st.session_state.email_address else "a beta tester"}
           </p>
         </div>
@@ -1885,7 +1885,7 @@ def page_full_report():
     <a href="https://docs.google.com/forms/d/e/1FAIpQLSeA1F9nEdQWkmplbAh973XKq2EsW0bEkhJiw7drhP7BZaPjKQ/viewform" target="_blank" style="
         display:inline-block;
         background:{NAVY};
-        colour:white;
+        color: white;
         padding:0.7rem 1.8rem;
         border-radius:4px;
         text-decoration:none;
@@ -1893,7 +1893,7 @@ def page_full_report():
         font-weight:600;
         font-size:0.95rem;
     ">Leave feedback →</a>
-    <p style="font-size:0.8rem;colour:#888;margin-top:0.5rem;">
+    <p style="font-size:0.8rem;color: #888;margin-top:0.5rem;">
         Opens in a new tab. Takes 2 minutes.
     </p>
     """, unsafe_allow_html=True)
@@ -1921,7 +1921,7 @@ def page_full_report():
         )
 
     st.markdown(
-        "<p style='font-size:0.85rem;colour:#888;'>Word is best for Windows/Office users. PDF is best for Apple devices.</p>",
+        "<p style='font-size:0.85rem;color: #888;'>Word is best for Windows/Office users. PDF is best for Apple devices.</p>",
         unsafe_allow_html=True
     )
 
@@ -2557,7 +2557,7 @@ def render_pattern_card(p, index):
         <p style="font-weight:700;margin:0 0 0.2rem;font-size:0.88rem;text-transform:uppercase;letter-spacing:0.05em;">The question to ask:</p>
         <p style="margin:0;font-size:0.93rem;font-style:italic;">{p['fred_question']}</p>
       </div>
-      {f'<p style="font-size:0.82rem;colour:#666;margin:0.4rem 0 0;border-left:3px solid #ddd;padding-left:0.6rem;">{p["extract"]}…</p>' if p.get("extract") else ""}
+      {f'<p style="font-size:0.82rem;color: #666;margin:0.4rem 0 0;border-left:3px solid #ddd;padding-left:0.6rem;">{p["extract"]}…</p>' if p.get("extract") else ""}
     </div>
     """, unsafe_allow_html=True)
 
@@ -2622,7 +2622,7 @@ def page_correspondence():
     # Link back to report
     if st.session_state.get("findings"):
         st.markdown(
-            f"<a href='#' onclick='void(0)' style='font-size:0.85rem;colour:{NAVY};'>← View my EHCP report</a>",
+            f"<a href='#' onclick='void(0)' style='font-size:0.85rem;color:{NAVY};'>← View my EHCP report</a>",
             unsafe_allow_html=True
         )
         if st.button("← Back to my EHCP report", key="back_to_report"):
@@ -2669,7 +2669,7 @@ def page_correspondence():
                 help="Upload the school accessibility, SEN, or behaviour policy."
             )
             st.markdown(
-                "<p style='font-size:0.82rem;colour:#666;margin-top:0.3rem;'>"
+                "<p style='font-size:0.82rem;color: #666;margin-top:0.3rem;'>"
                 "Upload the school's accessibility or SEN policy and FRED will check whether "
                 "they have met their own commitments."
                 "</p>", unsafe_allow_html=True
@@ -2720,9 +2720,9 @@ def page_correspondence():
     if tone_override:
         st.markdown(f"""
         <div style="background:#eaf5e0;border-radius:8px;padding:0.6rem 1rem;margin-bottom:0.5rem;">
-          <p style="margin:0;font-size:0.85rem;colour:#2d5a2d;">
+          <p style="margin:0;font-size:0.85rem;color: #2d5a2d;">
             Tone set to: <b>{tone_override}</b> —
-            <a href="#" onclick="void(0)" style="colour:#5a8a5a;">change</a>
+            <a href="#" onclick="void(0)" style="color:#5a8a5a;">change</a>
           </p>
         </div>
         """, unsafe_allow_html=True)
@@ -2735,7 +2735,7 @@ def page_correspondence():
 
     if not email1 and not analyse:
         st.markdown(
-            "<p style='colour:#888;font-size:0.9rem;margin-top:0.5rem;'>"
+            "<p style='color:#888;font-size:0.9rem;margin-top:0.5rem;'>"
             "Upload at least one piece of correspondence to begin."
             "</p>",
             unsafe_allow_html=True
@@ -2845,7 +2845,7 @@ def page_correspondence():
 
         st.markdown(f"""
         <div style="background:{summary_colour};border-radius:6px;padding:0.9rem 1.2rem;margin:1rem 0 1.5rem;">
-          <p style="colour:white;font-weight:700;margin:0;font-size:1rem;">{summary_text}</p>
+          <p style="color:white;font-weight:700;margin:0;font-size:1rem;">{summary_text}</p>
         </div>
         """, unsafe_allow_html=True)
 
@@ -2926,7 +2926,7 @@ def page_correspondence():
                 # Immediate Do
                 st.markdown("**Immediate steps — check what is already in the EHCP:**")
                 st.markdown(
-                    "<p style='font-size:0.9rem;colour:#555;margin-bottom:0.8rem;'>"
+                    "<p style='font-size:0.9rem;color: #555;margin-bottom:0.8rem;'>"
                     "Before requesting an amendment, check whether these provisions — "
                     "which may already be in Section F — apply specifically to this environment. "
                     "If they do, ask the school in writing to confirm they are in place."
@@ -2953,9 +2953,9 @@ def page_correspondence():
                 if st.session_state.get("show_amendment"):
                     st.markdown(f"""
                     <div style="background:{NAVY};border-radius:8px;padding:1.2rem 1.5rem;margin:1rem 0;">
-                      <p style="colour:#a8b8d8;font-size:0.8rem;margin:0 0 0.3rem;letter-spacing:0.08em;text-transform:uppercase;">EHCP AMENDMENT FLAG</p>
-                      <p style="colour:white;font-weight:700;margin:0 0 0.4rem;font-size:1rem;">New evidence — {environment} — {today}</p>
-                      <p style="colour:#c8d8f0;margin:0;font-size:0.9rem;">
+                      <p style="color:#a8b8d8;font-size:0.8rem;margin:0 0 0.3rem;letter-spacing:0.08em;text-transform:uppercase;">EHCP AMENDMENT FLAG</p>
+                      <p style="color:white;font-weight:700;margin:0 0 0.4rem;font-size:1rem;">New evidence — {environment} — {today}</p>
+                      <p style="color:#c8d8f0;margin:0;font-size:0.9rem;">
                         The observations above constitute new evidence about your child's sensory needs
                         in this environment. This should be formally documented and used to inform
                         the next EHCP review. Edit the draft below before sending.
@@ -3024,7 +3024,7 @@ Yours sincerely,
                 <div class="finding-{tier}">
                   <span class="badge-{tier}">POLICY</span>
                   <p style="font-weight:700;margin:0.4rem 0 0.3rem;">{f['title']}</p>
-                  {f'<p style="font-style:italic;colour:#555;font-size:0.88rem;margin:0 0 0.4rem;">"{f["extract"]}"</p>' if f.get("extract") else ""}
+                  {f'<p style="font-style:italic;color: #555;font-size:0.88rem;margin:0 0 0.4rem;">"{f["extract"]}"</p>' if f.get("extract") else ""}
                   <p style="margin:0;font-size:0.93rem;">{f['commentary']}</p>
                 </div>
                 """, unsafe_allow_html=True)
@@ -3044,10 +3044,10 @@ Yours sincerely,
           <p style="font-weight:600;margin:0 0 0.3rem;font-size:0.95rem;">
             FRED recommends: {tone_rec['label']}
           </p>
-          <p style="margin:0;font-size:0.9rem;line-height:1.6;colour:#444;">
+          <p style="margin:0;font-size:0.9rem;line-height:1.6;color: #444;">
             {tone_rec['reasoning']}
           </p>
-          <p style="margin:0.6rem 0 0;font-size:0.78rem;colour:#888;">
+          <p style="margin:0.6rem 0 0;font-size:0.78rem;color: #888;">
             Confidence: {tone_rec['confidence'].title()} —
             based on language patterns in this correspondence.
             This is a recommendation, not an instruction.
@@ -3078,10 +3078,10 @@ Yours sincerely,
         st.markdown("### Draft reply")
 
         st.markdown("""
-        <p style='font-size:0.92rem;colour:#444;margin-bottom:0.3rem;'>
+        <p style='font-size:0.92rem;color: #444;margin-bottom:0.3rem;'>
           This draft email has been generated for you. Please check to ensure it is your voice before sending.
         </p>
-        <p style='font-size:0.85rem;colour:#7ab870;margin-bottom:1rem;font-style:italic;'>
+        <p style='font-size:0.85rem;color: #7ab870;margin-bottom:1rem;font-style:italic;'>
           A focused question in writing is harder to ignore than five.
         </p>
         """, unsafe_allow_html=True)
@@ -3241,13 +3241,13 @@ def page_subscriber():
 
     st.markdown(f"""
     <div style="background:{NAVY};border-radius:8px;padding:2rem;margin-bottom:1.5rem;">
-      <p style="colour:#a8b8d8;font-size:0.85rem;margin:0 0 0.3rem;letter-spacing:0.1em;text-transform:uppercase;">
+      <p style="color:#a8b8d8;font-size:0.85rem;margin:0 0 0.3rem;letter-spacing:0.1em;text-transform:uppercase;">
         FRED BETA — SUBSCRIBER WORKSPACE
       </p>
-      <h2 style="colour:white;margin:0 0 0.4rem;font-family:'Playfair Display',serif;">
+      <h2 style="color:white;margin:0 0 0.4rem;font-family:'Playfair Display',serif;">
         Welcome to FRED
       </h2>
-      <p style="colour:#c8d8f0;margin:0;font-size:0.95rem;">
+      <p style="color:#c8d8f0;margin:0;font-size:0.95rem;">
         Everything is unlocked. You have full access during beta.
       </p>
     </div>
@@ -3327,7 +3327,7 @@ def page_subscriber():
                     <div class="finding-{p['tier']}">
                       <span class="badge-{p['tier']}">{p['name']}</span>
                       <p style="margin:0.4rem 0 0.3rem;font-size:0.93rem;">{p['explanation']}</p>
-                      <p style="font-style:italic;font-size:0.88rem;colour:#555;margin:0;">{p['fred_question']}</p>
+                      <p style="font-style:italic;font-size:0.88rem;color: #555;margin:0;">{p['fred_question']}</p>
                     </div>
                     """, unsafe_allow_html=True)
             else:
@@ -3336,7 +3336,7 @@ def page_subscriber():
             st.markdown(f"""
             <div style="background:#eaf5e0;border-radius:8px;padding:0.8rem 1.1rem;margin-top:1rem;">
               <p style="font-weight:600;margin:0 0 0.2rem;font-size:0.9rem;">Tone recommendation: {tone_rec['label']}</p>
-              <p style="margin:0;font-size:0.85rem;colour:#555;">{tone_rec['reasoning']}</p>
+              <p style="margin:0;font-size:0.85rem;color: #555;">{tone_rec['reasoning']}</p>
             </div>
             """, unsafe_allow_html=True)
 
@@ -3397,11 +3397,11 @@ def page_subscriber():
             for entry in bank:
                 confirmed_list = entry.get("confirmed", [])
                 items_html = "".join(f'<p style="font-size:0.85rem;margin:0.1rem 0;">• {item}</p>' for item in confirmed_list)
-                amendment_html = "<p style='font-size:0.82rem;font-weight:700;colour:#C0392B;margin-top:0.4rem;'>⚑ EHCP amendment flagged</p>" if entry.get("amendment_flagged") else ""
+                amendment_html = "<p style='font-size:0.82rem;font-weight:700;color: #C0392B;margin-top:0.4rem;'>⚑ EHCP amendment flagged</p>" if entry.get("amendment_flagged") else ""
                 st.markdown(f"""
                 <div style="background:white;border:1px solid #d0dae8;border-radius:6px;padding:1rem 1.2rem;margin-bottom:0.8rem;">
                   <p style="font-weight:700;margin:0 0 0.2rem;">{entry['date']} — {entry['environment']}</p>
-                  <p style="margin:0 0 0.4rem;font-size:0.88rem;colour:#555;">{len(confirmed_list)} confirmed factor(s)</p>
+                  <p style="margin:0 0 0.4rem;font-size:0.88rem;color: #555;">{len(confirmed_list)} confirmed factor(s)</p>
                   {items_html}
                   {amendment_html}
                 </div>
@@ -3411,19 +3411,19 @@ def page_subscriber():
                 st.markdown(f"""
                 <div style="background:white;border:1px solid #d0dae8;border-radius:6px;padding:1rem 1.2rem;margin-bottom:0.8rem;">
                   <p style="font-weight:700;margin:0 0 0.2rem;">{entry['date']}</p>
-                  <p style="margin:0;font-size:0.88rem;colour:#555;">{entry.get('patterns',0)} pattern(s) — held without action</p>
+                  <p style="margin:0;font-size:0.88rem;color: #555;">{entry.get('patterns',0)} pattern(s) — held without action</p>
                 </div>
                 """, unsafe_allow_html=True)
         else:
             st.markdown(
-                "<p style='colour:#888;font-size:0.9rem;'>"
+                "<p style='color:#888;font-size:0.9rem;'>"
                 "No evidence entries yet. Confirmed root cause findings from "
                 "correspondence analysis will appear here with dates."
                 "</p>",
                 unsafe_allow_html=True
             )
         st.markdown(
-            "<p style='font-size:0.82rem;colour:#aaa;margin-top:1rem;'>"
+            "<p style='font-size:0.82rem;color: #aaa;margin-top:1rem;'>"
             "Evidence bank is stored for this session. "
             "Screenshot entries before closing your browser."
             "</p>",
@@ -3474,7 +3474,7 @@ def render_nav():
 # ── ROUTER ────────────────────────────────────────────────────────────────────
 
 render_nav()
-st.markdown("<hr style='margin:0 0 1.5rem;border-colour:#d0dae8;'>", unsafe_allow_html=True)
+st.markdown("<hr style='margin:0 0 1.5rem;border-color: #d0dae8;'>", unsafe_allow_html=True)
 
 stage = st.session_state.stage
 
