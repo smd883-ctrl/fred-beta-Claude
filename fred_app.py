@@ -13,7 +13,13 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import cm
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable
 from reportlab.lib.enums import TA_LEFT, TA_CENTER
+try:
+    from sandbox.provision_inventory import build_provision_inventory
+    INVENTORY_AVAILABLE = True
 
+except Exception as e:
+    INVENTORY_AVAILABLE = False
+    print(f"Provision inventory unavailable: {e}")
 # ── PAGE CONFIG ──────────────────────────────────────────────────────────────
 
 st.set_page_config(
