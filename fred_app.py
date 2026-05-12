@@ -1734,7 +1734,7 @@ def page_full_report():
     st.markdown("---")
     if "provision_inventory" in st.session_state:
 
-    inventory = st.session_state.provision_inventory
+     inventory = st.session_state.provision_inventory
 
     if inventory:
 
