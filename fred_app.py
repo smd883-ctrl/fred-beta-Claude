@@ -1754,7 +1754,7 @@ def page_full_report():
 
         for category, items in inventory.items():
 
-            st.markdown(f"### {category}"
+            st.markdown(f"### {category}")
 
             for item in items:
                 st.markdown(f"- {item}")
