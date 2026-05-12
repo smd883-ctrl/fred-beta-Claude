@@ -1168,6 +1168,7 @@ def init_state():
     defaults = {
         "stage": "landing",
         "findings": [],
+        "provision_inventory": {},
         "parse_meta": {},
         "full_text": "",
         "doc_type": "Final EHCP",
