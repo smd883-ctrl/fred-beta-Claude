@@ -1732,6 +1732,32 @@ def page_full_report():
         )
 
     st.markdown("---")
+    if "provision_inventory" in st.session_state:
+
+    inventory = st.session_state.provision_inventory
+
+    if inventory:
+
+        st.markdown("## Provision Inventory")
+
+        st.markdown(
+            """
+            These are the approaches your child's documents identify as useful,
+            recommended, or currently referenced.
+
+            This is not a complete delivery record.
+
+            At your next review, ask the school which of these are currently in place,
+            how they are being delivered, and how impact is being monitored.
+            """
+        )
+
+        for category, items in inventory.items():
+
+            st.markdown(f"### {category}"
+
+            for item in items:
+                st.markdown(f"- {item}")
     st.markdown("### Findings")
 
     for i, finding in enumerate(findings):
