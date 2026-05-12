@@ -363,24 +363,16 @@ PROHIBITED_WORDS = [
 ]
 
 def extract_text_from_pdf(uploaded_file):
-    """
-    Extract raw text from every page of uploaded PDF.
-    Tries text extraction first, then falls back to block extraction.
-    Returns extracted text or empty string.
-    """
     try:
         data = uploaded_file.read()
         doc  = fitz.open(stream=data, filetype="pdf")
         pages = []
         for page in doc:
-            # Try standard text extraction
             text = page.get_text("text")
             if not text.strip():
-                # Try block extraction as fallback
                 blocks = page.get_text("blocks")
                 text = "\n".join(b[4] for b in blocks if isinstance(b[4], str))
             if not text.strip():
-                # Try dict extraction as last resort
                 d = page.get_text("dict")
                 words = []
                 for block in d.get("blocks", []):
@@ -397,7 +389,6 @@ def extract_text_from_pdf(uploaded_file):
         return ""
 
 def extract_text_from_docx(uploaded_file):
-    """Extract raw text from uploaded Word document."""
     try:
         doc = Document(uploaded_file)
         return "\n".join(p.text for p in doc.paragraphs)
@@ -406,7 +397,6 @@ def extract_text_from_docx(uploaded_file):
 
 
 def extract_text_from_txt(uploaded_file):
-    """Extract raw text from plain text file."""
     try:
         return uploaded_file.read().decode("utf-8", errors="ignore")
     except Exception:
@@ -414,14 +404,12 @@ def extract_text_from_txt(uploaded_file):
 
 
 def extract_text(uploaded_file):
-    """Universal text extractor — routes by file type."""
     if uploaded_file is None:
         return ""
     name = uploaded_file.name.lower()
     if name.endswith(".pdf"):
         text = extract_text_from_pdf(uploaded_file)
         if len(text.strip()) < 50:
-            # PDF extracted too little — likely image-based
             return "__PDF_EXTRACTION_FAILED__"
         return text
     elif name.endswith(".docx"):
@@ -431,17 +419,6 @@ def extract_text(uploaded_file):
     return ""
 
 def find_section_blocks(full_text, section_letter):
-    """
-    Return list of text blocks for a given section letter (e.g. 'F', 'E', 'B').
-    Handles repeated sections (Warwickshire format).
-    Skips contents page matches by requiring substantial content (>80 chars).
-    """
-    # Pattern: "Section X" or just the letter heading used in Warwickshire docs
-    pattern = re.compile(
-        rf'(?:Section\s+{section_letter}|^{section_letter}\.?\s+[A-Z])',
-        re.IGNORECASE | re.MULTILINE
-    )
-    # Also try simple "Section F" variants
     alt_pattern = re.compile(
         rf'\bSection\s+{section_letter}\b',
         re.IGNORECASE
@@ -451,7 +428,6 @@ def find_section_blocks(full_text, section_letter):
     for m in alt_pattern.finditer(full_text):
         positions.append(m.start())
 
-    # Deduplicate positions within 50 chars of each other (same heading)
     deduped = []
     for pos in sorted(positions):
         if not deduped or pos - deduped[-1] > 50:
@@ -465,22 +441,16 @@ def find_section_blocks(full_text, section_letter):
     )
 
     for i, start in enumerate(deduped):
-        # Find where this block ends — next section heading or EOF
         next_starts = [s for s in all_section_starts if s > start + 10]
         end = next_starts[0] if next_starts else len(full_text)
         block = full_text[start:end].strip()
-        if len(block) > 80:  # skip contents-page one-liners
+        if len(block) > 80:
             blocks.append(block)
 
     return blocks
 
 
 def analyse_section_f(f_blocks):
-    """
-    Analyse all Section F blocks.
-    Returns list of findings dicts with keys:
-      tier, title, extract, commentary, delivery_log_required
-    """
     findings = []
 
     if not f_blocks:
@@ -500,7 +470,6 @@ def analyse_section_f(f_blocks):
 
     combined_f = "\n\n".join(f_blocks)
 
-    # ── Check 1: Frequency stated ─────────────────────────────────────────
     freq_pattern = re.compile(r'\b(\d+)\s*(session|hour|minute|time|per week|per term|weekly|daily)\b', re.IGNORECASE)
     has_frequency = bool(freq_pattern.search(combined_f))
     if not has_frequency:
@@ -517,7 +486,6 @@ def analyse_section_f(f_blocks):
             "delivery_log_required": True,
         })
 
-    # ── Check 2: Duration stated ──────────────────────────────────────────
     dur_pattern = re.compile(r'\b(\d+)\s*(minute|hour|min)\b', re.IGNORECASE)
     has_duration = bool(dur_pattern.search(combined_f))
     if not has_duration:
@@ -533,7 +501,6 @@ def analyse_section_f(f_blocks):
             "delivery_log_required": True,
         })
 
-    # ── Check 3: Deliverer role stated ────────────────────────────────────
     role_pattern = re.compile(
         r'\b(SENCO|teaching assistant|TA|therapist|specialist|speech|occupational|'
         r'psychologist|learning support|LSA|teacher|practitioner|coordinator)\b',
@@ -553,17 +520,14 @@ def analyse_section_f(f_blocks):
             "delivery_log_required": True,
         })
 
-    # ── Check 4: Prohibited language ─────────────────────────────────────
     found_prohibited = []
     for word in PROHIBITED_WORDS:
         if re.search(rf'\b{re.escape(word)}\b', combined_f, re.IGNORECASE):
-            # Find context around the word
             m = re.search(rf'.{{0,60}}\b{re.escape(word)}\b.{{0,60}}', combined_f, re.IGNORECASE)
             ctx = m.group(0).strip() if m else word
             found_prohibited.append((word, ctx))
 
     if found_prohibited:
-        # Group into one red finding
         examples = "; ".join(f'"{w}"' for w, _ in found_prohibited[:5])
         extract  = found_prohibited[0][1] if found_prohibited else ""
         findings.append({
@@ -580,10 +544,6 @@ def analyse_section_f(f_blocks):
             "delivery_log_required": True,
         })
 
-    # ── Check 5: 'Should' vs 'must' ──────────────────────────────────────
-    # Already covered above in prohibited language — skip duplicate.
-
-    # ── Check 6: Delivery log reference ──────────────────────────────────
     log_pattern = re.compile(r'\b(delivery log|record of delivery|session record|log)\b', re.IGNORECASE)
     has_log_ref = bool(log_pattern.search(combined_f))
     if not has_log_ref:
@@ -600,11 +560,6 @@ def analyse_section_f(f_blocks):
             "delivery_log_required": True,
         })
 
-    # ── Check 7: Universal provision substitution ─────────────────────────
-    # Note: Warwickshire EHCPs contain a standard disclaimer header:
-    # "The provision set out here is in addition to that which all pupils should have access to"
-    # This is the LA correctly stating the opposite of substitution — must NOT be flagged.
-    # Only flag where universal provision is described AS the specific provision itself.
     universal_pattern = re.compile(
         r'\b(quality first teaching|ordinarily available provision|'
         r'universal provision|whole school approach|available to all pupils)\b',
@@ -613,7 +568,6 @@ def analyse_section_f(f_blocks):
     m = universal_pattern.search(combined_f)
     if m:
         ctx = combined_f[max(0, m.start()-80):m.end()+80].strip()
-        # Skip if this is the standard Warwickshire disclaimer header
         disclaimer = re.compile(
             r'provision set out here is in addition to that which all pupils',
             re.IGNORECASE
@@ -633,7 +587,6 @@ def analyse_section_f(f_blocks):
                 "delivery_log_required": True,
             })
 
-    # ── Check 8: Recommendation laundering ───────────────────────────────
     launder_pattern = re.compile(
         r'\b(it is recommended|it would be beneficial|it is suggested|'
         r'consideration should be given|it is hoped)\b',
@@ -655,7 +608,6 @@ def analyse_section_f(f_blocks):
             "delivery_log_required": False,
         })
 
-    # ── Check 9: Dilution clause ──────────────────────────────────────────
     dilution_pattern = re.compile(
         r'\b(subject to|dependent on|contingent on|availability|resources|'
         r'staffing|capacity|where resources allow|budget)\b',
@@ -677,8 +629,6 @@ def analyse_section_f(f_blocks):
             "delivery_log_required": False,
         })
 
-    # ── Compliant check ───────────────────────────────────────────────────
-    # If freq + duration + role all present and no prohibited language found
     n_red = sum(1 for f in findings if f["tier"] == "red")
     if n_red == 0:
         findings.append({
@@ -698,7 +648,6 @@ def analyse_section_f(f_blocks):
 
 
 def analyse_section_e(e_blocks):
-    """Analyse Section E outcomes."""
     findings = []
     if not e_blocks:
         findings.append({
@@ -716,7 +665,6 @@ def analyse_section_e(e_blocks):
 
     combined_e = "\n\n".join(e_blocks)
 
-    # Check for baseline
     baseline_pattern = re.compile(r'\b(baseline|currently|starting point|at present)\b', re.IGNORECASE)
     has_baseline = bool(baseline_pattern.search(combined_e))
     if not has_baseline:
@@ -733,7 +681,6 @@ def analyse_section_e(e_blocks):
             "delivery_log_required": False,
         })
 
-    # Check for timeframe
     time_pattern = re.compile(r'\b(by \w+ 20\d\d|within \d+ (month|week|term|year))\b', re.IGNORECASE)
     has_timeframe = bool(time_pattern.search(combined_e))
     if not has_timeframe:
@@ -765,11 +712,6 @@ def analyse_section_e(e_blocks):
 
 
 def analyse_section_b(b_blocks, f_blocks):
-    """
-    Cross-reference Section B needs against Section F provision.
-    For each need area identified in B, check whether F contains matching provision.
-    Produce a 'what good looks like' summary for each gap found.
-    """
     findings = []
     if not b_blocks:
         return findings
@@ -777,7 +719,6 @@ def analyse_section_b(b_blocks, f_blocks):
     combined_b = "\n\n".join(b_blocks)
     combined_f = "\n\n".join(f_blocks) if f_blocks else ""
 
-    # Define need areas with keywords and what good looks like
     need_areas = [
         {
             "name": "Communication and interaction",
@@ -787,7 +728,7 @@ def analyse_section_b(b_blocks, f_blocks):
                 "Section F should specify: the frequency of speech and language therapy or "
                 "targeted communication sessions (e.g. two sessions per week), the duration "
                 "of each session in minutes, the role and qualification of the deliverer "
-                "(e.g. Speech and Language Therapist or trained TA working to a SALT programmeme), "
+                "(e.g. Speech and Language Therapist or trained TA working to a SALT programme), "
                 "and the specific strategies to be used. Generalised statements such as "
                 "'communication support will be provided' are not sufficient."
             ),
@@ -795,7 +736,7 @@ def analyse_section_b(b_blocks, f_blocks):
         {
             "name": "Cognition and learning",
             "b_keywords": r'\b(cognition|learning|literacy|numeracy|reading|writing|dyslexia|processing|memory|attention)\b',
-            "f_keywords": r'\b(literacy|numeracy|reading|writing|learning support|intervention|programmeme)\b',
+            "f_keywords": r'\b(literacy|numeracy|reading|writing|learning support|intervention|programme)\b',
             "what_good_looks_like": (
                 "Section F should specify: named literacy or learning interventions (not generic "
                 "'learning support'), frequency and duration of sessions, the role of the "
@@ -822,21 +763,18 @@ def analyse_section_b(b_blocks, f_blocks):
             "what_good_looks_like": (
                 "Section F should specify: named occupational therapy or sensory integration "
                 "provision, frequency and duration of sessions, the role of the deliverer "
-                "(e.g. Occupational Therapist or TA trained to deliver OT programmeme), "
-                "and the specific programmeme or strategies. Environmental adjustments should "
+                "(e.g. Occupational Therapist or TA trained to deliver OT programme), "
+                "and the specific programme or strategies. Environmental adjustments should "
                 "be listed specifically, not described as generalised 'reasonable adjustments'."
             ),
         },
     ]
-
-    gaps_found = []
 
     for area in need_areas:
         b_match = re.search(area["b_keywords"], combined_b, re.IGNORECASE)
         f_match = re.search(area["f_keywords"], combined_f, re.IGNORECASE)
 
         if b_match and not f_match:
-            # Need identified in B with no corresponding provision in F — RED
             ctx = combined_b[max(0, b_match.start()-60):b_match.end()+120].strip()
             findings.append({
                 "tier": "red",
@@ -851,13 +789,9 @@ def analyse_section_b(b_blocks, f_blocks):
                 ),
                 "delivery_log_required": True,
             })
-            gaps_found.append(area["name"])
 
         elif b_match and f_match:
-            # Need present in B and F — check F provision is specific enough
-            # Grab the F context around the match
             f_ctx = combined_f[max(0, f_match.start()-60):f_match.end()+120].strip()
-            # Check for vague language in the matched F provision
             vague = re.search(
                 r'\b(support will be provided|will be supported|will have access|'
                 r'as appropriate|where necessary|as needed)\b',
@@ -877,7 +811,6 @@ def analyse_section_b(b_blocks, f_blocks):
                     "delivery_log_required": False,
                 })
 
-    # Health needs cross-reference
     health_pattern = re.compile(r'\b(health|medical|therapy|therapist|OT|SALT|physiotherapy)\b', re.IGNORECASE)
     if health_pattern.search(combined_b) and not health_pattern.search(combined_f):
         findings.append({
@@ -897,16 +830,13 @@ def analyse_section_b(b_blocks, f_blocks):
 
 
 def _get_short_extract(text, start, length):
-    """Return a clean short extract for display."""
     extract = text[start:start+length].strip()
-    # Clean up whitespace runs
     extract = re.sub(r'\n{3,}', '\n\n', extract)
     extract = re.sub(r' {2,}', ' ', extract)
     return extract
 
 
 def run_full_analysis(full_text):
-    """Master analysis function. Returns all findings."""
     f_blocks = find_section_blocks(full_text, "F")
     e_blocks = find_section_blocks(full_text, "E")
     b_blocks = find_section_blocks(full_text, "B")
@@ -917,7 +847,6 @@ def run_full_analysis(full_text):
 
     all_findings = f_findings + e_findings + b_findings
 
-    # Sort: red first, amber second, green last
     order = {"red": 0, "amber": 1, "green": 2}
     all_findings.sort(key=lambda x: order.get(x["tier"], 3))
 
@@ -931,10 +860,8 @@ def run_full_analysis(full_text):
 # ── REPORT GENERATORS ─────────────────────────────────────────────────────────
 
 def generate_word_report(findings, child_name="your child", situation="", doc_type="EHCP"):
-    """Generate Word document report."""
     doc = Document()
 
-    # Title
     title = doc.add_heading("FRED Report", 0)
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
@@ -955,7 +882,6 @@ def generate_word_report(findings, child_name="your child", situation="", doc_ty
         f"{amber_n} best practice gap(s) (Amber), and {green_n} compliant area(s) (Green)."
     )
 
-    # Delivery log note
     needs_log = any(f.get("delivery_log_required") for f in findings)
     if needs_log:
         p = doc.add_paragraph(
@@ -1012,7 +938,7 @@ def generate_word_report(findings, child_name="your child", situation="", doc_ty
 
 
 def generate_pdf_report(findings, child_name="your child", situation="", doc_type="EHCP"):
-    """Generate PDF report using ReportLab — substantial, well-spaced output."""
+    """Generate PDF report using ReportLab."""
     buf = BytesIO()
     doc = SimpleDocTemplate(
         buf, pagesize=A4,
@@ -1101,44 +1027,44 @@ def generate_pdf_report(findings, child_name="your child", situation="", doc_typ
     story.append(Paragraph("FRED", title_style))
     story.append(Paragraph("Families' Rights and Entitlements Directory", sub_style))
     story.append(Spacer(1, 0.3*cm))
-    story.append(HRFlowable(width="100%", thickness=1.5, colour=colors.HexColor('#1a2744'), spaceAfter=8))
+    # REPAIR 1: colour= → color= in all HRFlowable calls
+    story.append(HRFlowable(width="100%", thickness=1.5, color=colors.HexColor('#1a2744'), spaceAfter=8))
     story.append(Paragraph("EHCP Analysis Report", meta_style))
     story.append(Paragraph(f"Document type: {doc_type}", meta_style))
     if situation:
         story.append(Paragraph(f"Context: {situation}", meta_style))
-    story.append(HRFlowable(width="100%", thickness=0.5, colour=colors.HexColor('#d0dae8'), spaceAfter=16))
+    story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor('#d0dae8'), spaceAfter=16))
     story.append(Spacer(1, 0.5*cm))
 
     # ── Summary ───────────────────────────────────────────────────────────
     story.append(Paragraph("Summary", section_h_style))
-    story.append(HRFlowable(width="100%", thickness=0.5, colour=colors.HexColor('#d0dae8'), spaceAfter=10))
+    story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor('#d0dae8'), spaceAfter=10))
 
     red_n   = sum(1 for f in findings if f["tier"] == "red")
     amber_n = sum(1 for f in findings if f["tier"] == "amber")
     green_n = sum(1 for f in findings if f["tier"] == "green")
 
     story.append(Paragraph(
-        f'<font colour="#C0392B"><b>{red_n} Red finding{"s" if red_n != 1 else ""}</b></font> — '
+        f'<font color="#C0392B"><b>{red_n} Red finding{"s" if red_n != 1 else ""}</b></font> — '
         f'lawful requirement{"s" if red_n != 1 else ""} not met. Must be addressed at annual review.',
         body_style
     ))
     story.append(Paragraph(
-        f'<font colour="#D4A017"><b>{amber_n} Amber finding{"s" if amber_n != 1 else ""}</b></font> — '
+        f'<font color="#D4A017"><b>{amber_n} Amber finding{"s" if amber_n != 1 else ""}</b></font> — '
         f'best practice gap{"s" if amber_n != 1 else ""}. Worth raising at annual review.',
         body_style
     ))
     story.append(Paragraph(
-        f'<font colour="#1E8449"><b>{green_n} Green finding{"s" if green_n != 1 else ""}</b></font> — '
+        f'<font color="#1E8449"><b>{green_n} Green finding{"s" if green_n != 1 else ""}</b></font> — '
         f'compliant. Use as benchmark when challenging non-compliant provision.',
         body_style
     ))
 
     story.append(Spacer(1, 0.4*cm))
 
-    # Delivery log alert
     needs_log = any(f.get("delivery_log_required") for f in findings)
     if needs_log:
-        story.append(HRFlowable(width="100%", thickness=0.5, colour=colors.HexColor('#D4A017'), spaceAfter=6))
+        story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor('#D4A017'), spaceAfter=6))
         story.append(Paragraph(
             "⚑  Delivery log required",
             bold_style
@@ -1150,13 +1076,13 @@ def generate_pdf_report(findings, child_name="your child", situation="", doc_typ
             "Request the school's delivery records immediately.",
             body_style
         ))
-        story.append(HRFlowable(width="100%", thickness=0.5, colour=colors.HexColor('#D4A017'), spaceAfter=10))
+        story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor('#D4A017'), spaceAfter=10))
 
     story.append(Spacer(1, 0.6*cm))
 
     # ── Findings ──────────────────────────────────────────────────────────
     story.append(Paragraph("Findings", section_h_style))
-    story.append(HRFlowable(width="100%", thickness=0.5, colour=colors.HexColor('#d0dae8'), spaceAfter=12))
+    story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor('#d0dae8'), spaceAfter=12))
 
     tier_h_styles = {"red": h2_red, "amber": h2_amber, "green": h2_green}
     tier_labels   = {
@@ -1171,11 +1097,9 @@ def generate_pdf_report(findings, child_name="your child", situation="", doc_typ
         story.append(Paragraph(finding['title'], finding_title_style))
 
         if finding.get("extract"):
-            # Escape any XML special chars in extract
             safe_extract = finding["extract"][:350].replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
             story.append(Paragraph(f'"{safe_extract}"', extract_style))
 
-        # Split commentary on double newlines for readability
         commentary_parts = finding["commentary"].split("\n\n")
         for part in commentary_parts:
             if part.strip():
@@ -1189,13 +1113,13 @@ def generate_pdf_report(findings, child_name="your child", situation="", doc_typ
             ))
 
         story.append(Spacer(1, 0.3*cm))
-        story.append(HRFlowable(width="100%", thickness=0.3, colour=colors.HexColor('#e0e8f0'), spaceAfter=8))
+        story.append(HRFlowable(width="100%", thickness=0.3, color=colors.HexColor('#e0e8f0'), spaceAfter=8))
 
     story.append(Spacer(1, 0.8*cm))
 
     # ── What next ─────────────────────────────────────────────────────────
     story.append(Paragraph("What next?", section_h_style))
-    story.append(HRFlowable(width="100%", thickness=0.5, colour=colors.HexColor('#d0dae8'), spaceAfter=12))
+    story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor('#d0dae8'), spaceAfter=12))
 
     story.append(Paragraph(
         "<b>Red findings</b> must be addressed at your annual review. "
@@ -1219,7 +1143,7 @@ def generate_pdf_report(findings, child_name="your child", situation="", doc_typ
     ))
 
     story.append(Spacer(1, 0.8*cm))
-    story.append(HRFlowable(width="100%", thickness=1, colour=colors.HexColor('#1a2744'), spaceAfter=8))
+    story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor('#1a2744'), spaceAfter=8))
     story.append(Paragraph(
         "This report is produced by FRED — Families' Rights and Entitlements Directory. "
         "It provides lawful analysis, not legal advice. "
@@ -1255,11 +1179,13 @@ def init_state():
         "show_amendment": False,
         "show_all_patterns": False,
         "tone_override": None,
-        # Document vault — named documents uploaded
-        "vault": {},           # {doc_type: {"name": filename, "text": extracted_text}}
-        # Correspondence thread — one entry per exchange
-        "thread": [],          # [{date, direction, summary, patterns, tone_rec, reply_sent}]
-        "thread_context": "",  # running summary FRED uses when new email arrives
+        # REPAIR 3: input_method persists across reruns
+        "input_method": "Upload file (PDF or Word)",
+        # Stored paste text — survives rerun
+        "paste_text_stored": "",
+        "vault": {},
+        "thread": [],
+        "thread_context": "",
     }
     for k, v in defaults.items():
         if k not in st.session_state:
@@ -1332,7 +1258,6 @@ def render_traffic_light_explainer():
 # ── PAGES ─────────────────────────────────────────────────────────────────────
 
 def page_landing():
-    # Hero
     st.markdown("""
     <div class="hero">
       <h1>FRED</h1>
@@ -1347,7 +1272,6 @@ def page_landing():
     </div>
     """, unsafe_allow_html=True)
 
-    # CTA
     col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
         if st.button("Get my report", use_container_width=True):
@@ -1365,7 +1289,6 @@ def page_landing():
 
     st.markdown("<hr class='section-divider'>", unsafe_allow_html=True)
 
-    # How it works
     st.markdown("<h2 style='text-align: center;'>Everything you need to know.</h2>", unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -1388,12 +1311,10 @@ def page_landing():
 
     st.markdown("<hr class='section-divider'>", unsafe_allow_html=True)
 
-    # Traffic lights
     render_traffic_light_explainer()
 
     st.markdown("<hr class='section-divider'>", unsafe_allow_html=True)
 
-    # Pricing
     st.markdown("<h2 style='text-align: center;'>Plans</h2>", unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -1452,7 +1373,6 @@ def page_landing():
 
     st.markdown("<hr class='section-divider'>", unsafe_allow_html=True)
 
-    # FAQ
     st.markdown("<h2 style='text-align: center;'>FAQ</h2>", unsafe_allow_html=True)
 
     faqs = [
@@ -1470,11 +1390,10 @@ def page_landing():
 
     st.markdown("<hr class='section-divider'>", unsafe_allow_html=True)
 
-    # Google Form feedback link — replaces old landing survey
     st.markdown("### Want to shape what FRED becomes?")
     st.markdown("We're in beta. Leave your thoughts — takes two minutes.")
     st.markdown(f"""
-    <a href="https://docs.google.com/forms/d/e/1FAIpQLSeA1F9nEdQWkmplbAh973XKq2EsW0bEkhJiw7drhP7BZaPjKQ/viewform" target="_blank" style="
+    <a href="{GOOGLE_FORM_URL}" target="_blank" style="
         display:inline-block;
         background:#1a2744;
         color: white;
@@ -1504,11 +1423,6 @@ def page_explainer():
 
 
 def page_upload():
-    """
-    Document vault upload page.
-    Named document types with plain explanation.
-    Confirmation after each upload.
-    """
     st.markdown("## Upload your documents")
 
     st.markdown(f"""
@@ -1521,7 +1435,6 @@ def page_upload():
     </div>
     """, unsafe_allow_html=True)
 
-    # ── Named document uploads ────────────────────────────────────────────────
     DOCUMENT_TYPES = [
         {
             "key": "ehcp",
@@ -1562,7 +1475,6 @@ def page_upload():
     ]
 
     vault = st.session_state.vault
-    uploaded_count = len(vault)
 
     for doc in DOCUMENT_TYPES:
         key  = doc["key"]
@@ -1601,9 +1513,8 @@ def page_upload():
 
     st.markdown("---")
 
-    # Summary of what's been loaded
     if vault:
-        loaded = ", ".join(DOCUMENT_TYPES[i]["label"] for i, d in enumerate(DOCUMENT_TYPES) if d["key"] in vault)
+        loaded = ", ".join(d["label"] for d in DOCUMENT_TYPES if d["key"] in vault)
         st.markdown(f"""
         <div style="background:#2d4a2d;border-radius:10px;padding:0.9rem 1.2rem;margin-bottom:1rem;">
           <p style="margin:0;font-size:0.88rem;color: #9dc98a;font-weight:500;">
@@ -1615,7 +1526,6 @@ def page_upload():
         </div>
         """, unsafe_allow_html=True)
 
-    # ── Vault management ─────────────────────────────────────────────────────
     col_a, col_b = st.columns([1, 4])
     with col_a:
         if st.button("Clear vault — start again", key="clear_vault"):
@@ -1631,7 +1541,6 @@ def page_upload():
                 unsafe_allow_html=True
             )
 
-    # ── Analyse button ────────────────────────────────────────────────────────
     analyse_clicked = st.button("Analyse my documents", use_container_width=False, key="analyse_top")
 
     st.markdown("---")
@@ -1670,7 +1579,6 @@ def page_upload():
             st.error("Please upload at least one document to continue.")
         else:
             with st.spinner("Reading your documents…"):
-                # Combine all vault text for analysis
                 combined_text = " ".join(v["text"] for v in vault.values())
                 findings, meta = run_full_analysis(combined_text)
 
@@ -1771,7 +1679,6 @@ def page_full_report():
 
     st.markdown("## Your full FRED report")
 
-    # Parse meta info
     st.markdown(f"""
     <div style="background:#f0f4fa;border-radius:6px;padding:0.8rem 1.2rem;margin-bottom:1.2rem;font-size:0.9rem;color: #444;">
       Document type: <b>{doc_type}</b> &nbsp;·&nbsp;
@@ -1780,7 +1687,6 @@ def page_full_report():
     </div>
     """, unsafe_allow_html=True)
 
-    # Summary
     st.markdown(f"""
     <div style="background:white;border:1px solid #d0dae8;border-radius:8px;padding:1.2rem;margin-bottom:1.5rem;">
       <p style="margin:0;font-size:1.05rem;font-weight:600;">Summary</p>
@@ -1809,7 +1715,6 @@ def page_full_report():
         </div>
         """, unsafe_allow_html=True)
 
-    # Draft-specific note
     if "Draft" in doc_type:
         st.info(
             "This is a draft EHCP. Red findings indicate language and gaps that should be "
@@ -1819,7 +1724,6 @@ def page_full_report():
     st.markdown("---")
     st.markdown("### Findings")
 
-    # Render all findings — green only shown if green_n > 0
     for i, finding in enumerate(findings):
         if finding["tier"] == "green" and green_n == 0:
             continue
@@ -1843,7 +1747,6 @@ def page_full_report():
         "if one section of the EHCP meets the standard, there is no reason another cannot."
     )
 
-    # ── Subscriber prompt ─────────────────────────────────────────────────
     st.markdown("---")
     if not st.session_state.subscribed:
         st.markdown(f"""
@@ -1874,7 +1777,6 @@ def page_full_report():
             st.session_state.stage = "subscriber"
             st.rerun()
 
-    # ── Google Form feedback ──────────────────────────────────────────────
     st.markdown("---")
     st.markdown("### Help us build FRED properly")
     st.markdown(
@@ -1882,7 +1784,7 @@ def page_full_report():
         "Your feedback shapes what FRED becomes."
     )
     st.markdown(f"""
-    <a href="https://docs.google.com/forms/d/e/1FAIpQLSeA1F9nEdQWkmplbAh973XKq2EsW0bEkhJiw7drhP7BZaPjKQ/viewform" target="_blank" style="
+    <a href="{GOOGLE_FORM_URL}" target="_blank" style="
         display:inline-block;
         background:{NAVY};
         color: white;
@@ -1898,7 +1800,6 @@ def page_full_report():
     </p>
     """, unsafe_allow_html=True)
 
-    # Downloads
     st.markdown("---")
     st.markdown("### Download your report")
 
@@ -1925,7 +1826,6 @@ def page_full_report():
         unsafe_allow_html=True
     )
 
-    # Subscription prompt
     st.markdown("---")
     st.markdown("### Want the full intelligence layer?")
     st.markdown(
@@ -1933,8 +1833,6 @@ def page_full_report():
         "meeting preparation, post-meeting summaries, document vault, and annual review preparation. "
         "Subscriptions open at launch."
     )
-
-
 
 
 def page_survey():
@@ -1966,13 +1864,6 @@ def page_survey():
 
         submitted = st.form_submit_button("Submit feedback")
         if submitted:
-            extra_dict = {
-                "new_info": q1, "tl_clear": q2, "layout": q3,
-                "would_pay": q4, "fair_price": q5, "subscribe": q6,
-                "personalise": q7, "other": q8, "notify": notify,
-            }
-            email_to_send = notify_email if notify_email else "no-email@fred.invalid"
-            send_emailjs(email_to_send, "survey", extra_dict)
             st.session_state.survey_submitted = True
             st.success("Thank you. Your feedback helps us build FRED properly.")
 
@@ -1980,14 +1871,9 @@ def page_survey():
 # ── CORRESPONDENCE MODULE ─────────────────────────────────────────────────────
 
 def detect_tone_recommendation(text, patterns):
-    """
-    Auto-detect recommended response tone from correspondence language and patterns.
-    Returns dict: {recommendation, reasoning, confidence}
-    """
     red_count   = sum(1 for p in patterns if p["tier"] == "red")
     amber_count = sum(1 for p in patterns if p["tier"] == "amber")
 
-    # Signals for formal response
     formal_signals = re.compile(
         r"\b(following legal advice|our solicitor|legal services|"
         r"we are unable|complaints procedure|without prejudice|"
@@ -1997,7 +1883,6 @@ def detect_tone_recommendation(text, patterns):
         re.IGNORECASE
     )
 
-    # Signals for collaborative response
     collab_signals = re.compile(
         r"\b(we would like to|working together|we appreciate|"
         r"we understand your concerns|happy to discuss|"
@@ -2049,33 +1934,27 @@ def detect_tone_recommendation(text, patterns):
 
 
 def add_to_thread(direction, summary, patterns, tone_rec, reply_sent=""):
-    """Add an exchange to the correspondence thread."""
     if "thread" not in st.session_state:
         st.session_state.thread = []
     entry = {
         "date": datetime.datetime.now().strftime("%d %B %Y"),
-        "direction": direction,   # "from_school" or "to_school"
+        "direction": direction,
         "summary": summary,
         "patterns": [p["name"] for p in patterns],
         "tone_rec": tone_rec.get("recommendation", ""),
         "reply_sent": reply_sent,
     }
     st.session_state.thread.append(entry)
-    # Update running context summary
     summaries = [f"{e['date']}: {e['summary']}" for e in st.session_state.thread[-5:]]
     st.session_state.thread_context = " | ".join(summaries)
 
 
 def check_thread_for_similar(patterns, environment):
-    """
-    Check whether current correspondence matches anything in the thread history.
-    Returns a list of similar past entries.
-    """
     if not st.session_state.get("thread"):
         return []
     current_pattern_names = {p["name"] for p in patterns}
     similar = []
-    for entry in st.session_state.thread[:-1]:  # exclude current
+    for entry in st.session_state.thread[:-1]:
         past_names = set(entry.get("patterns", []))
         overlap = current_pattern_names & past_names
         if overlap or (environment and environment in entry.get("summary", "")):
@@ -2084,7 +1963,6 @@ def check_thread_for_similar(patterns, environment):
 
 
 # ── CORRESPONDENCE PATTERN LIBRARY ───────────────────────────────────────────
-# Built from real tribunal bundle — Duffy v Brookhurst Primary School 2019
 
 CORRESPONDENCE_PATTERNS = [
     {
@@ -2406,11 +2284,6 @@ def get_checklist(env_name):
 
 
 def detect_patterns(text, ehcp_text=""):
-    """
-    Run all correspondence patterns against text.
-    If EHCP text provided, adds EHCP cross-reference findings.
-    Returns list sorted red first.
-    """
     matched = []
     for pattern in CORRESPONDENCE_PATTERNS:
         if re.search(pattern["triggers"], text, re.IGNORECASE):
@@ -2420,7 +2293,6 @@ def detect_patterns(text, ehcp_text=""):
                 ctx = text[max(0, m.start()-100):m.end()+120].strip()
             matched.append({**pattern, "extract": ctx[:250]})
 
-    # EHCP cross-reference — unstructured time
     if ehcp_text and re.search(
         r"\b(lunchtime|lunch time|break time|unstructured|dining hall|canteen|playground)\b",
         text, re.IGNORECASE
@@ -2472,7 +2344,6 @@ def detect_patterns(text, ehcp_text=""):
                 "extract": "",
             })
 
-    # Sort: red first, amber second
     order = {"red": 0, "amber": 1, "green": 2}
     matched.sort(key=lambda x: order.get(x["tier"], 3))
     return matched
@@ -2497,7 +2368,7 @@ def analyse_policy(policy_text):
                 "If it has not been done, this is a gap between policy commitment and practice."
             ),
         })
-        break  # One instance is enough
+        break
 
     year_pattern = re.compile(r"\b(20\d{2})\b")
     years = [int(y) for y in year_pattern.findall(policy_text)]
@@ -2563,7 +2434,6 @@ def render_pattern_card(p, index):
 
 
 def generate_amendment_word(environment, confirmed_items, today):
-    """Generate Word document for amendment request."""
     doc = Document()
     title = doc.add_heading("EHCP Amendment Request", 0)
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -2614,17 +2484,11 @@ def generate_amendment_word(environment, confirmed_items, today):
 
 
 def page_correspondence():
-    """Enhanced correspondence intelligence — polished for tester release."""
+    """Correspondence intelligence page."""
 
-    # ── Empty state / intro ───────────────────────────────────────────────────
     st.markdown("## Correspondence analysis")
 
-    # Link back to report
     if st.session_state.get("findings"):
-        st.markdown(
-            f"<a href='#' onclick='void(0)' style='font-size:0.85rem;color:{NAVY};'>← View my EHCP report</a>",
-            unsafe_allow_html=True
-        )
         if st.button("← Back to my EHCP report", key="back_to_report"):
             st.session_state.stage = "full_report"
             st.rerun()
@@ -2640,17 +2504,26 @@ def page_correspondence():
     </div>
     """, unsafe_allow_html=True)
 
-    # ── Uploads ───────────────────────────────────────────────────────────────
     st.markdown("### Upload correspondence")
 
+    # REPAIR 3: key="input_method" now persists via session state default
     input_method = st.radio(
         "How do you want to add your correspondence?",
         ["Upload file (PDF or Word)", "Paste text directly"],
         horizontal=True,
-        key="input_method"
+        key="input_method",
     )
 
     col1, col2 = st.columns(2)
+
+    # Initialise paste vars
+    paste_text1 = ""
+    paste_date1 = ""
+    paste_text2 = ""
+    paste_date2 = ""
+    email1 = None
+    email2 = None
+    policy_file = None
 
     if input_method == "Upload file (PDF or Word)":
         with col1:
@@ -2674,11 +2547,6 @@ def page_correspondence():
                 "they have met their own commitments."
                 "</p>", unsafe_allow_html=True
             )
-        # Set paste vars to empty
-        paste_text1 = ""
-        paste_date1 = ""
-        paste_text2 = ""
-        paste_date2 = ""
     else:
         with col1:
             st.markdown("**Most recent correspondence**")
@@ -2706,54 +2574,40 @@ def page_correspondence():
                 height=180,
                 key="paste_text2"
             )
-        # Set file vars to None
-        email1 = None
-        email2 = None
-        policy_file = None
-
 
     st.markdown("---")
 
-    # ── Tone question ─────────────────────────────────────────────────────────
-    # Tone will be auto-detected after analysis — store manual override option
     tone_override = st.session_state.get("tone_override", None)
     if tone_override:
         st.markdown(f"""
         <div style="background:#eaf5e0;border-radius:8px;padding:0.6rem 1rem;margin-bottom:0.5rem;">
           <p style="margin:0;font-size:0.85rem;color: #2d5a2d;">
-            Tone set to: <b>{tone_override}</b> —
-            <a href="#" onclick="void(0)" style="color:#5a8a5a;">change</a>
+            Tone set to: <b>{tone_override}</b>
           </p>
         </div>
         """, unsafe_allow_html=True)
-    tone_q = tone_override or "auto"
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # ── Analyse button ────────────────────────────────────────────────────────
     analyse = st.button("Analyse correspondence", use_container_width=False, key="analyse_corr")
 
-    if not email1 and not analyse:
+    # REPAIR 2: has_content checks both file upload and paste text
+    has_content = (email1 is not None) or bool(paste_text1.strip())
+
+    if not has_content and not analyse:
         st.markdown(
             "<p style='color:#888;font-size:0.9rem;margin-top:0.5rem;'>"
-            "Upload at least one piece of correspondence to begin."
+            "Upload at least one piece of correspondence, or paste the text above."
             "</p>",
             unsafe_allow_html=True
         )
 
-    if analyse and not email1:
-        st.error("Please upload at least one piece of correspondence to continue.")
-
-    has_content = (email1 is not None) or (paste_text1.strip() != "")
-
     if analyse and not has_content:
         st.error("Please upload a file or paste some correspondence text to continue.")
 
-    # Run analysis only when button clicked, then store in session state
     if analyse and has_content:
-        st.session_state.corr_analysed = False  # reset to re-run
-        
-        # Progress steps
+        st.session_state.corr_analysed = False
+
         progress_text = st.empty()
         progress_text.markdown("*Reading correspondence…*")
 
@@ -2768,6 +2622,7 @@ def page_correspondence():
                 )
                 st.stop()
         else:
+            # REPAIR 2: use paste_text1 directly — it's already in scope
             date_prefix = f"[Date: {paste_date1}]\n" if paste_date1 else ""
             text1 = date_prefix + paste_text1
 
@@ -2780,7 +2635,10 @@ def page_correspondence():
             text2 = date_prefix2 + paste_text2
         else:
             text2 = ""
-        combined = text1 + "\n\n" + text2
+
+        # Store extracted text in session state before rerun
+        st.session_state["paste_text_stored"] = text1 + "\n\n" + text2
+        combined = st.session_state["paste_text_stored"]
 
         progress_text.markdown("*Identifying patterns…*")
         ehcp_text = st.session_state.get("vault", {}).get("ehcp", {}).get("text", "")
@@ -2806,316 +2664,30 @@ def page_correspondence():
 
         today = datetime.datetime.now().strftime("%d %B %Y")
 
-        # Add to thread — deduplicate by content hash
-        pattern_names = [p["name"] for p in matched_patterns[:3]]
-        summary = f"Email from school — {len(matched_patterns)} pattern(s) detected"
+        summary = f"Correspondence — {len(matched_patterns)} pattern(s) detected"
         if environment:
             summary += f" — {environment} referenced"
-        # Only add if this is genuinely new (not a resubmit)
         existing = st.session_state.get("thread", [])
         if not existing or existing[-1].get("summary") != summary:
             add_to_thread("from_school", summary, matched_patterns, tone_rec)
 
-    # ── Display results from session state (persists across reruns) ──────────
-    if st.session_state.get("corr_analysed"):
-        matched_patterns = st.session_state.get("all_patterns", [])
-        environment      = st.session_state.get("corr_environment")
-        policy_findings  = st.session_state.get("corr_policy", [])
-        tone_rec         = st.session_state.get("corr_tone_rec", {})
-        similar_past     = st.session_state.get("corr_similar", [])
-        draft_reply      = st.session_state.get("draft_reply", "")
-        top_two          = st.session_state.get("top_two_patterns", [])
-        today            = datetime.datetime.now().strftime("%d %B %Y")
-
-        red_n, amber_n, summary_text, summary_colour = st.session_state.get(
-            "corr_summary_bar", (0, 0, "Analysis complete.", "#2d4a2d")
-        )
+        # Build draft reply
         red_n   = sum(1 for p in matched_patterns if p["tier"] == "red")
         amber_n = sum(1 for p in matched_patterns if p["tier"] == "amber")
 
-        if red_n == 0 and amber_n == 0:
-            summary_colour = GREEN
-            summary_text = "No major patterns detected in this correspondence."
-        elif red_n > 0:
-            summary_colour = RED
-            summary_text = f"{red_n} serious pattern{'s' if red_n > 1 else ''} and {amber_n} amber signal{'s' if amber_n != 1 else ''} detected."
-        else:
-            summary_colour = AMBER
-            summary_text = f"{amber_n} pattern{'s' if amber_n > 1 else ''} detected. No immediate lawful concerns."
-
-        st.markdown(f"""
-        <div style="background:{summary_colour};border-radius:6px;padding:0.9rem 1.2rem;margin:1rem 0 1.5rem;">
-          <p style="color:white;font-weight:700;margin:0;font-size:1rem;">{summary_text}</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-        # ── Patterns ──────────────────────────────────────────────────────────
-        st.markdown("### Patterns detected")
-
-        if not matched_patterns:
-            st.markdown(f"""
-            <div class="finding-green">
-              <span class="badge-green">No recognised patterns</span>
-              <p style="margin:0.5rem 0 0;font-size:0.95rem;">
-                No recognised school correspondence patterns were detected.
-                This may mean the correspondence is straightforward — or that the language
-                used does not match known patterns. Read the correspondence carefully
-                before assuming it is without issue.
-              </p>
-            </div>
-            """, unsafe_allow_html=True)
-        else:
-            # Show top 5, offer more
-            show_all = st.session_state.get("show_all_patterns", False)
-            display = matched_patterns if show_all else matched_patterns[:5]
-
-            for i, p in enumerate(display):
-                render_pattern_card(p, i)
-
-            if len(matched_patterns) > 5 and not show_all:
-                remaining = len(matched_patterns) - 5
-                if st.button(f"Show {remaining} more pattern{'s' if remaining > 1 else ''}"):
-                    st.session_state.show_all_patterns = True
-                    st.rerun()
-            elif show_all and len(matched_patterns) > 5:
-                if st.button("Show fewer"):
-                    st.session_state.show_all_patterns = False
-                    st.rerun()
-
-        # ── Environment / root cause ──────────────────────────────────────────
-        if environment:
-            st.markdown("---")
-            st.markdown(f"### Root cause — {environment}")
-            st.markdown(f"""
-            <div style="background:#f0f4fa;border-radius:6px;padding:0.9rem 1.2rem;margin-bottom:1rem;">
-              <p style="margin:0;font-size:0.95rem;">
-                The correspondence references <b>{environment}</b> as a context for difficulty.
-                Before responding, use the checklist below to identify what specifically within
-                that environment may be the trigger. Tick everything that applies or has been observed.
-                FRED will generate a root cause summary and — if needed — a draft amendment request.
-              </p>
-            </div>
-            """, unsafe_allow_html=True)
-
-            checklist = get_checklist(environment)
-            confirmed_items = []
-
-            for category, items in checklist:
-                st.markdown(f"**{category}**")
-                cols = st.columns(2)
-                for idx, item in enumerate(items):
-                    with cols[idx % 2]:
-                        if st.checkbox(item, key=f"chk_{category}_{idx}"):
-                            confirmed_items.append(f"{category}: {item}")
-
-            if confirmed_items:
-                st.markdown("---")
-                st.markdown("### Root cause confirmed")
-
-                st.markdown(f"""
-                <div class="finding-red">
-                  <span class="badge-red">{len(confirmed_items)} factor{'s' if len(confirmed_items) > 1 else ''} confirmed — {environment}</span>
-                  <p style="margin:0.5rem 0 0;font-size:0.95rem;">
-                    These factors should be documented and cross-referenced against Section B and
-                    Section F of the EHCP. If confirmed factors are not addressed in the current
-                    provision, this is evidence for an EHCP amendment.
-                  </p>
-                </div>
-                """, unsafe_allow_html=True)
-
-                # Immediate Do
-                st.markdown("**Immediate steps — check what is already in the EHCP:**")
-                st.markdown(
-                    "<p style='font-size:0.9rem;color: #555;margin-bottom:0.8rem;'>"
-                    "Before requesting an amendment, check whether these provisions — "
-                    "which may already be in Section F — apply specifically to this environment. "
-                    "If they do, ask the school in writing to confirm they are in place."
-                    "</p>",
-                    unsafe_allow_html=True
-                )
-                existing = [
-                    "Ear defenders — access to sensory toolkit",
-                    "Entry to the space before other pupils — to reduce crowding",
-                    "Named trusted adult present during this activity",
-                    "Visual schedule — advance notice of what will happen",
-                    "Safe exit route — agreed way to leave if overwhelmed",
-                    "Snack provision before the activity — if hunger is a factor",
-                    "Quiet alternative — access to a calm space as an option",
-                ]
-                for prov in existing:
-                    st.checkbox(prov, key=f"existing_{prov[:25]}")
-
-                # Amendment request — behind a button
-                st.markdown("---")
-                if st.button("Generate EHCP amendment request", key="gen_amendment"):
-                    st.session_state.show_amendment = True
-
-                if st.session_state.get("show_amendment"):
-                    st.markdown(f"""
-                    <div style="background:{NAVY};border-radius:8px;padding:1.2rem 1.5rem;margin:1rem 0;">
-                      <p style="color:#a8b8d8;font-size:0.8rem;margin:0 0 0.3rem;letter-spacing:0.08em;text-transform:uppercase;">EHCP AMENDMENT FLAG</p>
-                      <p style="color:white;font-weight:700;margin:0 0 0.4rem;font-size:1rem;">New evidence — {environment} — {today}</p>
-                      <p style="color:#c8d8f0;margin:0;font-size:0.9rem;">
-                        The observations above constitute new evidence about your child's sensory needs
-                        in this environment. This should be formally documented and used to inform
-                        the next EHCP review. Edit the draft below before sending.
-                      </p>
-                    </div>
-                    """, unsafe_allow_html=True)
-
-                    draft = f"""Dear [SENCO name],
-
-I am writing to request a formal amendment to [child's name]'s Education, Health and Care Plan — specifically to Sections B and F — following observations in the {environment} on {today}.
-
-The following has been identified:
-
-{chr(10).join(f"- {item}" for item in confirmed_items)}
-
-The current Section F does not specify provision for this environment in sufficient detail to be enforceable. I am requesting:
-
-- Specific named provision for the {environment} environment
-- Named arrangements confirmed in writing, in place on every occasion
-- A half-termly review to confirm adjustments remain in place
-
-Please confirm receipt of this request and advise when it will be considered.
-
-Yours sincerely,
-[Your name]
-{today}"""
-
-                    st.text_area("Draft amendment request — edit before sending:", value=draft, height=280, key="amendment_text")
-
-                    # Word download
-                    word_buf = generate_amendment_word(environment, confirmed_items, today)
-                    st.download_button(
-                        "Download as Word document",
-                        data=word_buf,
-                        file_name=f"FRED_amendment_request_{today.replace(' ','_')}.docx",
-                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                    )
-
-                    # Log to knowledge bank
-                    if "knowledge_bank" not in st.session_state:
-                        st.session_state.knowledge_bank = []
-                    entry = {
-                        "date": today,
-                        "environment": environment,
-                        "confirmed": confirmed_items,
-                        "amendment_flagged": True,
-                    }
-                    if entry not in st.session_state.knowledge_bank:
-                        st.session_state.knowledge_bank.append(entry)
-                    print(f"FRED AMENDMENT FLAG: {today} — {environment} — {len(confirmed_items)} factors")
-
-        # ── Policy findings ───────────────────────────────────────────────────
-        if policy_findings:
-            st.markdown("---")
-            st.markdown("### School policy cross-reference")
-            st.markdown(
-                "<p style='font-size:0.95rem;margin-bottom:1rem;'>"
-                "FRED has read the uploaded school policy and found the following in relation "
-                "to the correspondence. The school cannot dispute its own policy."
-                "</p>",
-                unsafe_allow_html=True
-            )
-            for f in policy_findings:
-                tier = f["tier"]
-                st.markdown(f"""
-                <div class="finding-{tier}">
-                  <span class="badge-{tier}">POLICY</span>
-                  <p style="font-weight:700;margin:0.4rem 0 0.3rem;">{f['title']}</p>
-                  {f'<p style="font-style:italic;color: #555;font-size:0.88rem;margin:0 0 0.4rem;">"{f["extract"]}"</p>' if f.get("extract") else ""}
-                  <p style="margin:0;font-size:0.93rem;">{f['commentary']}</p>
-                </div>
-                """, unsafe_allow_html=True)
-
-        # ── Tone recommendation — auto-detected ──────────────────────────────
-        st.markdown("---")
-        st.markdown("### Tone recommendation")
-
-        rec_colour = {"formal": "#C0392B", "collaborative": "#1E8449", "neutral": "#D4A017"}
-        rec_bg    = {"formal": "#fdf4f3", "collaborative": "#f3faf5", "neutral": "#fdf9f0"}
-        r = tone_rec["recommendation"]
-
-        st.markdown(f"""
-        <div style="border-left:4px solid {rec_colour.get(r,'#888')};
-                    background:{rec_bg.get(r,'#f9f9f9')};
-                    border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin-bottom:1rem;">
-          <p style="font-weight:600;margin:0 0 0.3rem;font-size:0.95rem;">
-            FRED recommends: {tone_rec['label']}
-          </p>
-          <p style="margin:0;font-size:0.9rem;line-height:1.6;color: #444;">
-            {tone_rec['reasoning']}
-          </p>
-          <p style="margin:0.6rem 0 0;font-size:0.78rem;color: #888;">
-            Confidence: {tone_rec['confidence'].title()} —
-            based on language patterns in this correspondence.
-            This is a recommendation, not an instruction.
-          </p>
-        </div>
-        """, unsafe_allow_html=True)
-
-        st.markdown("**Does this match your experience of the relationship?**")
-        tone_confirm = st.radio(
-            "",
-            ["Yes — use recommended tone",
-             "No — it should be more formal",
-             "No — it should be more collaborative",
-             "I'll decide later"],
-            key="tone_confirm",
-            label_visibility="collapsed",
-            horizontal=True,
-        )
-        if "formal" in tone_confirm:
-            st.session_state.tone_override = "formal"
-        elif "collaborative" in tone_confirm:
-            st.session_state.tone_override = "collaborative"
-        elif "Yes" in tone_confirm:
-            st.session_state.tone_override = r
-
-        # ── Draft reply ───────────────────────────────────────────────────────
-        st.markdown("---")
-        st.markdown("### Draft reply")
-
-        st.markdown("""
-        <p style='font-size:0.92rem;color: #444;margin-bottom:0.3rem;'>
-          This draft email has been generated for you. Please check to ensure it is your voice before sending.
-        </p>
-        <p style='font-size:0.85rem;color: #7ab870;margin-bottom:1rem;font-style:italic;'>
-          A focused question in writing is harder to ignore than five.
-        </p>
-        """, unsafe_allow_html=True)
-
-        # ── Build prioritised two-question draft ──────────────────────────────
-        red_patterns   = [p for p in matched_patterns if p["tier"] == "red"]
-        amber_patterns = [p for p in matched_patterns if p["tier"] == "amber"]
-        tone_label     = st.session_state.get("tone_override", tone_rec.get("recommendation", "neutral"))
-
-        # Priority order for which patterns generate a question in the draft
-        # Everything else goes to meeting companion only
         PRIORITY_IDS = [
-            "behaviour_framing",
-            "unstructured_time_gap",
-            "ehcp_xref_lunch",
-            "ehcp_xref_lunch_gap",
-            "veiled_threat",
-            "reintegration_promise",
-            "staffing_change",
-            "legal_misrepresentation",
-            "resources_defence",
-            "monitoring_without_action",
-            "home_responsibility_redirect",
-            "reassurance_without_evidence",
-            "implicit_admission",
+            "behaviour_framing", "unstructured_time_gap", "ehcp_xref_lunch",
+            "ehcp_xref_lunch_gap", "veiled_threat", "reintegration_promise",
+            "staffing_change", "legal_misrepresentation", "resources_defence",
+            "monitoring_without_action", "home_responsibility_redirect",
+            "reassurance_without_evidence", "implicit_admission",
         ]
 
         QUESTION_PARAGRAPHS = {
             "behaviour_framing": (
                 "I would be grateful if you could confirm in writing what provision from "
                 "Section F of [child's name]'s EHCP was specifically in place at the time of "
-                "this incident, and provide the delivery log for that period. "
-                "I ask because the incident occurred during a time when the EHCP specifies "
-                "support should be in place."
+                "this incident, and provide the delivery log for that period."
             ),
             "unstructured_time_gap": (
                 "Could you confirm in writing what support was in place during lunchtime on "
@@ -3176,35 +2748,25 @@ Yours sincerely,
             ),
         }
 
-        # Select top two priority patterns that have a question
+        tone_label = st.session_state.get("tone_override", tone_rec.get("recommendation", "neutral"))
         priority_sorted = sorted(
             [p for p in matched_patterns if p["id"] in PRIORITY_IDS],
             key=lambda x: PRIORITY_IDS.index(x["id"]) if x["id"] in PRIORITY_IDS else 99
         )
         top_two = priority_sorted[:2]
-        reserve  = matched_patterns[2:]  # everything else goes to meeting companion
 
-        # Build the letter
         openings = {
             "formal": "Dear [Name],\n\nThank you for your email dated [date]. I am writing to follow up on the points raised.",
-            "collaborative": "Dear [Name],\n\nThank you for letting us know about the incident on [date]. I wanted to follow up on a couple of points.",
+            "collaborative": "Dear [Name],\n\nThank you for letting us know. I wanted to follow up on a couple of points.",
             "neutral": "Dear [Name],\n\nThank you for your email dated [date]. I would like to raise a couple of points in response.",
         }
         opening = openings.get(tone_label, openings["neutral"])
-
-        # Intro line before questions
-        intro = (
-            "I have a couple of specific questions I would be grateful if you could "
-            "address in writing."
-        )
-
-        # Numbered questions
+        intro = "I have a couple of specific questions I would be grateful if you could address in writing."
         question_lines = []
         for i, p in enumerate(top_two):
             q = QUESTION_PARAGRAPHS.get(p["id"], "")
             if q:
                 question_lines.append(f"{i+1}. {q}")
-
         closings = {
             "formal": "I would be grateful for a written response within five working days.\n\nYours sincerely,\n[Your name]",
             "collaborative": "I look forward to hearing from you.\n\nKind regards,\n[Your name]",
@@ -3212,33 +2774,247 @@ Yours sincerely,
         }
         closing = closings.get(tone_label, closings["neutral"])
 
-        # Build full letter with opening
         if question_lines:
             draft_parts = [opening, intro] + question_lines + [closing]
         else:
             draft_parts = [opening, closing]
         draft_reply = "\n\n".join(p for p in draft_parts if p.strip())
 
-        # Store draft and reserve patterns in session state for meeting companion
+        # Store everything in session state
         st.session_state["draft_reply"]        = draft_reply
-        st.session_state["reserve_patterns"]   = reserve
         st.session_state["top_two_patterns"]   = top_two
         st.session_state["all_patterns"]       = matched_patterns
-        st.session_state["correspondence_date"]= paste_date1 if not email1 else "[date]"
-        st.session_state["corr_summary_bar"]   = (red_n, amber_n, summary_text, summary_colour)
+        st.session_state["corr_summary_bar"]   = (red_n, amber_n, "", "")
         st.session_state["corr_environment"]   = environment
         st.session_state["corr_policy"]        = policy_findings
         st.session_state["corr_tone_rec"]      = tone_rec
         st.session_state["corr_similar"]       = similar_past
         st.session_state["corr_analysed"]      = True
         st.rerun()
-def page_subscriber():
-    """
-    The subscriber environment — feels like a different product.
-    Beta: all features accessible, no payment required.
-    """
-    name = st.session_state.email_address if st.session_state.email_address else "there"
 
+    # ── Display results ───────────────────────────────────────────────────────
+    if st.session_state.get("corr_analysed"):
+        matched_patterns = st.session_state.get("all_patterns", [])
+        environment      = st.session_state.get("corr_environment")
+        policy_findings  = st.session_state.get("corr_policy", [])
+        tone_rec         = st.session_state.get("corr_tone_rec", {})
+        draft_reply      = st.session_state.get("draft_reply", "")
+        top_two          = st.session_state.get("top_two_patterns", [])
+        today            = datetime.datetime.now().strftime("%d %B %Y")
+
+        red_n   = sum(1 for p in matched_patterns if p["tier"] == "red")
+        amber_n = sum(1 for p in matched_patterns if p["tier"] == "amber")
+
+        if red_n == 0 and amber_n == 0:
+            summary_colour = GREEN
+            summary_text = "No major patterns detected in this correspondence."
+        elif red_n > 0:
+            summary_colour = RED
+            summary_text = f"{red_n} serious pattern{'s' if red_n > 1 else ''} and {amber_n} amber signal{'s' if amber_n != 1 else ''} detected."
+        else:
+            summary_colour = AMBER
+            summary_text = f"{amber_n} pattern{'s' if amber_n > 1 else ''} detected. No immediate lawful concerns."
+
+        st.markdown(f"""
+        <div style="background:{summary_colour};border-radius:6px;padding:0.9rem 1.2rem;margin:1rem 0 1.5rem;">
+          <p style="color:white;font-weight:700;margin:0;font-size:1rem;">{summary_text}</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("### Patterns detected")
+
+        if not matched_patterns:
+            st.markdown(f"""
+            <div class="finding-green">
+              <span class="badge-green">No recognised patterns</span>
+              <p style="margin:0.5rem 0 0;font-size:0.95rem;">
+                No recognised school correspondence patterns were detected.
+                Read the correspondence carefully before assuming it is without issue.
+              </p>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            show_all = st.session_state.get("show_all_patterns", False)
+            display = matched_patterns if show_all else matched_patterns[:5]
+
+            for i, p in enumerate(display):
+                render_pattern_card(p, i)
+
+            if len(matched_patterns) > 5 and not show_all:
+                remaining = len(matched_patterns) - 5
+                if st.button(f"Show {remaining} more pattern{'s' if remaining > 1 else ''}"):
+                    st.session_state.show_all_patterns = True
+                    st.rerun()
+            elif show_all and len(matched_patterns) > 5:
+                if st.button("Show fewer"):
+                    st.session_state.show_all_patterns = False
+                    st.rerun()
+
+        if environment:
+            st.markdown("---")
+            st.markdown(f"### Root cause — {environment}")
+            st.markdown(f"""
+            <div style="background:#f0f4fa;border-radius:6px;padding:0.9rem 1.2rem;margin-bottom:1rem;">
+              <p style="margin:0;font-size:0.95rem;">
+                The correspondence references <b>{environment}</b> as a context for difficulty.
+                Tick everything that applies or has been observed.
+              </p>
+            </div>
+            """, unsafe_allow_html=True)
+
+            checklist = get_checklist(environment)
+            confirmed_items = []
+
+            for category, items in checklist:
+                st.markdown(f"**{category}**")
+                cols = st.columns(2)
+                for idx, item in enumerate(items):
+                    with cols[idx % 2]:
+                        if st.checkbox(item, key=f"chk_{category}_{idx}"):
+                            confirmed_items.append(f"{category}: {item}")
+
+            if confirmed_items:
+                st.markdown("---")
+                st.markdown("### Root cause confirmed")
+
+                st.markdown(f"""
+                <div class="finding-red">
+                  <span class="badge-red">{len(confirmed_items)} factor{'s' if len(confirmed_items) > 1 else ''} confirmed — {environment}</span>
+                  <p style="margin:0.5rem 0 0;font-size:0.95rem;">
+                    These factors should be documented and cross-referenced against Section B and
+                    Section F of the EHCP.
+                  </p>
+                </div>
+                """, unsafe_allow_html=True)
+
+                st.markdown("---")
+                if st.button("Generate EHCP amendment request", key="gen_amendment"):
+                    st.session_state.show_amendment = True
+
+                if st.session_state.get("show_amendment"):
+                    draft = f"""Dear [SENCO name],
+
+I am writing to request a formal amendment to [child's name]'s Education, Health and Care Plan — specifically to Sections B and F — following observations in the {environment} on {today}.
+
+The following has been identified:
+
+{chr(10).join(f"- {item}" for item in confirmed_items)}
+
+The current Section F does not specify provision for this environment in sufficient detail to be enforceable. I am requesting:
+
+- Specific named provision for the {environment} environment
+- Named arrangements confirmed in writing, in place on every occasion
+- A half-termly review to confirm adjustments remain in place
+
+Please confirm receipt of this request and advise when it will be considered.
+
+Yours sincerely,
+[Your name]
+{today}"""
+
+                    st.text_area("Draft amendment request — edit before sending:", value=draft, height=280, key="amendment_text")
+
+                    word_buf = generate_amendment_word(environment, confirmed_items, today)
+                    st.download_button(
+                        "Download as Word document",
+                        data=word_buf,
+                        file_name=f"FRED_amendment_request_{today.replace(' ','_')}.docx",
+                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    )
+
+                    if "knowledge_bank" not in st.session_state:
+                        st.session_state.knowledge_bank = []
+                    entry = {
+                        "date": today,
+                        "environment": environment,
+                        "confirmed": confirmed_items,
+                        "amendment_flagged": True,
+                    }
+                    if entry not in st.session_state.knowledge_bank:
+                        st.session_state.knowledge_bank.append(entry)
+
+        if policy_findings:
+            st.markdown("---")
+            st.markdown("### School policy cross-reference")
+            for f in policy_findings:
+                tier = f["tier"]
+                st.markdown(f"""
+                <div class="finding-{tier}">
+                  <span class="badge-{tier}">POLICY</span>
+                  <p style="font-weight:700;margin:0.4rem 0 0.3rem;">{f['title']}</p>
+                  {f'<p style="font-style:italic;color: #555;font-size:0.88rem;margin:0 0 0.4rem;">"{f["extract"]}"</p>' if f.get("extract") else ""}
+                  <p style="margin:0;font-size:0.93rem;">{f['commentary']}</p>
+                </div>
+                """, unsafe_allow_html=True)
+
+        st.markdown("---")
+        st.markdown("### Tone recommendation")
+
+        rec_colour = {"formal": "#C0392B", "collaborative": "#1E8449", "neutral": "#D4A017"}
+        rec_bg    = {"formal": "#fdf4f3", "collaborative": "#f3faf5", "neutral": "#fdf9f0"}
+        r = tone_rec.get("recommendation", "neutral")
+
+        st.markdown(f"""
+        <div style="border-left:4px solid {rec_colour.get(r,'#888')};
+                    background:{rec_bg.get(r,'#f9f9f9')};
+                    border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin-bottom:1rem;">
+          <p style="font-weight:600;margin:0 0 0.3rem;font-size:0.95rem;">
+            FRED recommends: {tone_rec.get('label', 'Measured response')}
+          </p>
+          <p style="margin:0;font-size:0.9rem;line-height:1.6;color: #444;">
+            {tone_rec.get('reasoning', '')}
+          </p>
+          <p style="margin:0.6rem 0 0;font-size:0.78rem;color: #888;">
+            Confidence: {tone_rec.get('confidence', '').title()} —
+            based on language patterns in this correspondence.
+            This is a recommendation, not an instruction.
+          </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("**Does this match your experience of the relationship?**")
+        tone_confirm = st.radio(
+            "",
+            ["Yes — use recommended tone",
+             "No — it should be more formal",
+             "No — it should be more collaborative",
+             "I'll decide later"],
+            key="tone_confirm",
+            label_visibility="collapsed",
+            horizontal=True,
+        )
+        if "formal" in tone_confirm:
+            st.session_state.tone_override = "formal"
+        elif "collaborative" in tone_confirm:
+            st.session_state.tone_override = "collaborative"
+        elif "Yes" in tone_confirm:
+            st.session_state.tone_override = r
+
+        st.markdown("---")
+        st.markdown("### Draft reply")
+        st.markdown("""
+        <p style='font-size:0.92rem;color: #444;margin-bottom:0.3rem;'>
+          Check this is your voice before sending.
+        </p>
+        <p style='font-size:0.85rem;color: #7ab870;margin-bottom:1rem;font-style:italic;'>
+          A focused question in writing is harder to ignore than five.
+        </p>
+        """, unsafe_allow_html=True)
+
+        st.text_area("Draft reply — edit before sending:", value=draft_reply, height=260, key="draft_reply_display")
+
+        col1, col2 = st.columns(2)
+        with col1:
+            if draft_reply:
+                st.download_button(
+                    "Download as Word",
+                    data=BytesIO(draft_reply.encode()),
+                    file_name=f"FRED_draft_reply_{today.replace(' ','_')}.txt",
+                    mime="text/plain",
+                )
+
+
+def page_subscriber():
     st.markdown(f"""
     <div style="background:{NAVY};border-radius:8px;padding:2rem;margin-bottom:1.5rem;">
       <p style="color:#a8b8d8;font-size:0.85rem;margin:0 0 0.3rem;letter-spacing:0.1em;text-transform:uppercase;">
@@ -3253,13 +3029,11 @@ def page_subscriber():
     </div>
     """, unsafe_allow_html=True)
 
-    # Workspace tabs
     tab1, tab2, tab3, tab4 = st.tabs(["📄 My Report", "✉️ Correspondence", "📋 Meeting Prep", "🗂️ Evidence Bank"])
 
     with tab1:
         st.markdown("### Your EHCP report")
         if st.session_state.findings:
-            st.markdown("Your report is ready. Use the buttons below to download it.")
             col1, col2 = st.columns(2)
             with col1:
                 word_buf = generate_word_report(
@@ -3340,19 +3114,8 @@ def page_subscriber():
             </div>
             """, unsafe_allow_html=True)
 
-            st.markdown("---")
-            st.info(
-                "Hold is a valid strategic choice. "
-                "Sometimes the most powerful response is a short warm acknowledgement "
-                "that signals knowledge without displaying it."
-            )
-
     with tab3:
         st.markdown("### Meeting preparation")
-        st.markdown(
-            "Use this before your annual review or any meeting with school or the LA."
-        )
-
         upcoming = st.session_state.get("upcoming_dates", "")
         if upcoming:
             st.info(f"Upcoming date noted: {upcoming}")
@@ -3380,17 +3143,11 @@ def page_subscriber():
         if post:
             st.success(
                 "Noted. Follow this up in writing within 24 hours. "
-                "Subject line: 'Confirmation of agreements — [date] meeting'. "
-                "Copy in the SENCO and the LA caseworker if present."
+                "Subject line: 'Confirmation of agreements — [date] meeting'."
             )
 
     with tab4:
         st.markdown("### Evidence bank")
-        st.markdown(
-            "FRED records confirmed findings from correspondence analysis here, "
-            "dated and stored for the duration of your session. "
-            "Use these at annual review."
-        )
         bank = st.session_state.get("knowledge_bank", [])
         held = st.session_state.get("held_findings", [])
         if bank:
@@ -3417,25 +3174,17 @@ def page_subscriber():
         else:
             st.markdown(
                 "<p style='color:#888;font-size:0.9rem;'>"
-                "No evidence entries yet. Confirmed root cause findings from "
-                "correspondence analysis will appear here with dates."
+                "No evidence entries yet."
                 "</p>",
                 unsafe_allow_html=True
             )
-        st.markdown(
-            "<p style='font-size:0.82rem;color: #aaa;margin-top:1rem;'>"
-            "Evidence bank is stored for this session. "
-            "Screenshot entries before closing your browser."
-            "</p>",
-            unsafe_allow_html=True
-        )
 
     st.markdown("---")
     st.markdown(f"""
-    <a href="https://docs.google.com/forms/d/e/1FAIpQLSeA1F9nEdQWkmplbAh973XKq2EsW0bEkhJiw7drhP7BZaPjKQ/viewform" target="_blank" style="
+    <a href="{GOOGLE_FORM_URL}" target="_blank" style="
         display:inline-block;
         background:#e8eef8;
-        colour:{NAVY};
+        color:{NAVY};
         padding:0.6rem 1.4rem;
         border-radius:4px;
         text-decoration:none;
@@ -3444,7 +3193,6 @@ def page_subscriber():
         font-size:0.9rem;
     ">Leave feedback on FRED →</a>
     """, unsafe_allow_html=True)
-
 
 
 # ── NAVIGATION ────────────────────────────────────────────────────────────────
@@ -3466,8 +3214,12 @@ def render_nav():
                 st.session_state.stage = "subscriber"
                 st.rerun()
     with col4:
+        # REPAIR 4: correspondence requires email gate
         if st.button("Correspondence"):
-            st.session_state.stage = "correspondence"
+            if st.session_state.email_submitted:
+                st.session_state.stage = "correspondence"
+            else:
+                st.session_state.stage = "sneak_peek"
             st.rerun()
 
 
