@@ -1588,6 +1588,9 @@ def page_upload():
             with st.spinner("Reading your documents…"):
                 combined_text = " ".join(v["text"] for v in vault.values())
                 findings, meta = run_full_analysis(combined_text)
+                if INVENTORY_AVAILABLE:
+                    inventory = build_provision_inventory(combined_text)
+                    st.session_state.provision_inventory = inventory
 
             st.session_state.findings          = findings
             st.session_state.parse_meta        = meta
