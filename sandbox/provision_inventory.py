@@ -87,6 +87,6 @@ def build_provision_inventory(full_text):
                 found.add(item)
 
         if found:
-            inventory[category] = found
+            inventory[category] = sorted(found)
 
     return inventory
