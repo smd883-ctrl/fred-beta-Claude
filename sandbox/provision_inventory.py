@@ -80,11 +80,11 @@ def build_provision_inventory(full_text):
 
     for category, provisions in PROVISION_PATTERNS.items():
 
-        found = []
+        found = set()
 
         for item in provisions:
             if item.lower() in lower_text:
-                found.append(item)
+                found.add(item)
 
         if found:
             inventory[category] = found
