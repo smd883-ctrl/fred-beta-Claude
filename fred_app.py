@@ -365,14 +365,53 @@ st.markdown(f"""
 # Warwickshire format: multiple Section F blocks, two-column tables.
 # Strategy: collect ALL text, identify section boundaries, extract each F block.
 
-PROHIBITED_WORDS = [
-    "should", "could", "may", "access to", "as needed", "where necessary",
-    "as appropriate", "regular", "encouraged", "mindful", "cognisant",
-    "holistic approach", "opportunity", "it is expected", "would benefit from",
-    "it is recommended", "at their discretion", "where possible",
-    "as directed by", "flexible", "flexibility", "responsive", "tailored",
-    "embedded",
+# ── VAGUE LANGUAGE — SECTION F LEGAL STANDARD ─────────────────────────────────
+# Source: SOS!SEN EHCP Infosheet 2022, CoP para 9.69, Children and Families Act 2014
+# Split into two groups so findings can distinguish commitment failures from
+# specificity failures. Both are RED — both remove enforceability.
+
+# Group 1: Modal language — weakens the commitment from "will" to conditional.
+# The legal standard requires "will receive". Anything weaker is not a lawful
+# commitment and cannot be enforced via Judicial Review.
+VAGUE_MODAL = [
+    "will benefit from",
+    "would benefit from",
+    "might benefit from",
+    "should receive",
+    "could receive",
+    "may receive",
+    "may be provided",
+    "should be provided",
+    "may be helpful",
+    "might be appropriate",
+    "would be appropriate",
+    "should have access",
+    "could have access",
 ]
+
+# Group 2: Vague qualifiers — provision stated without specificity.
+# SOS!SEN explicit list: "access to", "opportunities are", "regular", "up to",
+# "as advised", "as required", "may be helpful", "contacts", "adults".
+# Each one makes provision impossible to audit or enforce.
+VAGUE_QUALIFIER = [
+    "access to",
+    "opportunities",
+    "as advised",
+    "as required",
+    "as appropriate",
+    "as needed",
+    "where necessary",
+    "up to",
+    "at their discretion",
+    "where possible",
+    "as directed",
+    "regular",
+    "regularly",
+    "ongoing support",
+]
+
+# Combined list — used where a single list is needed elsewhere in the app
+PROHIBITED_WORDS = VAGUE_MODAL + VAGUE_QUALIFIER
 
 def extract_text_from_pdf(uploaded_file):
     try:
