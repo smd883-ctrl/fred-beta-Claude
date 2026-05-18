@@ -581,7 +581,7 @@ def analyse_section_f(f_blocks):
             "delivery_log_required": True,
         })
 
-   # ── Check Group 1: Modal language — commitment strength ───────────────────
+    # ── Check Group 1: Modal language — commitment strength ───────────────────
     # "will benefit from", "should receive", "may be provided" etc.
     # These replace a lawful commitment with a conditional or aspirational statement.
     found_modal = []
@@ -612,8 +612,7 @@ def analyse_section_f(f_blocks):
 
     # ── Check Group 2: Vague qualifiers — specificity ────────────────────────
     # "access to", "as appropriate", "regular", "up to" etc.
-    # These are identified in SOS!SEN guidance and CoP para 9.69 as making
-    # provision impossible to audit or enforce.
+    # SOS!SEN explicit list — each one makes provision impossible to audit or enforce.
     found_qualifier = []
     for word in VAGUE_QUALIFIER:
         if re.search(rf'\b{re.escape(word)}\b', combined_f, re.IGNORECASE):
@@ -705,10 +704,8 @@ def analyse_section_f(f_blocks):
             "delivery_log_required": False,
         })
 
-   # Dilution clause — provision made conditional on resources, staffing, or budget.
-    # TIGHTER PATTERN: only fires on conditional clause constructions.
-    # Does NOT fire on "learning resources", "sensory resources", "staffing arrangements",
-    # "capacity building" etc. — single words without a conditional construction.
+    # Tighter dilution clause — only fires on conditional constructions,
+    # not on standalone words like "resources" or "staffing arrangements".
     dilution_pattern = re.compile(
         r'\b(?:'
         r'subject to (?:available )?(?:resources|staffing|funding|budget|capacity)|'
@@ -760,7 +757,6 @@ def analyse_section_f(f_blocks):
         })
 
     return findings
-
 
 def analyse_section_e(e_blocks):
     findings = []
