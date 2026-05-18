@@ -596,7 +596,7 @@ def analyse_section_f(f_blocks):
         findings.append({
             "tier": "red",
             "title": "Section F uses conditional language instead of a lawful commitment",
-            "extract": f"Examples found: {examples}",
+            "extract": "; ".join(f'"{ctx[:120]}"' for _, ctx in found_modal[:3]),
             "commentary": (
                 "Section F must state what provision 'will' be delivered — not what the child "
                 "'should receive', 'would benefit from', or 'may be provided with'. "
@@ -625,7 +625,7 @@ def analyse_section_f(f_blocks):
         findings.append({
             "tier": "red",
             "title": "Section F contains vague qualifier language that removes enforceability",
-            "extract": f"Examples found: {examples}",
+            "extract": "; ".join(f'"{ctx[:120]}"' for _, ctx in found_qualifier[:3]),
             "commentary": (
                 "The SEN Code of Practice (paragraph 9.69) requires Section F to be "
                 "detailed and specific — and normally quantified. Terms like 'access to', "
