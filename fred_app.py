@@ -431,14 +431,22 @@ def extract_text(uploaded_file):
     return ""
 
 def find_section_blocks(full_text, section_letter):
+    NEED_AREA_BOUNDARY = re.compile(
+        r'\b(?:Communication\s+and\s+Interaction|'
+        r'Social,?\s+Emotional\s+and\s+Mental\s+Health|'
+        r'Cognition\s+and\s+Learning|'
+        r'Physical\s+(?:and/or|and|or)\s+Sensory|'
+        r'Health\s+Needs?|'
+        r'Social\s+Care)\b',
+        re.IGNORECASE
+    )
+
     alt_pattern = re.compile(
         rf'\bSection\s+{section_letter}\b',
         re.IGNORECASE
     )
 
-    positions = []
-    for m in alt_pattern.finditer(full_text):
-        positions.append(m.start())
+    positions = [m.start() for m in alt_pattern.finditer(full_text)]
 
     deduped = []
     for pos in sorted(positions):
@@ -446,10 +454,12 @@ def find_section_blocks(full_text, section_letter):
             deduped.append(pos)
 
     blocks = []
+
     all_section_starts = sorted(
         [m.start() for m in re.finditer(
             r'\bSection\s+[A-Z]\b', full_text, re.IGNORECASE
-        )]
+        )] +
+        [m.start() for m in NEED_AREA_BOUNDARY.finditer(full_text)]
     )
 
     for i, start in enumerate(deduped):
