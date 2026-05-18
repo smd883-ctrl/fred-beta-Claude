@@ -14,6 +14,12 @@ from reportlab.lib.units import cm
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable
 from reportlab.lib.enums import TA_LEFT, TA_CENTER
 try:
+    from ehcp_parser.pipeline import EHCPPipeline
+    EHCP_PARSER_AVAILABLE = True
+except Exception as e:
+    EHCP_PARSER_AVAILABLE = False
+    print(f"EHCP parser unavailable: {e}")
+try:
     from sandbox.provision_inventory import build_provision_inventory
     INVENTORY_AVAILABLE = True
 
