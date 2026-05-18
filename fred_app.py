@@ -581,26 +581,62 @@ def analyse_section_f(f_blocks):
             "delivery_log_required": True,
         })
 
-    found_prohibited = []
-    for word in PROHIBITED_WORDS:
+   # ── Check Group 1: Modal language — commitment strength ───────────────────
+    # "will benefit from", "should receive", "may be provided" etc.
+    # These replace a lawful commitment with a conditional or aspirational statement.
+    found_modal = []
+    for word in VAGUE_MODAL:
         if re.search(rf'\b{re.escape(word)}\b', combined_f, re.IGNORECASE):
-            m = re.search(rf'.{{0,60}}\b{re.escape(word)}\b.{{0,60}}', combined_f, re.IGNORECASE)
+            m = re.search(rf'.{{0,80}}\b{re.escape(word)}\b.{{0,80}}', combined_f, re.IGNORECASE)
             ctx = m.group(0).strip() if m else word
-            found_prohibited.append((word, ctx))
+            found_modal.append((word, ctx))
 
-    if found_prohibited:
-        examples = "; ".join(f'"{w}"' for w, _ in found_prohibited[:5])
-        extract  = found_prohibited[0][1] if found_prohibited else ""
+    if found_modal:
+        examples = "; ".join(f'"{w}"' for w, _ in found_modal[:4])
         findings.append({
             "tier": "red",
-            "title": f"Weak or unenforceable language detected in Section F",
-            "extract": f"Language found: {examples}",
+            "title": "Section F uses conditional language instead of a lawful commitment",
+            "extract": f"Examples found: {examples}",
             "commentary": (
-                "Section F must use 'must' not 'should', 'will' not 'may', and must avoid "
-                "vague qualifiers such as 'as appropriate', 'where necessary', or 'flexible'. "
-                "Vague language removes enforceability. Each instance should be challenged "
-                "and replaced with specific, quantified, unambiguous commitments. "
-                "This is a lawful requirement under the Children and Families Act 2014."
+                "Section F must state what provision 'will' be delivered — not what the child "
+                "'should receive', 'would benefit from', or 'may be provided with'. "
+                "A provision written as a recommendation or a possibility is not a legal "
+                "commitment and cannot be enforced via Judicial Review. "
+                "Under the Children and Families Act 2014, the LA has an absolute duty to "
+                "secure whatever is specified in Section F. Only 'will receive' creates that duty. "
+                "Each instance must be challenged and rewritten as a specific, unambiguous "
+                "commitment before the plan is finalised."
+            ),
+            "delivery_log_required": True,
+        })
+
+    # ── Check Group 2: Vague qualifiers — specificity ────────────────────────
+    # "access to", "as appropriate", "regular", "up to" etc.
+    # These are identified in SOS!SEN guidance and CoP para 9.69 as making
+    # provision impossible to audit or enforce.
+    found_qualifier = []
+    for word in VAGUE_QUALIFIER:
+        if re.search(rf'\b{re.escape(word)}\b', combined_f, re.IGNORECASE):
+            m = re.search(rf'.{{0,80}}\b{re.escape(word)}\b.{{0,80}}', combined_f, re.IGNORECASE)
+            ctx = m.group(0).strip() if m else word
+            found_qualifier.append((word, ctx))
+
+    if found_qualifier:
+        examples = "; ".join(f'"{w}"' for w, _ in found_qualifier[:4])
+        findings.append({
+            "tier": "red",
+            "title": "Section F contains vague qualifier language that removes enforceability",
+            "extract": f"Examples found: {examples}",
+            "commentary": (
+                "The SEN Code of Practice (paragraph 9.69) requires Section F to be "
+                "detailed and specific — and normally quantified. Terms like 'access to', "
+                "'as appropriate', 'where necessary', 'regular', and 'up to X hours' "
+                "make it impossible to establish whether provision has been delivered. "
+                "'Regular' must become 'three sessions per week'. "
+                "'Access to' must become 'will receive'. "
+                "'Up to X hours' must become a specific commitment, not an upper limit. "
+                "Every vague qualifier in Section F is a gap in enforceability and "
+                "should be challenged at or before the annual review."
             ),
             "delivery_log_required": True,
         })
@@ -669,9 +705,23 @@ def analyse_section_f(f_blocks):
             "delivery_log_required": False,
         })
 
+   # Dilution clause — provision made conditional on resources, staffing, or budget.
+    # TIGHTER PATTERN: only fires on conditional clause constructions.
+    # Does NOT fire on "learning resources", "sensory resources", "staffing arrangements",
+    # "capacity building" etc. — single words without a conditional construction.
     dilution_pattern = re.compile(
-        r'\b(subject to|dependent on|contingent on|availability|resources|'
-        r'staffing|capacity|where resources allow|budget)\b',
+        r'\b(?:'
+        r'subject to (?:available )?(?:resources|staffing|funding|budget|capacity)|'
+        r'dependent on (?:available )?(?:resources|staffing|availability|funding)|'
+        r'contingent on (?:available )?(?:resources|staffing|budget|funding)|'
+        r'where resources (?:allow|permit)|'
+        r'where staffing (?:allows|permits)|'
+        r'if staffing (?:allows|permits)|'
+        r'where capacity (?:allows|permits)|'
+        r'subject to funding|'
+        r'resources permitting|'
+        r'if (?:resources|budget) (?:allow|permits?)'
+        r')\b',
         re.IGNORECASE
     )
     m = dilution_pattern.search(combined_f)
@@ -679,13 +729,17 @@ def analyse_section_f(f_blocks):
         ctx = combined_f[max(0, m.start()-80):m.end()+80].strip()
         findings.append({
             "tier": "red",
-            "title": "Dilution clause detected — provision made conditional",
+            "title": "Dilution clause detected — provision made conditional on resources or staffing",
             "extract": ctx[:300],
             "commentary": (
                 "Section F provision must not be conditional on school resources, staffing, "
-                "or budget. The duty to deliver specified provision is absolute under the "
-                "Children and Families Act 2014. Any clause that makes provision conditional "
-                "removes its enforceability and must be challenged and removed."
+                "or budget. The duty to deliver specified provision under the Children and "
+                "Families Act 2014 is absolute — it does not depend on what the school can "
+                "afford or what staff are available on a given day. "
+                "If additional funding is required to deliver what is in Section F, "
+                "that obligation falls on the LA under s42 CFA 2014, not the school. "
+                "Any dilution clause must be identified, challenged, and removed before "
+                "the plan is finalised."
             ),
             "delivery_log_required": False,
         })
