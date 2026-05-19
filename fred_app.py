@@ -941,15 +941,19 @@ def analyse_section_f(f_blocks):
 
 def analyse_section_e(e_blocks):
     findings = []
+
     if not e_blocks:
         findings.append({
             "tier": "amber",
             "title": "Section E outcomes not located",
             "extract": "",
             "commentary": (
-                "Section E should contain SMART outcomes with a baseline, measurable "
-                "progress indicator, and timeframe. If outcomes are absent, raise at "
-                "annual review."
+                "Section E should contain SMART outcomes — specific, measurable, "
+                "achievable, realistic, and time-limited. Each outcome should describe "
+                "what the child will be able to do as a result of the provision in "
+                "Section F, not what they will receive. If outcomes are absent from "
+                "the EHCP, raise this at annual review and request that Section E is "
+                "completed before the plan is finalised."
             ),
             "delivery_log_required": False,
         })
@@ -957,45 +961,210 @@ def analyse_section_e(e_blocks):
 
     combined_e = "\n\n".join(e_blocks)
 
-    baseline_pattern = re.compile(r'\b(baseline|currently|starting point|at present)\b', re.IGNORECASE)
-    has_baseline = bool(baseline_pattern.search(combined_e))
-    if not has_baseline:
-        findings.append({
-            "tier": "amber",
-            "title": "Section E outcomes lack a stated baseline",
-            "extract": _get_short_extract(combined_e, 0, 300),
-            "commentary": (
-                "SMART outcomes require a baseline — where the child is now — so that "
-                "progress can be measured. Without a baseline the Review stage of the "
-                "APDR cycle cannot be conducted accurately. Request that a baseline "
-                "is added to each outcome at the next review."
-            ),
-            "delivery_log_required": False,
-        })
-
-    time_pattern = re.compile(r'\b(by \w+ 20\d\d|within \d+ (month|week|term|year))\b', re.IGNORECASE)
+    # ── Check 1: Timeframe ────────────────────────────────────────────────────
+    # EHCP-relevant timeframes only — not APDR targets or school-based plans.
+    # Recognises: Key Stage references, Year group references, annual review
+    # references, age references, transition references, and dated timeframes.
+    time_pattern = re.compile(
+        r'\b('
+        # Dated timeframes — "by July 2025", "by end of 2026"
+        r'by \w+ 20\d\d|'
+        r'within \d+ (?:month|week|term|year)s?|'
+        # Key Stage references
+        r'by (?:the )?end of (?:key stage|ks)\s*[1-4]|'
+        r'by (?:the )?end of (?:ks)[1-4]|'
+        r'before (?:the )?end of (?:key stage|ks)\s*[1-4]|'
+        # Year group references
+        r'by (?:the )?end of year \d+|'
+        r'by year \d+|'
+        # Annual review references
+        r'by (?:the )?next annual review|'
+        r'at (?:the )?next annual review|'
+        r'by (?:the )?annual review|'
+        # Age references
+        r'by (?:the )?age of \d+|'
+        r'by age \d+|'
+        # Transition references
+        r'before (?:transition|transferring|moving) to|'
+        r'by (?:the )?time (?:of|they reach)|'
+        # Phase references
+        r'by (?:the )?end of (?:primary|secondary|sixth form|college)|'
+        r'before (?:leaving|starting) (?:primary|secondary|sixth form|college)'
+        r')\b',
+        re.IGNORECASE
+    )
     has_timeframe = bool(time_pattern.search(combined_e))
+
     if not has_timeframe:
         findings.append({
-            "tier": "amber",
+            "tier": "red",
             "title": "Section E outcomes lack a measurable timeframe",
             "extract": _get_short_extract(combined_e, 0, 300),
             "commentary": (
-                "Outcomes must include a timeframe — for example, 'by July 2025'. "
-                "Without a timeframe, outcomes cannot be objectively reviewed. "
-                "Raise at annual review."
+                "Every outcome in Section E must include a timeframe — when the child "
+                "is expected to achieve it. The SEN Code of Practice requires outcomes "
+                "to be time-limited. Acceptable timeframes in an EHCP include: "
+                "'by the end of Key Stage 2', 'by the next annual review', "
+                "'by July 2026', 'by age 11', or 'before transition to secondary'. "
+                "Without a timeframe, the annual review cannot establish whether an "
+                "outcome has been achieved. This must be raised and corrected before "
+                "the plan is finalised."
             ),
             "delivery_log_required": False,
         })
 
-    if not findings:
+    # ── Check 2: Achievement vs activity language ─────────────────────────────
+    # CoP para 9.69: outcomes describe what the child will be ABLE TO DO,
+    # not what they will RECEIVE. "Will receive" is provision language — it
+    # belongs in Section F, not Section E.
+
+    achievement_pattern = re.compile(
+        r'\b('
+        r'will be able to|'
+        r'will independently|'
+        r'will demonstrate|'
+        r'will achieve|'
+        r'will show|'
+        r'will communicate|'
+        r'will manage|'
+        r'will develop|'
+        r'will use|'
+        r'will apply|'
+        r'will self.regulate|'
+        r'will initiate|'
+        r'will sustain|'
+        r'will access independently|'
+        r'will produce|'
+        r'will read|'
+        r'will write|'
+        r'will participate'
+        r')\b',
+        re.IGNORECASE
+    )
+
+    activity_pattern = re.compile(
+        r'\b('
+        r'will receive|'
+        r'will attend|'
+        r'will be supported|'
+        r'will be provided|'
+        r'will have access|'
+        r'will be given|'
+        r'will be included|'
+        r'will be helped|'
+        r'will be encouraged|'
+        r'will be offered|'
+        r'will be placed|'
+        r'will be monitored|'
+        r'will be reviewed|'
+        r'will take part in|'
+        r'will participate in sessions|'
+        r'will be exposed to'
+        r')\b',
+        re.IGNORECASE
+    )
+
+    has_achievement = bool(achievement_pattern.search(combined_e))
+    has_activity    = bool(activity_pattern.search(combined_e))
+
+    if has_activity and not has_achievement:
+        m = activity_pattern.search(combined_e)
+        ctx = combined_e[max(0, m.start()-80):m.end()+120].strip() if m else ""
+        findings.append({
+            "tier": "red",
+            "title": "Section E outcomes written as activities, not achievements",
+            "extract": ctx[:300],
+            "commentary": (
+                "Section E outcomes must describe what the child will be able to do — "
+                "not what they will receive or attend. This is a requirement of the "
+                "SEN Code of Practice (paragraph 9.69). "
+                "'Freddie will receive speech and language therapy' is provision — "
+                "it belongs in Section F. "
+                "'Freddie will be able to use two-word combinations to make requests' "
+                "is an outcome — it belongs in Section E. "
+                "Outcomes written as activities cannot be measured at annual review "
+                "and make the EHCP significantly harder to enforce. "
+                "Every outcome must describe an achievement, not a service."
+            ),
+            "delivery_log_required": False,
+        })
+
+    elif has_activity and has_achievement:
+        m = activity_pattern.search(combined_e)
+        ctx = combined_e[max(0, m.start()-80):m.end()+120].strip() if m else ""
+        findings.append({
+            "tier": "amber",
+            "title": "Section E contains a mix of achievement and activity language",
+            "extract": ctx[:300],
+            "commentary": (
+                "Some outcomes in Section E are written correctly as achievements — "
+                "describing what the child will be able to do. Others are written as "
+                "activities — describing what the child will receive or attend. "
+                "Activity-language outcomes cannot be measured at annual review and "
+                "should be rewritten. At annual review, ask for each activity-language "
+                "outcome to be replaced with an achievement: not 'will attend a social "
+                "skills group' but 'will be able to initiate a conversation with a peer "
+                "in a structured setting'."
+            ),
+            "delivery_log_required": False,
+        })
+
+    # ── Check 3: SMART language — measurability ───────────────────────────────
+    # Checks whether outcomes contain any measurable indicator.
+    # Not checking for baselines — those belong in assessment reports, not the EHCP.
+    measurable_pattern = re.compile(
+        r'\b('
+        r'\d+|'                          # any number
+        r'independently|'
+        r'without support|'
+        r'without prompting|'
+        r'with minimal|'
+        r'on \d+ out of|'
+        r'in \d+ out of|'
+        r'four out of five|'
+        r'three out of four|'
+        r'consistently|'
+        r'across all|'
+        r'in all settings|'
+        r'measured by|'
+        r'evidenced by|'
+        r'assessed by'
+        r')\b',
+        re.IGNORECASE
+    )
+    has_measurable = bool(measurable_pattern.search(combined_e))
+
+    if not has_measurable:
+        findings.append({
+            "tier": "amber",
+            "title": "Section E outcomes may lack a measurable success criterion",
+            "extract": _get_short_extract(combined_e, 0, 300),
+            "commentary": (
+                "The SEN Code of Practice requires outcomes to be measurable — "
+                "there should be a way to establish at annual review whether the "
+                "outcome has been achieved. Measurable outcomes include specific "
+                "numbers ('four out of five occasions'), independence indicators "
+                "('without adult prompting'), or setting criteria ('across all "
+                "lessons'). A vague outcome like 'Freddie will improve his "
+                "communication' cannot be objectively reviewed. At annual review, "
+                "ask for each outcome to include a specific success criterion."
+            ),
+            "delivery_log_required": False,
+        })
+
+    # ── Green — outcomes appear correctly structured ───────────────────────────
+    n_red = sum(1 for f in findings if f["tier"] == "red")
+    if n_red == 0:
         findings.append({
             "tier": "green",
-            "title": "Section E outcomes contain baseline and timeframe indicators",
+            "title": "Section E outcomes appear correctly structured",
             "extract": "",
             "commentary": (
-                "Section E appears to contain measurable outcome language. "
-                "Use these as benchmarks."
+                "Section E contains timeframe indicators and achievement language. "
+                "Outcomes appear to describe what the child will be able to do "
+                "rather than what they will receive. Use these as benchmarks when "
+                "challenging any outcomes that do not meet this standard in future "
+                "reviews or amended plans."
             ),
             "delivery_log_required": False,
         })
