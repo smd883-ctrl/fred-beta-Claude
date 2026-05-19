@@ -556,32 +556,139 @@ PROVISION_LIBRARY = {
 # Flat list for fast regex matching in correspondence analysis
 PROVISION_TERMS_FLAT = [
     term for terms in PROVISION_LIBRARY.values() for term in terms
-]
-def extract_text_from_pdf(uploaded_file):
-    try:
-        data = uploaded_file.read()
-        doc  = fitz.open(stream=data, filetype="pdf")
-        pages = []
-        for page in doc:
-            text = page.get_text("text")
-            if not text.strip():
-                blocks = page.get_text("blocks")
-                text = "\n".join(b[4] for b in blocks if isinstance(b[4], str))
-            if not text.strip():
-                d = page.get_text("dict")
-                words = []
-                for block in d.get("blocks", []):
-                    for line in block.get("lines", []):
-                        for span in line.get("spans", []):
-                            words.append(span.get("text", ""))
-                text = " ".join(words)
-            pages.append(text)
-        result = "\n".join(pages)
-        print(f"PDF extracted: {len(result)} chars from {len(doc)} pages")
-        return result
-    except Exception as e:
-        print(f"PDF extraction error: {e}")
+]def _reconstruct_column(words):
+    """
+    Reconstruct readable text from pdfplumber word dicts.
+    Groups words into lines by top coordinate, sorts by x within each line.
+    Used to separate two-column PDF layouts.
+    """
+    if not words:
         return ""
+
+    words_sorted = sorted(
+        words,
+        key=lambda w: (round(float(w['top']) / 5) * 5, float(w['x0']))
+    )
+
+    lines = []
+    current_line = []
+    current_top = None
+
+    for word in words_sorted:
+        word_top = round(float(word['top']) / 5) * 5
+        if current_top is None or abs(word_top - current_top) <= 5:
+            current_line.append(word)
+            current_top = word_top
+        else:
+            if current_line:
+                lines.append(sorted(current_line, key=lambda w: float(w['x0'])))
+            current_line = [word]
+            current_top = word_top
+
+    if current_line:
+        lines.append(sorted(current_line, key=lambda w: float(w['x0'])))
+
+    text_lines = [" ".join(w['text'] for w in line) for line in lines if line]
+    return "\n".join(text_lines)
+def extract_text_from_pdf(uploaded_file):
+    """
+    Two-column aware PDF extraction.
+    Uses pdfplumber for layout-aware extraction.
+    Detects Warwickshire/Capita Synergy two-column Section F format
+    and separates columns by x-coordinate to prevent text scrambling.
+    Left column (provision text) is extracted cleanly first.
+    Right column (deliverer info) is appended with a label.
+    Falls back to PyMuPDF if pdfplumber fails.
+    """
+    try:
+        import pdfplumber
+
+        data = uploaded_file.read()
+        pages_text = []
+
+        with pdfplumber.open(BytesIO(data)) as pdf:
+            page_count = len(pdf.pages)
+
+            for page in pdf.pages:
+                words = page.extract_words(
+                    x_tolerance=3,
+                    y_tolerance=3,
+                    keep_blank_chars=False,
+                    use_text_flow=True,
+                )
+
+                if not words:
+                    pages_text.append("")
+                    continue
+
+                page_width = page.width
+
+                # Column split threshold — Warwickshire format uses ~65% left / 35% right
+                # A4 page = 595pt. Right column ("Who will provide support") starts ~390pt
+                split_x = page_width * 0.65
+
+                left_words  = [w for w in words if float(w['x0']) <= split_x]
+                right_words = [w for w in words if float(w['x0']) >  split_x]
+
+                # Only apply column separation if right column has meaningful content
+                # Filters out page numbers and single-word headers
+                right_content = [w for w in right_words if len(w['text']) > 2]
+                is_two_column = (
+                    len(right_content) >= 5 and
+                    len(left_words)    >= 10
+                )
+
+                if is_two_column:
+                    left_text  = _reconstruct_column(left_words)
+                    right_text = _reconstruct_column(right_words)
+                    if right_text.strip():
+                        page_text = left_text + "\nDeliverer: " + right_text
+                    else:
+                        page_text = left_text
+                else:
+                    page_text = page.extract_text(
+                        x_tolerance=3, y_tolerance=3
+                    ) or ""
+
+                pages_text.append(page_text)
+
+        result = "\n".join(pages_text)
+        print(f"pdfplumber extracted: {len(result)} chars from {page_count} pages")
+
+        if len(result.strip()) < 50:
+            return "__PDF_EXTRACTION_FAILED__"
+
+        return result
+
+    except Exception as e:
+        print(f"pdfplumber error: {e} — falling back to PyMuPDF")
+        try:
+            uploaded_file.seek(0)
+            data = uploaded_file.read()
+            doc  = fitz.open(stream=data, filetype="pdf")
+            pages = []
+            for page in doc:
+                text = page.get_text("text")
+                if not text.strip():
+                    blocks = page.get_text("blocks")
+                    text = "\n".join(
+                        b[4] for b in blocks if isinstance(b[4], str)
+                    )
+                if not text.strip():
+                    d = page.get_text("dict")
+                    words = []
+                    for block in d.get("blocks", []):
+                        for line in block.get("lines", []):
+                            for span in line.get("spans", []):
+                                words.append(span.get("text", ""))
+                    text = " ".join(words)
+                pages.append(text)
+            result = "\n".join(pages)
+            print(f"PyMuPDF fallback extracted: {len(result)} chars")
+            return result
+        except Exception as e2:
+            print(f"PyMuPDF fallback error: {e2}")
+            return ""
 
 def extract_text_from_docx(uploaded_file):
     try:
