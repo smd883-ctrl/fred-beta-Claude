@@ -2597,13 +2597,13 @@ CORRESPONDENCE_PATTERNS = [
         "name": "The Escalation Sequence",
         "tier": "red",
         "triggers": (
-            r"\b(escalated to|referred to educational psychology|"
-            r"statutory assessment request|alternative provision referral|"
-            r"behaviour support plan review|emergency annual review|"
-            r"consultation period triggered|formal panel review|"
-            r"multi.agency referral|risk assessment updated|"
-            r"complex needs panel|managed move|high.needs funding application|"
-            r"fixed.term suspension|safeguarding threshold|child in need)\b"
+            r"(?:sensory diet|trusted adult|safe space|take[\s-]up time|"
+            r"now and next|now-and-next|visual timetable|social stor(?:y|ies)|"
+            r"non[\s-]confrontational|regulation break|emotion coaching|"
+            r"co[\s-]regulation|zones of regulation|sensory circuit|"
+            r"movement break|de[\s-]escalation|low arousal|check[\s-]in|"
+            r"safe adult|exit card|emotion thermometer|5[\s-]point scale|"
+            r"feelings fan|time out card|anxiety support|emotional regulation)"
         ),
         "explanation": (
             "The correspondence contains escalation terminology — referrals, panels, "
