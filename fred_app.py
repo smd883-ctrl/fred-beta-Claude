@@ -1855,19 +1855,7 @@ def render_finding_card(finding, index=None, show_full=True):
       <span class="{badge_class}">{label}</span>
       <p style="font-weight:700;margin:0.4rem 0 0.5rem 0;font-size:1rem;">{finding['title']}</p>
     """
-    if finding.get("extract") and show_full:
-        html += f'''
-        <div style="background:#f5f5f0;border-left:3px solid #ccc;border-radius:0 4px 4px 0;
-                    padding:0.6rem 1rem;margin:0.5rem 0 0.8rem 0;">
-          <p style="font-size:0.78rem;font-weight:600;text-transform:uppercase;
-                    letter-spacing:0.08em;color:#888;margin:0 0 0.3rem 0;">
-            From your EHCP:
-          </p>
-          <p style="font-style:italic;color:#333;font-size:0.92rem;
-                    margin:0;line-height:1.6;">
-            "{finding["extract"][:400]}"
-          </p>
-        </div>'''
+    render_finding_card
     if show_full:
         html += f'<p style="margin:0;font-size:0.95rem;line-height:1.6;">{finding["commentary"]}</p>'
 
