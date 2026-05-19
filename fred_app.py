@@ -2487,6 +2487,193 @@ CORRESPONDENCE_PATTERNS = [
             "monitoring identifies further difficulty. Ask for this in writing."
         ),
     },
+   {
+        "id": "process_substitution",
+        "name": "The Process Substitution",
+        "tier": "red",
+        "triggers": (
+            r"\b(graduated response|universal provision|quality first teaching|"
+            r"whole.school approach|standard tracking|differentiation within|"
+            r"pastoral support plan|wave 1 intervention|internal monitoring|"
+            r"delivered within standard timetable|curriculum modification|"
+            r"monitored by the class teacher|flexible grouping|"
+            r"scaffolding strategies|in-house literacy screening)\b"
+        ),
+        "explanation": (
+            "The school has shifted from SEND provision language to operational and "
+            "policy management language. Terms like 'graduated response', 'quality first "
+            "teaching', and 'universal provision' describe what the school does for all "
+            "pupils — they are not the specified, individualised provision required by "
+            "an EHCP. A child with an EHCP is entitled to provision above and beyond "
+            "universal classroom practice. Substituting process language for provision "
+            "language is a way of appearing to respond without committing to anything "
+            "that is specific, quantified, or enforceable."
+        ),
+        "fred_question": (
+            "Ask the school to identify which provisions in Section F of the EHCP — "
+            "by name, frequency, and deliverer — are currently being delivered. "
+            "The question is not what the school does generally. "
+            "It is what is being delivered for this child, as specified in the plan."
+        ),
+    },
+    {
+        "id": "escalation_sequence",
+        "name": "The Escalation Sequence",
+        "tier": "red",
+        "triggers": (
+            r"\b(escalated to|referred to educational psychology|"
+            r"statutory assessment request|alternative provision referral|"
+            r"behaviour support plan review|emergency annual review|"
+            r"consultation period triggered|formal panel review|"
+            r"multi.agency referral|risk assessment updated|"
+            r"complex needs panel|managed move|high.needs funding application|"
+            r"fixed.term suspension|safeguarding threshold|child in need)\b"
+        ),
+        "explanation": (
+            "The correspondence contains escalation terminology — referrals, panels, "
+            "risk assessments, managed moves. These are formal process steps that "
+            "have significant consequences for your child's placement and provision. "
+            "Escalation language in correspondence often appears before a formal "
+            "decision has been made, creating a paper trail that justifies later action. "
+            "Each escalation step has a statutory process — it cannot happen without "
+            "proper notice, evidence, and parental involvement."
+        ),
+        "fred_question": (
+            "Ask the school or LA to confirm in writing what process is being initiated, "
+            "what the statutory basis for it is, and what your rights are at each stage. "
+            "Ask for copies of all referral documents and risk assessments. "
+            "Any change to provision or placement must go through the EHCP review process "
+            "under the Children and Families Act 2014."
+        ),
+    },
+    {
+        "id": "collaborative_mask",
+        "name": "The Collaborative Mask",
+        "tier": "amber",
+        "triggers": (
+            r"\b(working collaboratively|partnership approach|co.production|"
+            r"working in tandem|shared expectations|collaborative solution|"
+            r"team around the child|open dialogue|working towards common goals|"
+            r"parental views incorporated|joint action planning|"
+            r"transparent communication|multi.disciplinary approach|"
+            r"liaising closely|holistic support model|agreed next steps|"
+            r"shared responsibility|consensus building|child.centred review)\b"
+        ),
+        "explanation": (
+            "The correspondence uses warm collaborative language — partnership, "
+            "co-production, open dialogue, shared goals. This tone is not itself a "
+            "problem. The concern is when collaborative language appears alongside "
+            "procedural distancing, escalation steps, or provision substitution. "
+            "Warm words do not pause statutory obligations. A letter that opens with "
+            "'we are committed to working in partnership' and closes with a referral "
+            "to a panel is not a collaborative document — it is a managed one."
+        ),
+        "fred_question": (
+            "Read the full correspondence for what is being proposed or initiated, "
+            "not just the tone. Ask the school to confirm specifically what will "
+            "change in terms of provision — not the relationship, the provision. "
+            "Collaborative language without a specific provision commitment "
+            "is reassurance, not a plan."
+        ),
+    },
+    {
+        "id": "retrospective_justification",
+        "name": "The Retrospective Justification",
+        "tier": "red",
+        "triggers": (
+            r"\b(retrospective|post.incident review|following a period of monitoring|"
+            r"subsequent data analysis|records indicate prior patterns|"
+            r"historical tracking|in light of recent assessments|"
+            r"evidence gathered over time|retrospective application|"
+            r"incident log reconciliation|following review of previous strategies|"
+            r"patterns established through data|chronological review|"
+            r"subsequent professional advice|post.hoc evaluation|"
+            r"re.evaluation of previous entries|file review demonstrates|"
+            r"longitudinal tracking confirms|evidence base established post.event)\b"
+        ),
+        "explanation": (
+            "The correspondence contains retrospective justification language — "
+            "the school is presenting a later reconstruction of events, provision, "
+            "or process as if it were contemporaneous evidence. Phrases like "
+            "'records indicate prior patterns' or 'evidence gathered over time reveals' "
+            "suggest that documentation is being assembled after the fact. "
+            "Contemporaneous records — delivery logs, incident reports, session notes — "
+            "written at the time carry significantly more evidential weight than "
+            "retrospective summaries. If a pattern was identified over time, "
+            "ask when it was first recorded and what action was taken at that point."
+        ),
+        "fred_question": (
+            "Ask the school to provide the original contemporaneous records — "
+            "the delivery logs, session notes, and incident reports written at the time, "
+            "not a summary compiled afterwards. Ask specifically: when was this pattern "
+            "first recorded, who recorded it, and what action was taken at that point? "
+            "If no contemporaneous record exists, note that in writing."
+        ),
+    },
+    {
+        "id": "provision_substitution_corr",
+        "name": "The Provision Substitution",
+        "tier": "red",
+        "triggers": (
+            r"\b(within available resources|flexible delivery model|"
+            r"equivalent alternative provision|integrated support delivery|"
+            r"delivered within standard ratios|shared teaching assistant|"
+            r"group.based provision model|delivered within existing frameworks|"
+            r"alternative timetabling|resource allocation panel|"
+            r"delivered via general school environment|"
+            r"pro.rata provision delivery|integrated therapeutic model|"
+            r"delivered by available pastoral staff|flexible group structures|"
+            r"capacity.linked support|resource.matched intervention|"
+            r"delivered within current site constraints|"
+            r"alternative curriculum pathway|delivered via class.based deployment|"
+            r"integrated within standard delivery|resource.limited intervention)\b"
+        ),
+        "explanation": (
+            "The school is describing provision in terms of what is operationally "
+            "convenient rather than what the EHCP specifies. Phrases like 'within "
+            "available resources', 'shared teaching assistant support', and 'flexible "
+            "delivery model' are substitutes for the named, quantified, specific "
+            "provision required by Section F. The duty to deliver is absolute under "
+            "the Children and Families Act 2014 — it is not modifiable by the school's "
+            "staffing model, timetable, or resource allocation decisions. "
+            "If the school cannot deliver what Section F specifies within its current "
+            "structure, the obligation passes to the LA to make alternative arrangements."
+        ),
+        "fred_question": (
+            "Ask the school to confirm which provisions in Section F are being delivered "
+            "exactly as specified — named role, stated frequency, stated duration. "
+            "For any provision described as 'flexible', 'shared', or 'within available "
+            "resources', ask what the Section F specification actually says and how "
+            "that differs from what is currently being delivered."
+        ),
+    },
+    {
+        "id": "operational_language_signal",
+        "name": "Correct SEND Language Used",
+        "tier": "green",
+        "triggers": (
+            r"\b(sensory diet|trusted adult|safe space|take.up time|"
+            r"now and next|visual timetable|social stor(?:y|ies)|"
+            r"non.confrontational|regulation break|emotion coaching|"
+            r"co.regulation|zones of regulation|sensory circuit|"
+            r"movement break|de.escalation|low arousal|check.in)\b"
+        ),
+        "explanation": (
+            "The school is using specific SEND provision language in this correspondence. "
+            "This is what good looks like — it suggests staff are familiar with your "
+            "child's needs and are using the right framework to describe support. "
+            "This is a positive signal and should be acknowledged."
+        ),
+        "fred_question": (
+            "The delivery check: this language should appear in Section F of the EHCP "
+            "as a specified, quantified commitment — not just in correspondence. "
+            "Ask the school to confirm which of these provisions are formally written "
+            "into the plan, how often they are delivered, by whom, and whether a "
+            "delivery log is being kept. Language in an email is not the same as "
+            "a lawful commitment in the EHCP. Good language plus a delivery log "
+            "is the standard. Good language alone is a start."
+        ),
+    }, 
 ]
 
 ENVIRONMENT_TRIGGERS = {
