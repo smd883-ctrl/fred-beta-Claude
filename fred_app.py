@@ -971,8 +971,8 @@ def analyse_section_e(e_blocks):
         r'by \w+ 20\d\d|'
         r'within \d+ (?:month|week|term|year)s?|'
         # Key Stage references
-        r'by (?:the )?end of (?:key stage|ks)\s*[1-4]|'
-        r'by (?:the )?end of (?:ks)[1-4]|'
+        r'by (?:the )?end of (?:the )?(?:key stage|ks)\s*[1-4]|'
+        r'before (?:the )?end of (?:the )?(?:key stage|ks)\s*[1-4]|'
         r'before (?:the )?end of (?:key stage|ks)\s*[1-4]|'
         # Year group references
         r'by (?:the )?end of year \d+|'
