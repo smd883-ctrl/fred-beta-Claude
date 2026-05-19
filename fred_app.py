@@ -412,7 +412,151 @@ VAGUE_QUALIFIER = [
 
 # Combined list — used where a single list is needed elsewhere in the app
 PROHIBITED_WORDS = VAGUE_MODAL + VAGUE_QUALIFIER
+# ── PROVISION LIBRARY ─────────────────────────────────────────────────────────
+# Four categories matching the four need areas in analyse_section_b.
+# Used by: analyse_section_b (B→F matching), build_provision_inventory,
+# and the correspondence Operational Language Signal pattern.
+# Duplicates removed. Source: FRED_PROVISION_LIBRARY.txt
 
+PROVISION_LIBRARY = {
+    "Communication and Interaction": [
+        "visual supports", "now and next board", "communication passport",
+        "comic strip conversations", "language intervention",
+        "speech and language input", "social communication support",
+        "processing time", "reduced language load", "makaton signing",
+        "symbols", "structured language", "peer modelling", "rephrasing",
+        "modified language", "augmented communication device",
+        "clarified instructions", "visual sequencing", "task board",
+        "communication prompts", "visual cue card", "language scaffolding",
+        "structured conversation", "conversation prompts",
+        "comprehension support", "attention cues", "adult language modelling",
+        "supported interaction", "visual checklist", "task planner",
+        "supported play", "transition warning", "structured transition",
+        "adult facilitation", "social skills group", "peer support",
+        "visual prompt", "attention support", "visual timetable",
+        "now-and-next board", "social story", "comic strip conversation",
+        "Colourful Semantics", "PECS", "AAC device", "Makaton signing",
+        "pre-teaching vocabulary", "blank level questioning",
+        "structured conversation starter", "communication book",
+        "processing time pause", "LEGO therapy", "supported peer interaction",
+        "explicit instruction", "first-then sequence",
+        "concrete language model", "auditory processing breakdown",
+        "visual prompt script", "talking partners structured framework",
+        "word bank provision", "scaffolded sentence starter",
+        "dual-coding delivery", "semantic mapping",
+        "phonological awareness intervention", "cued articulation",
+        "verbal prompt fading", "directed questioning scaffolding",
+        "narrative therapy structure", "conversational turn-taking script",
+        "minimal pair training", "total communication approach",
+        "clarification tracking strategy", "literal language modification",
+        "receptive language visual support", "expressive language framework",
+        "echolalia functional redirection", "comprehension check constraint",
+        "information carrying word framework",
+    ],
+    "Sensory and Physical": [
+        "sensory diet", "sensory circuit", "movement opportunity",
+        "movement opportunities", "movement break", "brain break",
+        "fidget tool", "weighted item", "chewelry", "quiet workstation",
+        "low arousal environment", "sensory regulation",
+        "multi-sensory approach", "writing slope", "adapted resources",
+        "prompt sheets", "supervision at unstructured times",
+        "movement programme", "sensory integration support",
+        "environmental adaptation", "alternative seating",
+        "noise reduction support", "sensory toolkit", "regulation equipment",
+        "fine motor support", "gross motor support", "adaptive writing tools",
+        "postural support", "regulated movement", "calm workstation",
+        "movement route", "sensory support plan", "ear defenders",
+        "planned sensory break", "motor skills support",
+        "environment adaptation", "low stimulus environment",
+        "regulation support", "toileting support", "wobble cushion",
+        "weighted lap pad", "noise-cancelling headphones",
+        "slanted writing board", "pencil grip", "adaptive scissors",
+        "sensory break area", "deep pressure input",
+        "proprioceptive feedback task", "vestibular stimulation exercise",
+        "tactile defensive modification", "environmental audit accommodation",
+        "low-stimulus workspace", "privacy screen",
+        "gross motor tracking program", "fine motor precision task",
+        "handwriting grip stabilization", "spatial awareness grid",
+        "visual tracking exercise", "sensory profile adaptation",
+        "scheduled hydration prompt", "postural support seating",
+        "soundfield system", "dimmed lighting provision",
+        "tactile baseline object", "heavy work activity",
+        "finger isolation exercise", "bilateral coordination task",
+        "hand-eye coordination drill", "sensory decompression interval",
+        "scheduled movement transition", "fidget regulation tool",
+        "adaptive cutlery", "step-free route mapping",
+        "physical prompt fading", "ergonomic workstation set-up",
+    ],
+    "SEMH": [
+        "emotional regulation", "trusted adult", "check in", "safe adult",
+        "time out card", "emotion coaching", "restorative conversation",
+        "co-regulation", "regulation strategy", "anxiety support",
+        "feelings fan", "safe space", "relationship support",
+        "take-up time", "non-confrontational language", "emotional check in",
+        "supported regulation", "planned regulation support",
+        "emotion identification", "regulation breaks", "trusted relationship",
+        "repair conversation", "emotional processing support",
+        "adult reassurance", "predictable routine", "supported transition",
+        "daily check in", "emotional support", "pastoral support",
+        "regulation intervention", "exit card", "anxiety regulation",
+        "Zones of Regulation", "5-point scale", "emotion thermometer",
+        "safe space access", "de-escalation script", "box breathing technique",
+        "predictable routine framing", "transition countdown",
+        "object of reference", "emotional literacy checklist",
+        "restorative conversation framework", "anxiety scaling tool",
+        "regulation check-in schedule", "predictable exit strategy",
+        "demand reduction protocol", "low-arousal approach",
+        "safe adult check-in", "proprioceptive regulation task",
+        "distraction technique blueprint", "hypervigilance reduction routine",
+        "physiological regulation interval", "sensory grounding sequence",
+        "structured playground role", "lunchtime nurture group",
+        "calm-down toolkit", "self-regulation script",
+        "contingency mapping visual", "reframing prompt tool",
+        "structured check-out protocol", "emotional check-in board",
+        "positive reinforcement schedule", "token economy framework",
+        "antecedent modification sequence", "preferred activity transition card",
+        "guided self-calming routine", "nurture room provision",
+        "social script for conflict", "peer mediation model",
+    ],
+    "Cognition and Learning": [
+        "task chunking", "scaffolded learning", "overlearning", "pre-teaching",
+        "post teaching", "writing frame", "exam access arrangements",
+        "processing support", "instruction breakdown",
+        "differentiated resources", "chunking information", "small group work",
+        "reading intervention", "numeracy intervention", "task reduction",
+        "guided practice", "modelled learning", "supported recording",
+        "visual task breakdown", "sequenced instructions",
+        "working memory support", "repetition and reinforcement",
+        "adult prompting", "independent learning support",
+        "learning reinforcement", "structured recording support",
+        "guided reading", "task support", "memory aids", "sequenced learning",
+        "reduced worksheet", "alternative recording", "structured support",
+        "learning prompts", "processing break", "overlearning routine",
+        "precision teaching", "spaced retrieval practice",
+        "dual-coding template", "word map scaffolding",
+        "scaffolded worksheet", "dyscalculia targeted intervention",
+        "phonics systematic recovery", "reading tracking ruler",
+        "colored overlay use", "assistive technology text-to-speech",
+        "speech-to-text software", "mind mapping framework",
+        "visual checklist processing", "memory prompt cue card",
+        "working memory externalization", "guided errorless learning",
+        "multi-sensory spelling model", "backward chaining technique",
+        "forward chaining technique", "diagnostic math baseline",
+        "visual math manipulation tool", "Numicon framework",
+        "Cuisenaire rod tracking", "graphic organizer template",
+        "step-by-step instruction breakdown", "dictation method support",
+        "exemplar reference framework", "task analysis breakdown",
+        "high-frequency word bank", "cloze procedure scaffold",
+        "enlarged print modification", "time management visual tracker",
+        "independent work folder organization", "self-correction checklist",
+        "modeled example framework", "faded scaffold sheet",
+    ],
+}
+
+# Flat list for fast regex matching in correspondence analysis
+PROVISION_TERMS_FLAT = [
+    term for terms in PROVISION_LIBRARY.values() for term in terms
+]
 def extract_text_from_pdf(uploaded_file):
     try:
         data = uploaded_file.read()
@@ -706,6 +850,8 @@ def analyse_section_f(f_blocks):
 
     # Tighter dilution clause — only fires on conditional constructions,
     # not on standalone words like "resources" or "staffing arrangements".
+    # Dilution clause — tighter pattern, conditional constructions only.
+    # Extended with Provision Substitution terms from FRED_PROCESS_PATTERNS.
     dilution_pattern = re.compile(
         r'\b(?:'
         r'subject to (?:available )?(?:resources|staffing|funding|budget|capacity)|'
@@ -717,10 +863,45 @@ def analyse_section_f(f_blocks):
         r'where capacity (?:allows|permits)|'
         r'subject to funding|'
         r'resources permitting|'
-        r'if (?:resources|budget) (?:allow|permits?)'
+        r'if (?:resources|budget) (?:allow|permits?)|'
+        r'within available resources|'
+        r'delivered operational capacity permitting|'
+        r'resource-dependent intervention|'
+        r'capacity-linked support|'
+        r'resource-matched intervention|'
+        r'subject to specialist availability|'
+        r'subject to recruitment timelines|'
+        r'delivered within existing frameworks|'
+        r'delivered within standard ratios|'
+        r'delivered via general school environment|'
+        r'operational adjustments applied|'
+        r'pro-rata provision delivery|'
+        r'resource allocation panel decision|'
+        r'delivered by available pastoral staff|'
+        r'integrated within standard delivery|'
+        r'resource-limited intervention'
         r')\b',
         re.IGNORECASE
     )
+    m = dilution_pattern.search(combined_f)
+    if m:
+        ctx = combined_f[max(0, m.start()-80):m.end()+80].strip()
+        findings.append({
+            "tier": "red",
+            "title": "Dilution clause detected — provision made conditional on resources or staffing",
+            "extract": ctx[:300],
+            "commentary": (
+                "Section F provision must not be conditional on school resources, staffing, "
+                "or budget. The duty to deliver specified provision under the Children and "
+                "Families Act 2014 is absolute — it does not depend on what the school can "
+                "afford or what staff are available on a given day. "
+                "If additional funding is required to deliver what is in Section F, "
+                "that obligation falls on the LA under s42 CFA 2014, not the school. "
+                "Any dilution clause must be identified, challenged, and removed before "
+                "the plan is finalised."
+            ),
+            "delivery_log_required": False,
+        })
     m = dilution_pattern.search(combined_f)
     if m:
         ctx = combined_f[max(0, m.start()-80):m.end()+80].strip()
