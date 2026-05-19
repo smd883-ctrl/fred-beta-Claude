@@ -3003,7 +3003,11 @@ def analyse_policy(policy_text):
 
 def render_pattern_card(p, index):
     tier = p["tier"]
-    tier_label = "RED — Lawful concern" if tier == "red" else "AMBER — Pattern detected"
+    tier_label = (
+        "RED — Lawful concern" if tier == "red"
+        else "GREEN — Positive signal" if tier == "green"
+        else "AMBER — Pattern detected"
+    )
     st.markdown(f"""
     <div class="finding-{tier}" style="margin-bottom:1.2rem;">
       <span class="badge-{tier}">{tier_label}</span>
