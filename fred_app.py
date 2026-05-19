@@ -3394,15 +3394,30 @@ def page_correspondence():
         red_n   = sum(1 for p in matched_patterns if p["tier"] == "red")
         amber_n = sum(1 for p in matched_patterns if p["tier"] == "amber")
 
-        if red_n == 0 and amber_n == 0:
+        green_n = sum(1 for p in matched_patterns if p["tier"] == "green")
+
+        if red_n == 0 and amber_n == 0 and green_n == 0:
             summary_colour = GREEN
             summary_text = "No major patterns detected in this correspondence."
         elif red_n > 0:
+            green_note = f" {green_n} positive signal{'s' if green_n != 1 else ''}." if green_n > 0 else ""
             summary_colour = RED
-            summary_text = f"{red_n} serious pattern{'s' if red_n > 1 else ''} and {amber_n} amber signal{'s' if amber_n != 1 else ''} detected."
-        else:
+            summary_text = (
+                f"{red_n} serious pattern{'s' if red_n != 1 else ''} and "
+                f"{amber_n} amber signal{'s' if amber_n != 1 else ''} detected."
+                f"{green_note}"
+            )
+        elif amber_n > 0:
+            green_note = f" {green_n} positive signal{'s' if green_n != 1 else ''}." if green_n > 0 else ""
             summary_colour = AMBER
-            summary_text = f"{amber_n} pattern{'s' if amber_n > 1 else ''} detected. No immediate lawful concerns."
+            summary_text = (
+                f"{amber_n} pattern{'s' if amber_n != 1 else ''} detected. "
+                f"No immediate lawful concerns."
+                f"{green_note}"
+            )
+        else:
+            summary_colour = GREEN
+            summary_text = f"{green_n} positive signal{'s' if green_n != 1 else ''} detected. No concerns identified."
 
         st.markdown(f"""
         <div style="background:{summary_colour};border-radius:6px;padding:0.9rem 1.2rem;margin:1rem 0 1.5rem;">
