@@ -556,7 +556,9 @@ PROVISION_LIBRARY = {
 # Flat list for fast regex matching in correspondence analysis
 PROVISION_TERMS_FLAT = [
     term for terms in PROVISION_LIBRARY.values() for term in terms
-]def _reconstruct_column(words):
+]
+
+def _reconstruct_column(words):
     """
     Reconstruct readable text from pdfplumber word dicts.
     Groups words into lines by top coordinate, sorts by x within each line.
