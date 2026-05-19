@@ -1855,7 +1855,7 @@ def render_finding_card(finding, index=None, show_full=True):
       <span class="{badge_class}">{label}</span>
       <p style="font-weight:700;margin:0.4rem 0 0.5rem 0;font-size:1rem;">{finding['title']}</p>
     """
-   if finding.get("extract") and show_full:
+    if finding.get("extract") and show_full:
         html += f'''
         <div style="background:#f5f5f0;border-left:3px solid #ccc;border-radius:0 4px 4px 0;
                     padding:0.6rem 1rem;margin:0.5rem 0 0.8rem 0;">
