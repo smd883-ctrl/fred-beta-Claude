@@ -1535,8 +1535,10 @@ def generate_word_report(findings, child_name="your child", situation="", doc_ty
         doc.add_heading(finding["title"], 3)
 
         if finding.get("extract"):
-            p = doc.add_paragraph(finding["extract"])
+            doc.add_paragraph("From your EHCP:", style="Intense Quote")
+            p = doc.add_paragraph(f'"{finding["extract"][:400]}"')
             p.runs[0].italic = True
+            p.runs[0].font.color.rgb = RGBColor(0x33, 0x33, 0x33)
 
         doc.add_paragraph(finding["commentary"])
 
@@ -1724,7 +1726,20 @@ def generate_pdf_report(findings, child_name="your child", situation="", doc_typ
         story.append(Paragraph(finding['title'], finding_title_style))
 
         if finding.get("extract"):
-            safe_extract = finding["extract"][:350].replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+            safe_extract = finding["extract"][:400].replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+            story.append(Paragraph(
+                "From your EHCP:",
+                ParagraphStyle(
+                    'from_ehcp_label',
+                    fontSize=8,
+                    fontName='Helvetica-Bold',
+                    textColor=colors.HexColor('#888888'),
+                    spaceAfter=2,
+                    spaceBefore=6,
+                    leading=11,
+                    leftIndent=12,
+                )
+            ))
             story.append(Paragraph(f'"{safe_extract}"', extract_style))
 
         commentary_parts = finding["commentary"].split("\n\n")
@@ -1840,9 +1855,19 @@ def render_finding_card(finding, index=None, show_full=True):
       <span class="{badge_class}">{label}</span>
       <p style="font-weight:700;margin:0.4rem 0 0.5rem 0;font-size:1rem;">{finding['title']}</p>
     """
-    if finding.get("extract") and show_full:
-        html += f'<p style="font-style:italic;color: #555;font-size:0.9rem;margin:0 0 0.5rem 0;">"{finding["extract"][:280]}…"</p>'
-
+   if finding.get("extract") and show_full:
+        html += f'''
+        <div style="background:#f5f5f0;border-left:3px solid #ccc;border-radius:0 4px 4px 0;
+                    padding:0.6rem 1rem;margin:0.5rem 0 0.8rem 0;">
+          <p style="font-size:0.78rem;font-weight:600;text-transform:uppercase;
+                    letter-spacing:0.08em;color:#888;margin:0 0 0.3rem 0;">
+            From your EHCP:
+          </p>
+          <p style="font-style:italic;color:#333;font-size:0.92rem;
+                    margin:0;line-height:1.6;">
+            "{finding["extract"][:400]}"
+          </p>
+        </div>'''
     if show_full:
         html += f'<p style="margin:0;font-size:0.95rem;line-height:1.6;">{finding["commentary"]}</p>'
 
