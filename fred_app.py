@@ -1013,10 +1013,10 @@ def analyse_section_e(e_blocks):
             "delivery_log_required": False,
         })
 
-    # ── Check 2: Achievement vs activity language ─────────────────────────────
+# ── Check 2: Achievement vs activity language ─────────────────────────────
     # CoP para 9.69: outcomes describe what the child will be ABLE TO DO,
-    # not what they will RECEIVE. "Will receive" is provision language — it
-    # belongs in Section F, not Section E.
+    # not what they will RECEIVE. "Will receive" is provision language —
+    # it belongs in Section F, not Section E.
 
     achievement_pattern = re.compile(
         r'\b('
@@ -1027,7 +1027,6 @@ def analyse_section_e(e_blocks):
         r'will show|'
         r'will communicate|'
         r'will manage|'
-        r'will develop|'
         r'will use|'
         r'will apply|'
         r'will self.regulate|'
@@ -1064,9 +1063,42 @@ def analyse_section_e(e_blocks):
         re.IGNORECASE
     )
 
-    has_achievement = bool(achievement_pattern.search(combined_e))
-    has_activity    = bool(activity_pattern.search(combined_e))
+    # ── Check 3: Vague aspiration language ───────────────────────────────────
+    # "Will have developed", "will have improved", "will have made progress" —
+    # directional language that describes a state rather than a capability.
+    # Cannot be measured at annual review. Protects the school from accountability
+    # while appearing child-centred. Always benefits the institution, never the child.
+    vague_aspiration_pattern = re.compile(
+        r'\b('
+        r'will have developed|'
+        r'will have improved|'
+        r'will have increased|'
+        r'will have made progress|'
+        r'will have gained|'
+        r'will have grown|'
+        r'will have built|'
+        r'will have enhanced|'
+        r'will have extended|'
+        r'will have progressed|'
+        r'will have strengthened|'
+        r'will have consolidated|'
+        r'will have broadened|'
+        r'will have begun to|'
+        r'will have started to|'
+        r'will have continued to|'
+        r'will have worked towards|'
+        r'will have explored|'
+        r'will have experienced|'
+        r'will have been introduced to'
+        r')\b',
+        re.IGNORECASE
+    )
 
+    has_achievement  = bool(achievement_pattern.search(combined_e))
+    has_activity     = bool(activity_pattern.search(combined_e))
+    has_aspiration   = bool(vague_aspiration_pattern.search(combined_e))
+
+    # Activity language finding
     if has_activity and not has_achievement:
         m = activity_pattern.search(combined_e)
         ctx = combined_e[max(0, m.start()-80):m.end()+120].strip() if m else ""
@@ -1088,7 +1120,6 @@ def analyse_section_e(e_blocks):
             ),
             "delivery_log_required": False,
         })
-
     elif has_activity and has_achievement:
         m = activity_pattern.search(combined_e)
         ctx = combined_e[max(0, m.start()-80):m.end()+120].strip() if m else ""
@@ -1105,6 +1136,32 @@ def analyse_section_e(e_blocks):
                 "outcome to be replaced with an achievement: not 'will attend a social "
                 "skills group' but 'will be able to initiate a conversation with a peer "
                 "in a structured setting'."
+            ),
+            "delivery_log_required": False,
+        })
+
+    # Vague aspiration language finding — separate RED, separate explanation
+    if has_aspiration:
+        m = vague_aspiration_pattern.search(combined_e)
+        ctx = combined_e[max(0, m.start()-80):m.end()+120].strip() if m else ""
+        findings.append({
+            "tier": "red",
+            "title": "Section E outcomes use vague aspiration language — unmeasurable at annual review",
+            "extract": ctx[:300],
+            "commentary": (
+                "Outcomes like 'will have developed', 'will have improved', or "
+                "'will have made progress' describe a direction of travel, not an "
+                "achievable, measurable endpoint. They cannot be objectively assessed "
+                "at annual review — the school can always claim some development has "
+                "occurred without specifying what was expected. "
+                "This language benefits the institution, not the child. "
+                "A measurable outcome names a specific capability, a context, and "
+                "a standard: 'will be able to spend 20 minutes in a group of three "
+                "peers and initiate conversation on two occasions without adult "
+                "prompting'. That outcome can be assessed. 'Will have developed "
+                "his social understanding' cannot. "
+                "Every vague aspiration outcome must be rewritten at annual review "
+                "with a specific capability, a measurable standard, and a timeframe."
             ),
             "delivery_log_required": False,
         })
