@@ -2195,7 +2195,9 @@ def page_survey():
 def detect_tone_recommendation(text, patterns):
     red_count   = sum(1 for p in patterns if p["tier"] == "red")
     amber_count = sum(1 for p in patterns if p["tier"] == "amber")
+    green_count = sum(1 for p in patterns if p["tier"] == "green")
 
+    # ── Existing formal signals ───────────────────────────────────────────────
     formal_signals = re.compile(
         r"\b(following legal advice|our solicitor|legal services|"
         r"we are unable|complaints procedure|without prejudice|"
@@ -2205,6 +2207,24 @@ def detect_tone_recommendation(text, patterns):
         re.IGNORECASE
     )
 
+    # ── Extended formal signals — escalation and process substitution ─────────
+    escalation_signals = re.compile(
+        r"\b(escalated to|referred to educational psychology|"
+        r"statutory assessment request|alternative provision referral|"
+        r"behaviour support plan review|emergency annual review|"
+        r"consultation period triggered|formal panel review|"
+        r"multi.agency referral|risk assessment updated|"
+        r"complex needs panel|managed move|high.needs funding application|"
+        r"fixed.term suspension|safeguarding threshold|"
+        r"retrospective|post.incident review|"
+        r"records indicate prior patterns|evidence gathered over time|"
+        r"within available resources|resource.limited intervention|"
+        r"capacity.linked support|delivered within standard ratios|"
+        r"shared teaching assistant|pro.rata provision delivery)\b",
+        re.IGNORECASE
+    )
+
+    # ── Existing collaborative signals ────────────────────────────────────────
     collab_signals = re.compile(
         r"\b(we would like to|working together|we appreciate|"
         r"we understand your concerns|happy to discuss|"
@@ -2214,47 +2234,103 @@ def detect_tone_recommendation(text, patterns):
         re.IGNORECASE
     )
 
-    formal_count = len(formal_signals.findall(text))
-    collab_count = len(collab_signals.findall(text))
+    # ── Operational SEND language — school is engaging correctly ─────────────
+    operational_signals = re.compile(
+        r"\b(sensory diet|trusted adult|safe space|take.up time|"
+        r"now and next|visual timetable|social stor(?:y|ies)|"
+        r"non.confrontational|regulation break|emotion coaching|"
+        r"co.regulation|zones of regulation|sensory circuit|"
+        r"movement break|de.escalation|low arousal|check.in)\b",
+        re.IGNORECASE
+    )
 
-    if red_count >= 2 or formal_count >= 2:
+    formal_count      = len(formal_signals.findall(text))
+    escalation_count  = len(escalation_signals.findall(text))
+    collab_count      = len(collab_signals.findall(text))
+    operational_count = len(operational_signals.findall(text))
+
+    # ── Scoring logic ─────────────────────────────────────────────────────────
+    # Escalation language always pushes toward formal regardless of warm tone.
+    # Collaborative mask: warm words + escalation = formal, not collaborative.
+    # Operational language: school using correct SEND terms = slight collab signal.
+
+    adjusted_formal = formal_count + (escalation_count * 2)
+    adjusted_collab = collab_count + operational_count - (escalation_count * 1)
+
+    # Collaborative mask detection — warm language paired with escalation
+    collab_mask_active = (
+        collab_count >= 2 and escalation_count >= 1
+    )
+
+    if collab_mask_active:
+        return {
+            "recommendation": "formal",
+            "label": "Formal written response — collaborative mask detected",
+            "reasoning": (
+                "This correspondence uses warm, collaborative language alongside "
+                "escalation or process language. This combination — partnership tone "
+                "paired with referrals, panels, or resource restrictions — is a "
+                "recognised pattern. The warm tone does not change the substance. "
+                "A formal written response that focuses on provision specifics "
+                "rather than the relationship is appropriate here. "
+                "Put everything in writing and request written responses within "
+                "five working days."
+            ),
+            "confidence": "high",
+        }
+
+    if red_count >= 2 or adjusted_formal >= 2:
         return {
             "recommendation": "formal",
             "label": "Formal written response",
             "reasoning": (
-                f"The correspondence contains {'serious patterns' if red_count >= 2 else 'formal or legal language'} "
+                f"The correspondence contains "
+                f"{'serious provision or escalation patterns' if red_count >= 2 else 'formal or legal language'} "
                 f"that suggest the school is managing rather than engaging. "
                 f"A formal written response that references Section F specifically "
                 f"is likely to be more effective than a collaborative one. "
-                f"Put everything in writing and request a written response within five working days."
+                f"Put everything in writing and request a written response "
+                f"within five working days."
             ),
-            "confidence": "high" if red_count >= 2 and formal_count >= 1 else "moderate",
+            "confidence": "high" if red_count >= 2 and adjusted_formal >= 1 else "moderate",
         }
-    elif collab_count >= 2 and red_count == 0:
+
+    elif adjusted_collab >= 2 and red_count == 0 and escalation_count == 0:
+        # Only genuinely collaborative if no escalation present
+        operational_note = (
+            " The school is also using correct SEND language which is a positive signal."
+            if operational_count >= 2 else ""
+        )
         return {
             "recommendation": "collaborative",
             "label": "Collaborative response",
             "reasoning": (
                 "The language in this correspondence is constructive and appears to be "
                 "engaging with your concerns. A collaborative tone is likely to preserve "
-                "the relationship while still holding the school to account. "
+                "the relationship while still holding the school to account."
+                f"{operational_note} "
                 "You can be warm and firm at the same time."
             ),
             "confidence": "moderate",
         }
+
     else:
+        operational_note = (
+            " The school is using correct SEND language — that is a positive sign "
+            "but check it is backed by a delivery log."
+            if operational_count >= 1 else ""
+        )
         return {
             "recommendation": "neutral",
             "label": "Measured response",
             "reasoning": (
                 "The correspondence does not show strong signals in either direction. "
                 "A measured written response — factual, specific, referencing the EHCP — "
-                "is appropriate. Neither overly formal nor overly warm."
+                f"is appropriate.{operational_note} "
+                "Neither overly formal nor overly warm."
             ),
             "confidence": "low",
         }
-
-
 def add_to_thread(direction, summary, patterns, tone_rec, reply_sent=""):
     if "thread" not in st.session_state:
         st.session_state.thread = []
