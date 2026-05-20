@@ -2546,6 +2546,92 @@ def page_full_report():
         render_finding_card(finding, index=i, show_full=True)
 
     st.markdown("---")
+    st.subheader("Professional Reports — Recommendation Check")
+    st.caption(
+        "Upload an EP, SALT, or OT report. FRED will check whether each "
+        "recommendation has been written into Section F as a legal commitment."
+    )
+
+    report_type = st.selectbox(
+        "Report type",
+        ["EP report", "SALT report", "OT report", "Other professional report"],
+        key="report_type_select"
+    )
+
+    uploaded_report = st.file_uploader(
+        f"Upload {report_type} (PDF)",
+        type=["pdf"],
+        key="report_uploader"
+    )
+
+    if uploaded_report is not None:
+        with st.spinner(f"Reading {report_type}..."):
+            report_text = extract_text_from_pdf(uploaded_report)
+
+        if not report_text or len(report_text.strip()) < 50:
+            st.error(
+                f"Could not extract text from this {report_type}. "
+                "Check the PDF is not scanned-only."
+            )
+        else:
+            section_f_blocks = find_section_blocks(
+                st.session_state.get("full_text", ""), "F"
+            )
+            section_f_combined = "\n".join(section_f_blocks) if section_f_blocks else ""
+
+            if not section_f_combined:
+                st.warning(
+                    "Section F has not been extracted yet. "
+                    "Upload your EHCP first, then upload the report."
+                )
+            else:
+                rec_findings = analyse_report_recommendations(
+                    report_text=report_text,
+                    section_f_text=section_f_combined,
+                    report_label=report_type
+                )
+
+                if not rec_findings:
+                    st.info(
+                        f"No recommendation language detected in this {report_type}. "
+                        "Check the report extracted correctly using the text preview below."
+                    )
+                    with st.expander("Report text preview (first 1000 characters)"):
+                        st.text(report_text[:1000])
+                else:
+                    red_count   = sum(1 for f in rec_findings if f["type"] == "RED")
+                    green_count = sum(1 for f in rec_findings if f["type"] == "GREEN")
+
+                    st.markdown(
+                        f"**{report_type} — Recommendation check:** "
+                        f":red[{red_count} not converted] &nbsp;|&nbsp; "
+                        f":green[{green_count} converted to Section F]"
+                    )
+
+                    for finding in rec_findings:
+                        if finding["type"] == "RED":
+                            with st.container(border=True):
+                                st.markdown("🔴 **Recommendation not converted to Section F**")
+                                st.markdown("**From the report:**")
+                                st.markdown(f"*{finding['recommendation'][:400]}*")
+                                st.markdown(f"**Trigger phrase found:** `{finding['trigger']}`")
+                                st.markdown(
+                                    f"**Substance checked for:** "
+                                    f"{', '.join(finding['key_terms'])}"
+                                )
+                                st.markdown(f"**Finding:** {finding['finding']}")
+                                st.caption(f"📋 {finding['citation']}")
+
+                        elif finding["type"] == "GREEN":
+                            with st.expander(
+                                f"✅ Converted — {', '.join(finding['matched_terms'][:3])}"
+                            ):
+                                st.markdown("**From the report:**")
+                                st.markdown(f"*{finding['recommendation'][:400]}*")
+                                st.markdown("**Matched in Section F:**")
+                                st.markdown(f"*{finding['section_f_match'][:400]}*")
+                                st.markdown(f"{finding['finding']}")
+                                
     st.markdown("### What next?")
     st.markdown(
         "**Red findings** must be addressed at your annual review. "
