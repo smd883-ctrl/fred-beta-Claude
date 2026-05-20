@@ -410,6 +410,32 @@ VAGUE_QUALIFIER = [
     "ongoing support",
 ]
 
+# ── TASK 2.3: EP / SALT / OT RECOMMENDATION TRIGGERS ────────────────────────
+RECOMMENDATION_TRIGGERS = [
+    "it is recommended that",
+    "it is recommended",
+    "would benefit from",
+    "should receive",
+    "recommended that",
+    "recommended",
+]
+
+_REC_STOPWORDS = {
+    "a", "an", "the", "and", "or", "but", "in", "on", "at", "to", "for",
+    "of", "with", "by", "from", "is", "are", "was", "were", "be", "been",
+    "being", "have", "has", "had", "do", "does", "did", "will", "would",
+    "could", "should", "may", "might", "shall", "can", "that", "this",
+    "these", "those", "it", "its", "they", "them", "their", "he", "she",
+    "his", "her", "we", "our", "you", "your", "i", "my", "who", "which",
+    "also", "both", "through", "during", "before", "after", "above",
+    "between", "out", "off", "over", "under", "again", "further", "then",
+    "once", "into", "onto", "upon", "when", "where", "while", "such",
+    "child", "pupil", "student", "young", "person", "their", "given",
+    "continue", "continued", "ongoing", "therefore", "however",
+}
+
+_REC_MATCH_THRESHOLD = 2
+
 # Combined list — used where a single list is needed elsewhere in the app
 PROHIBITED_WORDS = VAGUE_MODAL + VAGUE_QUALIFIER
 # ── PROVISION LIBRARY ─────────────────────────────────────────────────────────
@@ -763,7 +789,27 @@ def find_section_blocks(full_text, section_letter):
 
     return blocks
 
+def _split_into_sentences(text: str) -> list:
+    raw = re.split(r'(?<=[.!?])\s+(?=[A-Z])', text)
+    return [s.strip() for s in raw if s.strip()]
 
+
+def _extract_key_terms(phrase: str) -> list:
+    words = re.findall(r"[a-zA-Z']+", phrase.lower())
+    return [w for w in words if len(w) > 3 and w not in _REC_STOPWORDS]
+
+
+def _will_sentences_from_section_f(section_f_text: str) -> list:
+    sentences = _split_into_sentences(section_f_text)
+    will_re = re.compile(r'\bwill\b', re.IGNORECASE)
+    return [s for s in sentences if will_re.search(s)]
+
+
+def _score_match(key_terms: list, candidate_sentence: str) -> tuple:
+    lower = candidate_sentence.lower()
+    matched = [t for t in key_terms if t in lower]
+    return len(matched), matched
+    
 def analyse_section_f(f_blocks):
     findings = []
 
@@ -1047,7 +1093,94 @@ def analyse_section_f(f_blocks):
         })
 
     return findings
+def analyse_report_recommendations(report_text: str, section_f_text: str,
+                                   report_label: str = "Professional report") -> list:
+    if not report_text or not section_f_text:
+        return []
 
+    findings = []
+    sentences = _split_into_sentences(report_text)
+    will_sentences = _will_sentences_from_section_f(section_f_text)
+
+    trigger_pattern = re.compile(
+        r'(' + '|'.join(re.escape(t) for t in RECOMMENDATION_TRIGGERS) + r')',
+        re.IGNORECASE
+    )
+
+    seen = set()
+
+    for sentence in sentences:
+        m = trigger_pattern.search(sentence)
+        if not m:
+            continue
+
+        key = sentence.strip().lower()
+        if key in seen:
+            continue
+        seen.add(key)
+
+        trigger_found = m.group(1)
+        substance = sentence[m.end():].strip()
+        key_terms = _extract_key_terms(substance)
+
+        if len(key_terms) < 2:
+            continue
+
+        best_score = 0
+        best_sentence = None
+        best_matched = []
+
+        for will_s in will_sentences:
+            score, matched = _score_match(key_terms, will_s)
+            if score > best_score:
+                best_score = score
+                best_sentence = will_s
+                best_matched = matched
+
+        if best_score >= _REC_MATCH_THRESHOLD:
+            findings.append({
+                "type": "GREEN",
+                "report_label": report_label,
+                "recommendation": sentence.strip(),
+                "trigger": trigger_found,
+                "key_terms": key_terms,
+                "matched_terms": best_matched,
+                "section_f_match": best_sentence,
+                "finding": (
+                    f"This {report_label} recommendation appears to have been converted "
+                    f"to a 'will' commitment in Section F. "
+                    f"Matched terms: {', '.join(best_matched)}. "
+                    f"Check the Section F wording is specific, quantified, and names "
+                    f"the deliverer — vague 'will' language is flagged separately."
+                ),
+                "citation": "",
+            })
+        else:
+            findings.append({
+                "type": "RED",
+                "report_label": report_label,
+                "recommendation": sentence.strip(),
+                "trigger": trigger_found,
+                "key_terms": key_terms,
+                "matched_terms": [],
+                "section_f_match": None,
+                "finding": (
+                    f"A professional has recommended this provision in the {report_label}. "
+                    f"It does not appear in Section F as a 'will' commitment. "
+                    f"If it is not specified in Section F, the LA has no legal duty to deliver it. "
+                    f"At the next annual review, ask: "
+                    f"'Why has this recommendation not been written into Section F?'"
+                ),
+                "citation": (
+                    "Children and Families Act 2014 s42 — the duty to deliver provision "
+                    "is absolute, but only for provision that is specified in Section F. "
+                    "A recommendation that has not been converted to a 'will' commitment "
+                    "in Section F is not a legal entitlement and the LA can decline to act on it."
+                ),
+            })
+
+    return findings
+    
 def analyse_section_e(e_blocks):
     findings = []
 
