@@ -431,7 +431,11 @@ _REC_STOPWORDS = {
     "between", "out", "off", "over", "under", "again", "further", "then",
     "once", "into", "onto", "upon", "when", "where", "while", "such",
     "child", "pupil", "student", "young", "person", "their", "given",
-    "continue", "continued", "ongoing", "therefore", "however",
+    "continue", "continued", "ongoing", "therefore", "however","school",
+    "staff", "able", "support", "needs", "help", "time",
+    "work", "make", "feel", "find", "take", "give", "show", "know",
+    "including", "within", "around", "across", "often", "always",
+    "sometimes", "currently",
 }
 
 _REC_MATCH_THRESHOLD = 2
