@@ -435,7 +435,8 @@ _REC_STOPWORDS = {
     "staff", "able", "support", "needs", "help", "time",
     "work", "make", "feel", "find", "take", "give", "show", "know",
     "including", "within", "around", "across", "often", "always",
-    "sometimes", "currently",
+    "sometimes", "currently","sometimes", "currently", "specific", "having", 
+    "benefit", "continue", "engage",
 }
 
 _REC_MATCH_THRESHOLD = 2
