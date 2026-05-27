@@ -1637,6 +1637,13 @@ def run_full_analysis(full_text):
     e_blocks = find_section_blocks(full_text, "E")
     b_blocks = find_section_blocks(full_text, "B")
 
+    child_name = extract_child_name(full_text)
+    if child_name:
+        _REC_STOPWORDS.add(child_name)
+        st.session_state["child_name"] = child_name
+    else:
+        st.session_state["child_name"] = ""
+
     f_findings = analyse_section_f(f_blocks)
     e_findings = analyse_section_e(e_blocks)
     b_findings = analyse_section_b(b_blocks, f_blocks)
