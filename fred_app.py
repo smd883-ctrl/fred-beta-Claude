@@ -1170,11 +1170,14 @@ def analyse_report_recommendations(report_text: str, section_f_text: str,
                 "matched_terms": [],
                 "section_f_match": None,
                 "finding": (
-                    f"A professional has recommended this provision in the {report_label}. "
-                    f"It does not appear in Section F as a 'will' commitment. "
-                    f"If it is not specified in Section F, the LA has no legal duty to deliver it. "
-                    f"At the next annual review, ask: "
-                    f"'Why has this recommendation not been written into Section F?'"
+                    "A professional who assessed your child recommended this provision. "
+                    "It does not appear in Section F as a legal commitment — which means "
+                    "the school and the LA have no duty to deliver it. "
+                    "A recommendation that stays in an assessment report but never makes "
+                    "it into Section F is not enforceable. "
+                    "At your next annual review, ask directly: why has this not been "
+                    "written into the plan? If there is no satisfactory answer, request "
+                    "that it is added before the review closes."
                 ),
                 "citation": (
                     "Children and Families Act 2014 s42 — the duty to deliver provision "
