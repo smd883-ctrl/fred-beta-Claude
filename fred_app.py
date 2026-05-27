@@ -1152,11 +1152,14 @@ def analyse_report_recommendations(report_text: str, section_f_text: str,
                 "matched_terms": best_matched,
                 "section_f_match": best_sentence,
                 "finding": (
-                    f"This {report_label} recommendation appears to have been converted "
-                    f"to a 'will' commitment in Section F. "
-                    f"Matched terms: {', '.join(best_matched)}. "
-                    f"Check the Section F wording is specific, quantified, and names "
-                    f"the deliverer — vague 'will' language is flagged separately."
+                    "A recommendation from this report appears to have been carried "
+                    "through into Section F as a commitment. That is what good looks "
+                    "like — a professional identifies a need, and the EHCP converts it "
+                    "into something the school is legally required to deliver. "
+                    "Check the Section F wording carefully. It must state what will be "
+                    "delivered, how often, for how long, and by whom. If it uses vague "
+                    "language — 'as appropriate', 'access to', 'regularly' — that will "
+                    "appear as a separate red finding."
                 ),
                 "citation": "",
             })
