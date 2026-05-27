@@ -1630,7 +1630,7 @@ def extract_child_name(full_text: str) -> str:
                         "local", "authority", "education", "health", "care"}
             if candidate not in excluded:
                 return candidate
-            return ""
+    return ""
                 
 
 def run_full_analysis(full_text):
