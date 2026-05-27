@@ -1600,6 +1600,37 @@ def _get_short_extract(text, start, length):
     extract = re.sub(r' {2,}', ' ', extract)
     return extract
 
+def extract_child_name(full_text: str) -> str:
+    name_label_pattern = re.compile(
+        r"(?:child'?s?\s+name|name\s+of\s+child|full\s+name|pupil'?s?\s+name|student'?s?\s+name)"
+        r"\s*[:\-]?\s*([A-Z][a-z]{1,20}(?:\s+[A-Z][a-z]{1,20}){0,3})",
+        re.IGNORECASE
+    )
+    m = name_label_pattern.search(full_text)
+    if m:
+        first_name = m.group(1).strip().split()[0].lower()
+        if len(first_name) > 2:
+            return first_name
+    dob_marker = re.compile(
+        r'\b(date\s+of\s+birth|dob|date\s+issued)\b',
+        re.IGNORECASE
+    )
+    dob_m = dob_marker.search(full_text)
+    if dob_m:
+        start = max(0, dob_m.start() - 300)
+        end   = min(len(full_text), dob_m.end() + 300)
+        window = full_text[start:end]
+        name_in_window = re.search(
+            r'\b([A-Z][a-z]{2,20})\s+([A-Z][a-z]{2,20})\b',
+            window
+        )
+        if name_in_window:
+            candidate = name_in_window.group(1).lower()
+            excluded = {"date", "name", "birth", "section", "plan", "school",
+                        "local", "authority", "education", "health", "care"}
+            if candidate not in excluded:
+                return candidate
+    return ""=
 
 def run_full_analysis(full_text):
     f_blocks = find_section_blocks(full_text, "F")
