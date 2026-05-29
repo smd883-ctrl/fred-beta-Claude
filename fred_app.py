@@ -921,7 +921,7 @@ def analyse_section_f(f_blocks):
     for word in VAGUE_QUALIFIER:
         if re.search(rf'\b{re.escape(word)}\b', combined_f, re.IGNORECASE):
            m = re.search(rf'.{{0,200}}\b{re.escape(word)}\b.{{0,200}}', combined_f, re.IGNORECASE | re.DOTALL)
-            ctx = re.sub(r'\s+', ' ', m.group(0)).strip() if m else word
+           ctx = re.sub(r'\s+', ' ', m.group(0)).strip() if m else word
             found_qualifier.append((word, ctx))
 
     if found_qualifier:
