@@ -794,6 +794,25 @@ def find_section_blocks(full_text, section_letter):
 
     return blocks
 
+def _sentence_for_trigger(text: str, trigger: str, max_chars: int = 300) -> str:
+    """
+    Returns the complete sentence from text that contains trigger.
+    Cleans whitespace. Falls back to character window if sentence split fails.
+    """
+    sentences = _split_into_sentences(text)
+    trigger_lower = trigger.lower()
+    for sent in sentences:
+        if trigger_lower in sent.lower():
+            clean = re.sub(r'\s+', ' ', sent).strip()
+            return clean[:max_chars]
+    m = re.search(
+        rf'.{{0,150}}\b{re.escape(trigger)}\b.{{0,150}}',
+        text, re.IGNORECASE | re.DOTALL
+    )
+    if m:
+        return re.sub(r'\s+', ' ', m.group(0)).strip()[:max_chars]
+    return trigger
+
 def _split_into_sentences(text: str) -> list:
     raw = re.split(r'(?<=[.!?])\s+(?=[A-Z])', text)
     return [s.strip() for s in raw if s.strip()]
@@ -891,9 +910,8 @@ def analyse_section_f(f_blocks):
     found_modal = []
     for word in VAGUE_MODAL:
         if re.search(rf'\b{re.escape(word)}\b', combined_f, re.IGNORECASE):
-            m = re.search(rf'.{{0,200}}\b{re.escape(word)}\b.{{0,200}}', combined_f, re.IGNORECASE | re.DOTALL)
-            ctx = re.sub(r'\s+', ' ', m.group(0)).strip() if m else word
-            found_modal.append((word, ctx))
+           ctx = _sentence_for_trigger(combined_f, word)
+           found_modal.append((word, ctx))
 
     if found_modal:
         examples = "; ".join(f'"{w}"' for w, _ in found_modal[:4])
@@ -920,8 +938,7 @@ def analyse_section_f(f_blocks):
     found_qualifier = []
     for word in VAGUE_QUALIFIER:
         if re.search(rf'\b{re.escape(word)}\b', combined_f, re.IGNORECASE):
-           m = re.search(rf'.{{0,200}}\b{re.escape(word)}\b.{{0,200}}', combined_f, re.IGNORECASE | re.DOTALL)
-           ctx = re.sub(r'\s+', ' ', m.group(0)).strip() if m else word
+           ctx = _sentence_for_trigger(combined_f, word)
            found_qualifier.append((word, ctx))
 
     if found_qualifier:
