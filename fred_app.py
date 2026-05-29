@@ -891,7 +891,7 @@ def analyse_section_f(f_blocks):
     found_modal = []
     for word in VAGUE_MODAL:
         if re.search(rf'\b{re.escape(word)}\b', combined_f, re.IGNORECASE):
-            m = re.search(rf'.{{0,80}}\b{re.escape(word)}\b.{{0,80}}', combined_f, re.IGNORECASE)
+            m = re.search(rf'.{{0,200}}\b{re.escape(word)}\b.{{0,200}}', combined_f, re.IGNORECASE)
             ctx = m.group(0).strip() if m else word
             found_modal.append((word, ctx))
 
@@ -900,7 +900,7 @@ def analyse_section_f(f_blocks):
         findings.append({
             "tier": "red",
             "title": "Section F uses conditional language instead of a lawful commitment",
-            "extract": "; ".join(f'"{ctx[:120]}"' for _, ctx in found_modal[:3]),
+            "extract": "; ".join(f'"{ctx[:200]}"' for _, ctx in found_modal[:3]),
             "commentary": (
                 "Section F must state what provision 'will' be delivered — not what the child "
                 "'should receive', 'would benefit from', or 'may be provided with'. "
@@ -920,7 +920,7 @@ def analyse_section_f(f_blocks):
     found_qualifier = []
     for word in VAGUE_QUALIFIER:
         if re.search(rf'\b{re.escape(word)}\b', combined_f, re.IGNORECASE):
-            m = re.search(rf'.{{0,80}}\b{re.escape(word)}\b.{{0,80}}', combined_f, re.IGNORECASE)
+            m = re.search(rf'.{{0,200}}\b{re.escape(word)}\b.{{0,200}}', combined_f, re.IGNORECASE)
             ctx = m.group(0).strip() if m else word
             found_qualifier.append((word, ctx))
 
@@ -929,7 +929,7 @@ def analyse_section_f(f_blocks):
         findings.append({
             "tier": "red",
             "title": "Section F contains vague qualifier language that removes enforceability",
-            "extract": "; ".join(f'"{ctx[:120]}"' for _, ctx in found_qualifier[:3]),
+            "extract": "; ".join(f'"{ctx[:200]}"' for _, ctx in found_qualifier[:3]),
             "commentary": (
                 "The SEN Code of Practice (paragraph 9.69) requires Section F to be "
                 "detailed and specific — and normally quantified. Terms like 'access to', "
