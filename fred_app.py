@@ -794,6 +794,34 @@ def find_section_blocks(full_text, section_letter):
 
     return blocks
 
+def _context_passage_for_trigger(text: str, trigger: str, max_chars: int = 600) -> str:
+    """
+    Returns the sentence before, the sentence containing trigger, and the sentence after.
+    Plain text — bolding is applied at render time in render_finding_card.
+    Falls back to a character window if sentence split fails.
+    """
+    sentences = _split_into_sentences(text)
+    trigger_lower = trigger.lower()
+
+    target_idx = None
+    for i, sent in enumerate(sentences):
+        if trigger_lower in sent.lower():
+            target_idx = i
+            break
+
+    if target_idx is None:
+        m = re.search(
+            rf'.{{0,200}}\b{re.escape(trigger)}\b.{{0,200}}',
+            text, re.IGNORECASE | re.DOTALL
+        )
+        if m:
+            return re.sub(r'\s+', ' ', m.group(0)).strip()[:max_chars]
+        return trigger
+
+    start_idx = max(0, target_idx - 1)
+    end_idx   = min(len(sentences), target_idx + 2)
+    passage   = ' '.join(sentences[start_idx:end_idx])
+    return re.sub(r'\s+', ' ', passage).strip()[:max_chars]
 def _sentence_for_trigger(text: str, trigger: str, max_chars: int = 300) -> str:
     """
     Returns the complete sentence from text that contains trigger.
@@ -918,7 +946,8 @@ def analyse_section_f(f_blocks):
         findings.append({
             "tier": "red",
             "title": "Section F uses conditional language instead of a lawful commitment",
-            "extract": "; ".join(f'"{ctx[:200]}"' for _, ctx in found_modal[:3]),
+            "extract": _context_passage_for_trigger(combined_f, found_modal[0][0]),
+            "trigger_word": found_modal[0][0],
             "commentary": (
                 "Section F must state what provision 'will' be delivered — not what the child "
                 "'should receive', 'would benefit from', or 'may be provided with'. "
@@ -946,7 +975,8 @@ def analyse_section_f(f_blocks):
         findings.append({
             "tier": "red",
             "title": "Section F contains vague qualifier language that removes enforceability",
-            "extract": "; ".join(f'"{ctx[:200]}"' for _, ctx in found_qualifier[:3]),
+            "extract": _context_passage_for_trigger(combined_f, found_qualifier[0][0]),
+            "trigger_word": found_qualifier[0][0],
             "commentary": (
                 "The SEN Code of Practice (paragraph 9.69) requires Section F to be "
                 "detailed and specific — and normally quantified. Terms like 'access to', "
@@ -2039,6 +2069,16 @@ init_state()
 
 # ── HELPER RENDERERS ──────────────────────────────────────────────────────────
 
+def _highlight_trigger(text: str, trigger: str) -> str:
+    """Bolds the trigger word in red for HTML display. Used in render_finding_card only."""
+    if not trigger or not text:
+        return text
+    return re.sub(
+        rf'({re.escape(trigger)})',
+        r'<b style="color:#C0392B">\1</b>',
+        text,
+        flags=re.IGNORECASE
+    )
 def render_finding_card(finding, index=None, show_full=True):
     tier = finding["tier"]
     badge_class = f"badge-{tier}"
@@ -2065,7 +2105,7 @@ def render_finding_card(finding, index=None, show_full=True):
             'letter-spacing:0.08em;color:#888;margin:0 0 0.3rem 0;">From your EHCP:</p>'
             '<p style="font-style:italic;color:#333;font-size:0.92rem;'
             'margin:0;line-height:1.6;">'
-            f'"{extract[:400]}"'
+            f'"{_highlight_trigger(extract[:800], finding.get("trigger_word", ""))}"'
             '</p></div>'
         )
 
