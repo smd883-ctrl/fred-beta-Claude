@@ -1723,7 +1723,8 @@ def build_ehcp_commitments_summary(f_blocks: list) -> list:
         r'communication friendly|quality first|ordinarily available|'
         r'deliverer|section f|section e|section b|annual review|'
         r'children and families act|send code|local authority|'
-        r'this plan|this ehcp|the ehcp|named school|placement)\b',
+        r'this plan|this ehcp|the ehcp|named school|placement|'
+        r'will be discharged|will benefit his|will benefit her)\b',
         re.IGNORECASE
     )
 
@@ -2690,7 +2691,7 @@ def page_full_report():
             "This is a draft EHCP. Red findings indicate language and gaps that should be "
             "strengthened before the document is finalised. You have a window to request amendments."
         )
-        
+
 # ── EHCP Commitments Summary ──────────────────────────────────────────────
     f_blocks_for_summary = find_section_blocks(st.session_state.get("full_text", ""), "F")
     commitments = build_ehcp_commitments_summary(f_blocks_for_summary)
