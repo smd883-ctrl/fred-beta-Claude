@@ -1528,6 +1528,19 @@ def analyse_section_e(e_blocks):
 
     return findings
 
+def _build_provision_regex(category: str) -> re.Pattern:
+    """
+    Builds a compiled regex from PROVISION_LIBRARY terms for the given category.
+    Used in analyse_section_b() as a second-stage precision check.
+    Returns a pattern that matches any known provision term for that category.
+    Falls back to an never-matching pattern if category is not found.
+    """
+    terms = PROVISION_LIBRARY.get(category, [])
+    if not terms:
+        return re.compile(r"(?!)")  # never matches
+    escaped = [re.escape(term) for term in terms]
+    pattern_str = r'\b(?:' + "|".join(escaped) + r')\b'
+    return re.compile(pattern_str, re.IGNORECASE)
 
 def analyse_section_b(b_blocks, f_blocks):
     findings = []
@@ -1540,6 +1553,7 @@ def analyse_section_b(b_blocks, f_blocks):
     need_areas = [
         {
             "name": "Communication and interaction",
+            "library_key": "Communication and Interaction",
             "b_keywords": r'\b(communication|speech|language|SALT|interaction|social communication|autism|ASD|pragmatic)\b',
             "f_keywords": r'\b(speech|language|communication|SALT|social skills|interaction)\b',
             "what_good_looks_like": (
@@ -1553,6 +1567,7 @@ def analyse_section_b(b_blocks, f_blocks):
         },
         {
             "name": "Cognition and learning",
+            "library_key": "Cognition and Learning",
             "b_keywords": r'\b(cognition|learning|literacy|numeracy|reading|writing|dyslexia|processing|memory|attention)\b',
             "f_keywords": r'\b(literacy|numeracy|reading|writing|learning support|intervention|programme)\b',
             "what_good_looks_like": (
@@ -1564,6 +1579,7 @@ def analyse_section_b(b_blocks, f_blocks):
         },
         {
             "name": "Social, emotional and mental health",
+            "library_key": "SEMH",
             "b_keywords": r'\b(SEMH|emotional|mental health|anxiety|behaviour|wellbeing|regulation|self.esteem|ADHD|attachment)\b',
             "f_keywords": r'\b(emotional|SEMH|regulation|therapeutic|counselling|pastoral|wellbeing|anxiety)\b',
             "what_good_looks_like": (
@@ -1576,6 +1592,7 @@ def analyse_section_b(b_blocks, f_blocks):
         },
         {
             "name": "Sensory and physical needs",
+            "library_key": "Sensory and Physical",
             "b_keywords": r'\b(sensory|physical|motor|OT|occupational therapy|fine motor|gross motor|proprioception|vestibular|sensory processing)\b',
             "f_keywords": r'\b(OT|occupational|sensory|motor|physical|sensory diet|movement break)\b',
             "what_good_looks_like": (
@@ -1590,7 +1607,13 @@ def analyse_section_b(b_blocks, f_blocks):
 
     for area in need_areas:
         b_match = re.search(area["b_keywords"], combined_b, re.IGNORECASE)
-        f_match = re.search(area["f_keywords"], combined_f, re.IGNORECASE)
+
+        # Two-stage F check:
+        # Stage 1 — broad keyword match (topic present)
+        # Stage 2 — PROVISION_LIBRARY term match (named provision present)
+        f_broad  = re.search(area["f_keywords"], combined_f, re.IGNORECASE) if combined_f else None
+        f_library = _build_provision_regex(area["library_key"]).search(combined_f) if combined_f else None
+        f_match  = f_broad or f_library
 
         if b_match and not f_match:
             ctx = combined_b[max(0, b_match.start()-60):b_match.end()+120].strip()
