@@ -1758,7 +1758,7 @@ def build_ehcp_commitments_summary(f_blocks: list) -> list:
                 return results
 
     return results
-    
+
 def run_full_analysis(full_text):
     f_blocks = find_section_blocks(full_text, "F")
     e_blocks = find_section_blocks(full_text, "E")
@@ -2690,7 +2690,23 @@ def page_full_report():
             "This is a draft EHCP. Red findings indicate language and gaps that should be "
             "strengthened before the document is finalised. You have a window to request amendments."
         )
+        
+# ── EHCP Commitments Summary ──────────────────────────────────────────────
+    f_blocks_for_summary = find_section_blocks(st.session_state.get("full_text", ""), "F")
+    commitments = build_ehcp_commitments_summary(f_blocks_for_summary)
 
+    if commitments:
+        st.markdown("### Your child's EHCP commits to:")
+        st.markdown(
+            "<p style='font-size:0.88rem;color:#666;margin-bottom:0.8rem;'>"
+            "These are the specific commitments written into Section F of the plan. "
+            "Each one is a legal obligation on the school and the LA."
+            "</p>",
+            unsafe_allow_html=True
+        )
+        for item in commitments:
+            st.markdown(f"- {item}")
+        st.markdown("---")
     st.markdown("---")
     if "provision_inventory" in st.session_state:
 
