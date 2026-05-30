@@ -1708,7 +1708,57 @@ def extract_child_name(full_text: str) -> str:
                 return candidate
     return ""
                 
+def build_ehcp_commitments_summary(f_blocks: list) -> list:
+    """
+    Extracts plain-English commitment sentences from Section F blocks.
+    Returns up to 20 cleaned, deduplicated sentences containing 'will'.
+    Filters out administrative, structural, and deliverer-column sentences.
+    Used to display 'Your child's EHCP commits to:' at the top of the report.
+    """
+    if not f_blocks:
+        return []
 
+    ADMIN_PATTERNS = re.compile(
+        r'\b(who will provide|provision set out|all pupils|in addition to|'
+        r'communication friendly|quality first|ordinarily available|'
+        r'deliverer|section f|section e|section b|annual review|'
+        r'children and families act|send code|local authority|'
+        r'this plan|this ehcp|the ehcp|named school|placement)\b',
+        re.IGNORECASE
+    )
+
+    MIN_WORDS = 6
+    MAX_WORDS = 50
+
+    seen = set()
+    results = []
+
+    for block in f_blocks:
+        sentences = _split_into_sentences(block)
+        for sent in sentences:
+            # Must contain 'will'
+            if not re.search(r'\bwill\b', sent, re.IGNORECASE):
+                continue
+            # Filter admin/structural sentences
+            if ADMIN_PATTERNS.search(sent):
+                continue
+            # Clean whitespace
+            clean = re.sub(r'\s+', ' ', sent).strip()
+            # Length gate
+            word_count = len(clean.split())
+            if word_count < MIN_WORDS or word_count > MAX_WORDS:
+                continue
+            # Deduplicate on normalised lowercase
+            key = clean.lower()
+            if key in seen:
+                continue
+            seen.add(key)
+            results.append(clean)
+            if len(results) >= 20:
+                return results
+
+    return results
+    
 def run_full_analysis(full_text):
     f_blocks = find_section_blocks(full_text, "F")
     e_blocks = find_section_blocks(full_text, "E")
