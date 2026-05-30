@@ -1790,7 +1790,13 @@ def run_full_analysis(full_text):
 
 # ── REPORT GENERATORS ─────────────────────────────────────────────────────────
 
-def generate_word_report(findings, child_name="your child", situation="", doc_type="EHCP"):
+def generate_word_report(
+    findings,
+    child_name="your child",
+    situation="",
+    doc_type="EHCP",
+    commitments=None
+):
     doc = Document()
 
     title = doc.add_heading("FRED Report", 0)
@@ -1812,7 +1818,12 @@ def generate_word_report(findings, child_name="your child", situation="", doc_ty
         f"This report identified {red_n} lawful requirement(s) not met (Red), "
         f"{amber_n} best practice gap(s) (Amber), and {green_n} compliant area(s) (Green)."
     )
+    if commitments:
+        doc.add_heading("Your child's EHCP commits to:", 1)
 
+        for commitment in commitments[:20]:
+            p = doc.add_paragraph(style="List Bullet")
+            p.add_run(commitment)
     needs_log = any(f.get("delivery_log_required") for f in findings)
     if needs_log:
         p = doc.add_paragraph(
