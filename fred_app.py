@@ -2915,7 +2915,12 @@ def page_full_report():
 
     col1, col2, col3 = st.columns([1, 1, 2])
     with col1:
-        word_buf = generate_word_report(findings, doc_type=doc_type, situation=situation)
+        word_buf = generate_word_report(
+            findings,
+            doc_type=doc_type,
+            situation=situation,
+            commitments=commitments
+        )
         st.download_button(
             label="Download as Word",
             data=word_buf,
