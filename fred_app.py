@@ -19,6 +19,18 @@ try:
 except Exception as e:
     EHCP_PARSER_AVAILABLE = False
     print(f"EHCP parser unavailable: {e}")
+    # ── SUPABASE CONNECTION ──────────────────────────────────────────────────────
+try:
+    from supabase import create_client, Client
+    SUPABASE_URL = st.secrets["SUPABASE_URL"]
+    SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+    supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+    SUPABASE_AVAILABLE = True
+    print("Supabase connected successfully")
+except Exception as e:
+    SUPABASE_AVAILABLE = False
+    supabase = None
+    print(f"Supabase unavailable: {e}")
 try:
     from sandbox.provision_inventory import build_provision_inventory
     INVENTORY_AVAILABLE = True
