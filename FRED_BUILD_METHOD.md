@@ -2,7 +2,7 @@ FRED
 Families’ Rights and Entitlements Directory
 THE FRED BUILD METHOD
 Method statement · Build log · Decision record · Recovery document
-Living document — updated after every session. Current to Session Debrief 07, 29 May 2026.
+Living document — updated after every session. Current to Session Debrief 08, 31 May 2026.
 
 1. What FRED is for
 A parent uploads their child’s EHCP. FRED tells them in plain English: what Section F commits to, where the language is vague or unenforceable, where EP/SALT/OT recommendations were not converted to commitments, and where needs in Section B have no provision in Section F.
@@ -128,7 +128,7 @@ provision_patterns — anonymised tagged findings for best practice database (op
 
 
 8. Build tracker — current state
-Current as of Session Debrief 07, 29 May 2026.
+Current as of Session Debrief 08, 31 May 2026.
 
 Phase 0 — Pre-Beta
 #
@@ -408,9 +408,8 @@ Debrief 07
 Tasks 2.4 and 2.5 — two-stage B-to-F matching, plain English commitments summary. Perceived value principle established.
 ✅ Received
 Debrief 08
-
-
-Pending
+Tasks 2.5A and 1.6A — download parity achieved, column threshold set to 60%, page-break extraction identified
+✅ Received
 Debrief 09
 
 
