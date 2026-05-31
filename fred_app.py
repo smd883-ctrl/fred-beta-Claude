@@ -1881,7 +1881,13 @@ def generate_word_report(
     return buf
 
 
-def generate_pdf_report(findings, child_name="your child", situation="", doc_type="EHCP"):
+def generate_pdf_report(
+    findings,
+    child_name="your child",
+    situation="",
+    doc_type="EHCP",
+    commitments=None
+):
     """Generate PDF report using ReportLab."""
     buf = BytesIO()
     doc = SimpleDocTemplate(
@@ -2021,7 +2027,20 @@ def generate_pdf_report(findings, child_name="your child", situation="", doc_typ
             body_style
         ))
         story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor('#D4A017'), spaceAfter=10))
+        
+        if commitments:
+            story.append(Paragraph("Your child's EHCP commits to:", section_h_style))
 
+        for commitment in commitments[:20]:
+            safe_commitment = (
+                commitment.replace("&", "&amp;")
+                          .replace("<", "&lt;")
+                          .replace(">", "&gt;")
+            )
+            story.append(Paragraph(f"• {safe_commitment}", body_style))
+
+        story.append(Spacer(1, 0.3*cm))
+   
     story.append(Spacer(1, 0.6*cm))
 
     # ── Findings ──────────────────────────────────────────────────────────
@@ -2928,7 +2947,12 @@ def page_full_report():
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         )
     with col2:
-        pdf_buf = generate_pdf_report(findings, doc_type=doc_type, situation=situation)
+        pdf_buf = generate_pdf_report(
+            findings,
+            doc_type=doc_type,
+            situation=situation,
+            commitments=commitments
+        )
         st.download_button(
             label="Download as PDF",
             data=pdf_buf,
