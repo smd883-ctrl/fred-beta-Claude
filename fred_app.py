@@ -658,7 +658,7 @@ def extract_text_from_pdf(uploaded_file):
 
                 # Column split threshold — Warwickshire format uses ~65% left / 35% right
                 # A4 page = 595pt. Right column ("Who will provide support") starts ~390pt
-                split_x = page_width * 0.65
+                split_x = page_width * 0.60
 
                 left_words  = [w for w in words if float(w['x0']) <= split_x]
                 right_words = [w for w in words if float(w['x0']) >  split_x]
