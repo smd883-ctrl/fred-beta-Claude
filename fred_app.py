@@ -2609,6 +2609,13 @@ def page_upload():
 
 
 def page_sneak_peek():
+    # Logged in users bypass the email gate — beta access
+    if st.session_state.get("user"):
+        st.session_state.email_submitted = True
+        st.session_state.email_address = st.session_state["user"].email
+        st.session_state.stage = "full_report"
+        st.rerun()
+
     findings = st.session_state.findings
 
     st.markdown("## Your report is ready")
