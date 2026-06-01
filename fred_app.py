@@ -4691,22 +4691,21 @@ def page_subscriber():
 def render_nav():
     col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 3])
     with col1:
-        if st.button("Home"):
+        if st.button("Home", key="nav_home"):
             st.session_state.stage = "landing"
             st.rerun()
     with col2:
-        if st.button("My report"):
+        if st.button("My report", key="nav_report"):
             if st.session_state.findings:
                 st.session_state.stage = "full_report"
                 st.rerun()
     with col3:
         if st.session_state.subscribed:
-            if st.button("My workspace"):
+            if st.button("My workspace", key="nav_workspace"):
                 st.session_state.stage = "subscriber"
                 st.rerun()
     with col4:
-        # REPAIR 4: correspondence requires email gate
-        if st.button("Correspondence"):
+        if st.button("Correspondence", key="nav_correspondence"):
             if st.session_state.email_submitted:
                 st.session_state.stage = "correspondence"
             else:
