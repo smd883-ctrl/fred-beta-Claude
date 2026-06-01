@@ -4749,24 +4749,3 @@ else:
     else:
         page_landing()
 
-render_nav()
-st.markdown("<hr style='margin:0 0 1.5rem;border-color: #d0dae8;'>", unsafe_allow_html=True)
-
-stage = st.session_state.stage
-
-if stage == "landing":
-    page_landing()
-elif stage == "explainer":
-    page_explainer()
-elif stage == "upload":
-    page_upload()
-elif stage == "sneak_peek":
-    page_sneak_peek()
-elif stage == "full_report":
-    page_full_report()
-elif stage == "subscriber":
-    page_subscriber()
-elif stage == "correspondence":
-    page_correspondence()
-else:
-    page_landing()
