@@ -2985,6 +2985,64 @@ def page_full_report():
         "Subscriptions open at launch."
     )
 
+def page_login():
+    st.markdown("## Welcome to FRED")
+    st.markdown("Sign in or create an account to continue.")
+
+    mode = st.radio(
+        "What would you like to do?",
+        ["Sign in", "Create account"],
+        horizontal=True,
+        key="login_mode"
+    )
+
+    email = st.text_input("Email address", key="login_email")
+    password = st.text_input("Password", type="password", key="login_password")
+
+    if mode == "Sign in":
+        if st.button("Sign in", key="signin_btn"):
+            if not email or not password:
+                st.error("Please enter your email and password.")
+            elif not SUPABASE_AVAILABLE:
+                st.error("Authentication unavailable. Please try again later.")
+            else:
+                try:
+                    result = supabase.auth.sign_in_with_password({
+                        "email": email,
+                        "password": password
+                    })
+                    st.session_state["user"] = result.user
+                    st.session_state["session"] = result.session
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Sign in failed: {e}")
+
+    else:
+        st.markdown(
+            "<p style='font-size:0.88rem;color:#666;'>Free during beta — no card required.</p>",
+            unsafe_allow_html=True
+        )
+        if st.button("Create account", key="signup_btn"):
+            if not email or not password:
+                st.error("Please enter your email and password.")
+            elif len(password) < 6:
+                st.error("Password must be at least 6 characters.")
+            elif not SUPABASE_AVAILABLE:
+                st.error("Authentication unavailable. Please try again later.")
+            else:
+                try:
+                    result = supabase.auth.sign_up({
+                        "email": email,
+                        "password": password
+                    })
+                    st.session_state["user"] = result.user
+                    st.session_state["session"] = result.session
+                    st.success(
+                        "Account created. Check your email to confirm your address, "
+                        "then sign in."
+                    )
+                except Exception as e:
+                    st.error(f"Account creation failed: {e}")
 
 def page_survey():
     st.markdown("### Your feedback")
