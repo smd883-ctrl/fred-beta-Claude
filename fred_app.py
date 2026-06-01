@@ -2987,7 +2987,7 @@ def page_full_report():
 
 def page_login():
     st.markdown("## Welcome to FRED")
-    st.markdown("Sign in or create an account to continue.")
+    st.markdown("Sign in or create an account to continue.FRED is free during beta — no card required, no obligation.")
 
     mode = st.radio(
         "What would you like to do?",
