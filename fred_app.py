@@ -1805,8 +1805,6 @@ def write_analysis_to_supabase(findings: list, meta: dict, la_name: str = None):
         return True
     except Exception as e:
         print(f"Supabase write failed (non-blocking): {e}")
-    print(f"DEBUG user: {st.session_state.get('user')}")
-    print(f"DEBUG supabase available: {SUPABASE_AVAILABLE}")
         return False
     
 def run_full_analysis(full_text):
