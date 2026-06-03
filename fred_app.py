@@ -3033,8 +3033,33 @@ def page_full_report():
     )
 
 def page_login():
-    st.markdown("## Welcome to FRED")
-    st.markdown("Sign in or create an account to continue.FRED is free during beta — no card required, no obligation.")
+    st.markdown("""
+    <style>
+    [data-testid="stAppViewContainer"] {
+        background-color: #f5f3ef;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+    <div style="max-width:480px;margin:3rem auto 0 auto;padding:0 1rem;">
+
+      <div style="text-align:center;margin-bottom:2rem;">
+        <h1 style="font-family:'DM Serif Display',serif;font-size:3.2rem;
+                   color:#2d4a2d;margin:0;letter-spacing:0.06em;">FRED</h1>
+        <p style="font-size:0.72rem;letter-spacing:0.22em;text-transform:uppercase;
+                  color:#5a8a5a;margin:0.3rem 0 1.2rem;font-weight:300;">
+          Families' Rights and Entitlements Directory
+        </p>
+        <p style="font-size:1rem;color:#444;line-height:1.7;margin:0;font-weight:300;">
+          FRED helps parents understand what their child's EHCP commits to
+          and whether it is being delivered.
+        </p>
+      </div>
+
+      <div style="background:white;border-radius:12px;padding:2rem;
+                  border:0.5px solid #d8d4cc;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
+    """, unsafe_allow_html=True)
 
     mode = st.radio(
         "What would you like to do?",
@@ -3047,7 +3072,7 @@ def page_login():
     password = st.text_input("Password", type="password", key="login_password")
 
     if mode == "Sign in":
-        if st.button("Sign in", key="signin_btn"):
+        if st.button("Sign in", key="signin_btn", use_container_width=True):
             if not email or not password:
                 st.error("Please enter your email and password.")
             elif not SUPABASE_AVAILABLE:
@@ -3069,7 +3094,7 @@ def page_login():
             "<p style='font-size:0.88rem;color:#666;'>Free during beta — no card required.</p>",
             unsafe_allow_html=True
         )
-        if st.button("Create account", key="signup_btn"):
+        if st.button("Create account", key="signup_btn", use_container_width=True):
             if not email or not password:
                 st.error("Please enter your email and password.")
             elif len(password) < 6:
@@ -3090,6 +3115,15 @@ def page_login():
                     )
                 except Exception as e:
                     st.error(f"Account creation failed: {e}")
+
+    st.markdown("""
+      </div>
+
+      <p style="text-align:center;font-size:0.8rem;color:#999;margin-top:1.2rem;font-weight:300;">
+        Free during beta · No card required · Built by a parent
+      </p>
+    </div>
+    """, unsafe_allow_html=True)
 
 def page_survey():
     st.markdown("### Your feedback")
