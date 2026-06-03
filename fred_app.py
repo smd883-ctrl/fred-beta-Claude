@@ -1773,9 +1773,11 @@ def build_ehcp_commitments_summary(f_blocks: list) -> list:
     return results
 def write_analysis_to_supabase(findings: list, meta: dict, la_name: str = None):
     if not SUPABASE_AVAILABLE or not supabase:
+        st.warning("Supabase not available")
         return False
     user = st.session_state.get("user")
     if not user:
+        st.warning("No user found in session")
         return False
     try:
         import json as _json
