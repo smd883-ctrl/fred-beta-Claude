@@ -2638,6 +2638,8 @@ def page_upload():
             st.session_state.upcoming_dates    = upcoming_dates
             st.session_state.relationship_tone = relationship_tone
             st.session_state.doc_name          = vault.get("ehcp", {}).get("name", "EHCP")
+            write_success = write_analysis_to_supabase(findings, meta)
+            st.session_state["analysis_saved"] = write_success
             st.session_state.stage             = "sneak_peek"
             st.rerun()
 
