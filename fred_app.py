@@ -3043,7 +3043,6 @@ def page_login():
 
     st.markdown("""
     <div style="max-width:480px;margin:3rem auto 0 auto;padding:0 1rem;">
-
       <div style="text-align:center;margin-bottom:2rem;">
         <h1 style="font-family:'DM Serif Display',serif;font-size:3.2rem;
                    color:#2d4a2d;margin:0;letter-spacing:0.06em;">FRED</h1>
@@ -3056,9 +3055,7 @@ def page_login():
           and whether it is being delivered.
         </p>
       </div>
-
-      <div style="background:white;border-radius:12px;padding:2rem;
-                  border:0.5px solid #d8d4cc;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
+    </div>
     """, unsafe_allow_html=True)
 
     mode = st.radio(
@@ -3117,12 +3114,9 @@ def page_login():
                     st.error(f"Account creation failed: {e}")
 
     st.markdown("""
-      </div>
-
-      <p style="text-align:center;font-size:0.8rem;color:#999;margin-top:1.2rem;font-weight:300;">
-        Free during beta · No card required · Built by a parent
-      </p>
-    </div>
+    <p style="text-align:center;font-size:0.8rem;color:#999;margin-top:1.2rem;font-weight:300;">
+      Free during beta · No card required · Built by a parent
+    </p>
     """, unsafe_allow_html=True)
 
 def page_survey():
