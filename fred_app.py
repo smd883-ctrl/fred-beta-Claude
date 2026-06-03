@@ -2736,7 +2736,9 @@ def page_full_report():
     green_n = sum(1 for f in findings if f["tier"] == "green")
 
     st.markdown("## Your full FRED report")
-
+    if st.session_state.get("analysis_saved"):
+        st.caption("Your analysis has been saved to your account.")
+        
     st.markdown(f"""
     <div style="background:#f0f4fa;border-radius:6px;padding:0.8rem 1.2rem;margin-bottom:1.2rem;font-size:0.9rem;color: #444;">
       Document type: <b>{doc_type}</b> &nbsp;·&nbsp;
