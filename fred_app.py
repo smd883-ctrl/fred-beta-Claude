@@ -1780,6 +1780,7 @@ def write_analysis_to_supabase(findings: list, meta: dict, la_name: str = None):
     try:
         import json as _json
         user_id = user.id
+        supabase.auth.set_session(st.session_state["session"].access_token, st.session_state["session"].refresh_token)
         today_label = datetime.datetime.now().strftime("%d %b %Y")
         document_label = f"EHCP uploaded {today_label}"
         supabase.table("document_logs").insert({
