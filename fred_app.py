@@ -1807,7 +1807,7 @@ def write_analysis_to_supabase(findings: list, meta: dict, la_name: str = None):
         }).execute()
         return True
     except Exception as e:
-        print(f"Supabase write failed (non-blocking): {e}")
+        st.warning(f"Supabase write failed: {e}")
         return False
     
 def run_full_analysis(full_text):
