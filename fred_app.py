@@ -1771,7 +1771,42 @@ def build_ehcp_commitments_summary(f_blocks: list) -> list:
                 return results
 
     return results
-
+def write_analysis_to_supabase(findings: list, meta: dict, la_name: str = None):
+    if not SUPABASE_AVAILABLE or not supabase:
+        return False
+    user = st.session_state.get("user")
+    if not user:
+        return False
+    try:
+        import json as _json
+        user_id = user.id
+        today_label = datetime.datetime.now().strftime("%d %b %Y")
+        document_label = f"EHCP uploaded {today_label}"
+        supabase.table("document_logs").insert({
+            "user_id": str(user_id),
+            "document_label": document_label,
+            "la_name": la_name,
+        }).execute()
+        red_count = sum(1 for f in findings if f.get("tier") == "red")
+        vague_count = sum(1 for f in findings if "vague" in f.get("title", "").lower())
+        commitments_count = len(
+            build_ehcp_commitments_summary(
+                find_section_blocks(st.session_state.get("full_text", ""), "F")
+            )
+        )
+        supabase.table("analysis_findings").insert({
+            "user_id": str(user_id),
+            "section_f_blocks_found": meta.get("f_blocks_found", 0),
+            "vague_terms_count": vague_count,
+            "red_findings_count": red_count,
+            "commitments_count": commitments_count,
+            "raw_findings_json": _json.dumps(findings, default=str),
+        }).execute()
+        return True
+    except Exception as e:
+        print(f"Supabase write failed (non-blocking): {e}")
+        return False
+    
 def run_full_analysis(full_text):
     f_blocks = find_section_blocks(full_text, "F")
     e_blocks = find_section_blocks(full_text, "E")
