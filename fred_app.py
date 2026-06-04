@@ -1774,6 +1774,7 @@ def build_ehcp_commitments_summary(f_blocks: list) -> list:
 def write_analysis_to_supabase(findings: list, meta: dict, la_name: str = None):
     if not SUPABASE_AVAILABLE or not supabase:
         return False
+    st.markdown("<script>window.scrollTo(0, 0);</script>", unsafe_allow_html=True)
     user = st.session_state.get("user")
     if not user:
         return False
