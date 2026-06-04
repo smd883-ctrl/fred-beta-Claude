@@ -368,6 +368,12 @@ st.markdown(f"""
 
   footer {{visibility: hidden;}}
   #MainMenu {{visibility: hidden;}}
+
+  [data-testid="stTextInput"] input {{
+    border: 1.5px solid #9ab0c8 !important;
+    background-color: #ffffff !important;
+    border-radius: 6px !important;
+  }}
 </style>
 """, unsafe_allow_html=True)
 
