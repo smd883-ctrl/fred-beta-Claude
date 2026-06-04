@@ -4808,7 +4808,8 @@ def page_subscriber():
 # ── NAVIGATION ────────────────────────────────────────────────────────────────
 
 def render_nav():
-    components.html("<script>window.parent.document.querySelector('section.main').scrollTo(0, 0);</script>", height=0)
+    # Scroll-to-top on nav: not reliably achievable in Streamlit Community Cloud
+    # due to iframe sandboxing. Parked at Session 12. Revisit if self-hosting on Render.
     user = st.session_state.get("user")
     col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 1])
     with col1:
