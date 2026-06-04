@@ -4801,7 +4801,7 @@ else:
 with st.sidebar:
     st.markdown(
         f"<p style='font-size:0.85rem;color:#555;margin-bottom:0.5rem;'>"
-        f"Signed in as<br><b>{st.session_state['user'].email}</b></p>",
+        f"Signed in as<br><b>{st.session_state.get('user', {}).email if st.session_state.get('user') else ''}</b></p>",
         unsafe_allow_html=True
     )
     if st.button("Sign out", key="signout_btn", use_container_width=True):
