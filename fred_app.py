@@ -4766,7 +4766,7 @@ def page_subscriber():
 # ── NAVIGATION ────────────────────────────────────────────────────────────────
 
 def render_nav():
-    components.html("<script>window.parent.scrollTo(0, 0);</script>", height=0)
+    components.html("<script>window.parent.document.querySelector('section.main').scrollTo(0, 0);</script>", height=0)
     user = st.session_state.get("user")
     col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 1])
     with col1:
