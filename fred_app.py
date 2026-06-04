@@ -1689,6 +1689,40 @@ def _get_short_extract(text, start, length):
     extract = re.sub(r' {2,}', ' ', extract)
     return extract
 
+def extract_la_name(full_text: str) -> str:
+    """
+    Best-effort extraction of the local authority name from EHCP text.
+    Looks in the first 3000 characters where the issuing body typically appears.
+    Returns a string if found, empty string if not.
+    """
+    search_window = full_text[:3000]
+
+    # Pattern 1: "Local Authority: Warwickshire" or "Local Authority — Warwickshire"
+    m = re.search(
+        r'local authority\s*[:\-–]\s*([A-Z][a-zA-Z\s]{2,40}?)(?:\n|,|\.)',
+        search_window, re.IGNORECASE
+    )
+    if m:
+        return m.group(1).strip()
+
+    # Pattern 2: "Warwickshire County Council" or "Birmingham City Council"
+    m = re.search(
+        r'\b([A-Z][a-zA-Z\s]{2,30}(?:County|City|Borough|District|Metropolitan)\s+Council)\b',
+        search_window
+    )
+    if m:
+        return m.group(1).strip()
+
+    # Pattern 3: "issued by Warwickshire" or "prepared by Warwickshire"
+    m = re.search(
+        r'(?:issued|prepared|produced)\s+by\s+([A-Z][a-zA-Z\s]{2,30}?)(?:\n|,|\.)',
+        search_window, re.IGNORECASE
+    )
+    if m:
+        return m.group(1).strip()
+
+    return ""
+
 def extract_child_name(full_text: str) -> str:
     name_label_pattern = re.compile(
         r"(?:child'?s?\s+name|name\s+of\s+child|full\s+name|pupil'?s?\s+name|student'?s?\s+name)"
@@ -1788,7 +1822,7 @@ def write_analysis_to_supabase(findings: list, meta: dict, la_name: str = None):
         supabase.table("document_logs").insert({
             "user_id": str(user_id),
             "document_label": document_label,
-            "la_name": la_name,
+            "la_name": st.session_state.get("la_name", None) or None,
         }).execute()
         red_count = sum(1 for f in findings if f.get("tier") == "red")
         vague_count = sum(1 for f in findings if "vague" in f.get("title", "").lower())
@@ -1816,6 +1850,8 @@ def run_full_analysis(full_text):
     b_blocks = find_section_blocks(full_text, "B")
 
     child_name = extract_child_name(full_text)
+    la_name = extract_la_name(full_text)
+    st.session_state["la_name"] = la_name
     if child_name:
         _REC_STOPWORDS.add(child_name)
         st.session_state["child_name"] = child_name
