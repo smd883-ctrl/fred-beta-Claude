@@ -4794,25 +4794,29 @@ def render_nav():
 if not st.session_state.get("user"):
     page_login()
 else:
+    with st.sidebar:
+        user = st.session_state.get("user")
+        if user:
+            st.markdown(
+                f"<p style='font-size:0.85rem;color:#555;margin-bottom:0.5rem;'>"
+                f"Signed in as<br><b>{user.email}</b></p>",
+                unsafe_allow_html=True
+            )
+        if st.button("Sign out", key="signout_btn", use_container_width=True):
+            try:
+                if SUPABASE_AVAILABLE:
+                    supabase.auth.sign_out()
+            except Exception:
+                pass
+            for key in list(st.session_state.keys()):
+                del st.session_state[key]
+            st.rerun()
+
     render_nav()
     st.markdown("<hr style='margin:0 0 1.5rem;border-color: #d0dae8;'>", unsafe_allow_html=True)
 
     # Sign out button
-with st.sidebar:
-    st.markdown(
-        f"<p style='font-size:0.85rem;color:#555;margin-bottom:0.5rem;'>"
-        f"Signed in as<br><b>{st.session_state.get('user', {}).email if st.session_state.get('user') else ''}</b></p>",
-        unsafe_allow_html=True
-    )
-    if st.button("Sign out", key="signout_btn", use_container_width=True):
-        try:
-            if SUPABASE_AVAILABLE:
-                supabase.auth.sign_out()
-        except Exception:
-            pass
-        for key in list(st.session_state.keys()):
-            del st.session_state[key]
-        st.rerun()
+
 
     stage = st.session_state.stage
 
