@@ -4764,44 +4764,32 @@ def page_subscriber():
 # ── NAVIGATION ────────────────────────────────────────────────────────────────
 
 def render_nav():
-    col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 3])
+    user = st.session_state.get("user")
+    col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 1])
     with col1:
-        if st.button("Home", key="nav_home"):
+        if st.button("Home", key="nav_home", use_container_width=True):
             st.session_state.stage = "landing"
             st.rerun()
     with col2:
-        if st.button("My report", key="nav_report"):
+        if st.button("My report", key="nav_report", use_container_width=True):
             if st.session_state.findings:
                 st.session_state.stage = "full_report"
                 st.rerun()
     with col3:
-        if st.session_state.subscribed:
-            if st.button("My workspace", key="nav_workspace"):
-                st.session_state.stage = "subscriber"
-                st.rerun()
-    with col4:
-        if st.button("Correspondence", key="nav_correspondence"):
+        if st.button("Correspondence", key="nav_correspondence", use_container_width=True):
             if st.session_state.email_submitted:
                 st.session_state.stage = "correspondence"
             else:
                 st.session_state.stage = "sneak_peek"
             st.rerun()
-
-
-# ── ROUTER ────────────────────────────────────────────────────────────────────
-
-# ── AUTH GATE ─────────────────────────────────────────────────────────────────
-if not st.session_state.get("user"):
-    page_login()
-else:
-    with st.sidebar:
-        user = st.session_state.get("user")
+    with col4:
         if user:
             st.markdown(
-                f"<p style='font-size:0.85rem;color:#555;margin-bottom:0.5rem;'>"
-                f"Signed in as<br><b>{user.email}</b></p>",
+                f"<p style='font-size:0.78rem;color:#666;margin:0.4rem 0 0;text-align:center;'>"
+                f"{user.email}</p>",
                 unsafe_allow_html=True
             )
+    with col5:
         if st.button("Sign out", key="signout_btn", use_container_width=True):
             try:
                 if SUPABASE_AVAILABLE:
@@ -4812,12 +4800,17 @@ else:
                 del st.session_state[key]
             st.rerun()
 
+
+# ── ROUTER ────────────────────────────────────────────────────────────────────
+
+# ── AUTH GATE ─────────────────────────────────────────────────────────────────
+if not st.session_state.get("user"):
+    page_login()
+
+
+
     render_nav()
     st.markdown("<hr style='margin:0 0 1.5rem;border-color: #d0dae8;'>", unsafe_allow_html=True)
-
-    # Sign out button
-
-
     stage = st.session_state.stage
 
     if stage == "landing":
