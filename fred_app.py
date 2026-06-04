@@ -4802,17 +4802,13 @@ def render_nav():
 
 
 # ── ROUTER ────────────────────────────────────────────────────────────────────
-
 # ── AUTH GATE ─────────────────────────────────────────────────────────────────
 if not st.session_state.get("user"):
     page_login()
-
-
-
+else:
     render_nav()
     st.markdown("<hr style='margin:0 0 1.5rem;border-color: #d0dae8;'>", unsafe_allow_html=True)
     stage = st.session_state.stage
-
     if stage == "landing":
         page_landing()
     elif stage == "explainer":
