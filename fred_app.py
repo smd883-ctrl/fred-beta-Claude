@@ -4798,11 +4798,20 @@ else:
     st.markdown("<hr style='margin:0 0 1.5rem;border-color: #d0dae8;'>", unsafe_allow_html=True)
 
     # Sign out button
-    col_out = st.sidebar.button("Sign out", key="signout_btn")
-    if col_out:
-        supabase.auth.sign_out()
-        st.session_state["user"] = None
-        st.session_state["session"] = None
+    with st.sidebar:
+    st.markdown(
+        f"<p style='font-size:0.85rem;color:#555;margin-bottom:0.5rem;'>"
+        f"Signed in as<br><b>{st.session_state['user'].email}</b></p>",
+        unsafe_allow_html=True
+    )
+    if st.button("Sign out", key="signout_btn", use_container_width=True):
+        try:
+            if SUPABASE_AVAILABLE:
+                supabase.auth.sign_out()
+        except Exception:
+            pass
+        for key in list(st.session_state.keys()):
+            del st.session_state[key]
         st.rerun()
 
     stage = st.session_state.stage
