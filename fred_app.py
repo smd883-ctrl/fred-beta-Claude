@@ -2525,10 +2525,8 @@ def page_upload():
     </div>
     """, unsafe_allow_html=True)
 
-    if st.session_state.vault:
-        if st.button("Analyse my documents", use_container_width=False, key="analyse_top2"):
-            st.session_state["analyse_clicked_top"] = True
-
+    if st.button("Analyse my documents", use_container_width=False, key="analyse_top2"):
+        st.session_state["analyse_clicked_top"] = True
     DOCUMENT_TYPES = [
         {
             "key": "ehcp",
