@@ -65,7 +65,7 @@ st.markdown(f"""
 
   html, body, [class*="css"] {{
     font-family: 'DM Sans', sans-serif;
-    background-color: #f5f5f0;
+    background-color: #f2f0eb;
     color: #1c1c2e;
   }}
 
