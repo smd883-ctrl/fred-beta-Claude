@@ -4798,7 +4798,7 @@ else:
     st.markdown("<hr style='margin:0 0 1.5rem;border-color: #d0dae8;'>", unsafe_allow_html=True)
 
     # Sign out button
-    with st.sidebar:
+with st.sidebar:
     st.markdown(
         f"<p style='font-size:0.85rem;color:#555;margin-bottom:0.5rem;'>"
         f"Signed in as<br><b>{st.session_state['user'].email}</b></p>",
