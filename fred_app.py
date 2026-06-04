@@ -2515,7 +2515,7 @@ def page_explainer():
 def page_upload():
     st.markdown("## Upload your documents")
 
-    st.markdown(f"""
+   st.markdown(f"""
     <div style="background:#eaf5e0;border-radius:10px;padding:1rem 1.3rem;margin-bottom:1.5rem;border:0.5px solid #c0ddb0;">
       <p style="margin:0;font-size:0.95rem;color: #2d4a2d;line-height:1.7;">
         Upload your child's EHCP first. Then add any other documents you have —
@@ -2524,6 +2524,10 @@ def page_upload():
       </p>
     </div>
     """, unsafe_allow_html=True)
+
+    if st.session_state.vault:
+        if st.button("Analyse my documents", use_container_width=False, key="analyse_top2"):
+            st.session_state["analyse_clicked_top"] = True
 
     DOCUMENT_TYPES = [
         {
@@ -2631,7 +2635,8 @@ def page_upload():
                 unsafe_allow_html=True
             )
 
-    analyse_clicked = st.button("Analyse my documents", use_container_width=False, key="analyse_top")
+    analyse_clicked = st.button("Analyse my documents", use_container_width=False, key="analyse_top") or st.session_state.get("analyse_clicked_top", False)
+    st.session_state["analyse_clicked_top"] = False
 
     st.markdown("---")
     st.markdown("### A few quick questions")
