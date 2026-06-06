@@ -2362,10 +2362,14 @@ def page_landing():
     </div>
     """, unsafe_allow_html=True)
 
-    col1, col2, col3 = st.columns([1, 1, 1])
+    col1, col2, col3, col4 = st.columns([1, 2, 2, 1])
     with col2:
-        if st.button("Get my report", use_container_width=True):
+        if st.button("Analyse my documents", use_container_width=True, key="landing_analyse"):
             st.session_state.stage = "explainer"
+            st.rerun()
+    with col3:
+        if st.button("Apply for an EHCP", use_container_width=True, key="landing_ehc"):
+            st.session_state.stage = "ehc_request"
             st.rerun()
 
     st.markdown("""
