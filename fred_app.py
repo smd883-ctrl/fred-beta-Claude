@@ -4904,6 +4904,8 @@ else:
         page_subscriber()
     elif stage == "correspondence":
         page_correspondence()
+    elif stage == "ehc_request":
+        page_ehc_request()
     else:
         page_landing()
 
