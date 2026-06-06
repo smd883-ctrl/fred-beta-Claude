@@ -4630,6 +4630,79 @@ Yours sincerely,
                     mime="text/plain",
                 )
 
+def page_ehc_request():
+    st.markdown("## Apply for an EHCP")
+
+    st.markdown(f"""
+    <div style="background:#eaf5e0;border-radius:10px;padding:1.2rem 1.5rem;margin-bottom:1.5rem;border:0.5px solid #c0ddb0;">
+      <p style="margin:0 0 0.6rem;font-size:1rem;color:#2d4a2d;font-weight:600;">
+        What this tool does
+      </p>
+      <p style="margin:0 0 0.5rem;font-size:0.95rem;color:#2d4a2d;line-height:1.7;">
+        This tool helps you build a formal request for an Education, Health and Care needs assessment.
+        A well-constructed request is more likely to be accepted — and harder for the local authority to refuse.
+      </p>
+      <p style="margin:0 0 0.5rem;font-size:0.95rem;color:#2d4a2d;line-height:1.7;">
+        You will produce a structured written request covering your child's needs across ten categories,
+        ready to send to your local authority.
+      </p>
+      <p style="margin:0;font-size:0.95rem;color:#2d4a2d;line-height:1.7;">
+        Your answers save as you go. You can close this page and continue where you left off.
+      </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ── Supabase status check ─────────────────────────────────────────────────
+    user = st.session_state.get("user")
+    existing_request = None
+
+    if SUPABASE_AVAILABLE and supabase and user:
+        try:
+            supabase.auth.set_session(
+                st.session_state["session"].access_token,
+                st.session_state["session"].refresh_token
+            )
+            result = supabase.table("ehc_requests") \
+                .select("*") \
+                .eq("user_id", str(user.id)) \
+                .eq("status", "in_progress") \
+                .order("updated_at", desc=True) \
+                .limit(1) \
+                .execute()
+            if result.data:
+                existing_request = result.data[0]
+        except Exception as e:
+            st.caption(f"Could not check for existing request: {e}")
+
+    # ── Button logic ──────────────────────────────────────────────────────────
+    if existing_request:
+        completed = sum(
+            1 for i in range(1, 11)
+            if existing_request.get(f"category_{i}")
+        )
+        st.markdown(f"""
+        <div style="background:white;border:1px solid #d0dae8;border-radius:8px;
+                    padding:1rem 1.2rem;margin-bottom:1.2rem;">
+          <p style="margin:0;font-size:0.95rem;">
+            You have a request in progress —
+            <b>{completed} of 10</b> categories complete.
+          </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        col1, col2 = st.columns([1, 3])
+        with col1:
+            if st.button("Continue where you left off", use_container_width=True, key="ehc_continue"):
+                st.session_state["ehc_request_id"] = existing_request["id"]
+                st.session_state["ehc_request_data"] = existing_request
+                st.success("Welcome back — your progress has been loaded.")
+    else:
+        col1, col2 = st.columns([1, 3])
+        with col1:
+            if st.button("Start my request", use_container_width=True, key="ehc_start"):
+                st.session_state["ehc_request_id"] = None
+                st.session_state["ehc_request_data"] = {}
+                st.success("Your request has been started and will save as you go.")
 
 def page_subscriber():
     st.markdown(f"""
