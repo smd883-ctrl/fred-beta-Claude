@@ -4653,61 +4653,11 @@ def page_ehc_request():
     </div>
     """, unsafe_allow_html=True)
 
-    # ── Supabase status check ─────────────────────────────────────────────────
-    user = st.session_state.get("user")
-    existing_request = None
+    if st.button("Start my request", key="ehc_start"):
+        st.session_state["ehc_request_started"] = True
 
-    if SUPABASE_AVAILABLE and supabase and user:
-        try:
-            supabase.auth.set_session(
-                st.session_state["session"].access_token,
-                st.session_state["session"].refresh_token
-            )
-            result = supabase.table("ehc_requests") \
-                .select("*") \
-                .eq("user_id", str(user.id)) \
-                .eq("status", "in_progress") \
-                .order("updated_at", desc=True) \
-                .limit(1) \
-                .execute()
-            if result.data:
-                existing_request = result.data[0]
-        except Exception as e:
-            st.caption(f"Could not check for existing request: {e}")
-
-    # ── Button logic ──────────────────────────────────────────────────────────
-    if existing_request:
-        completed = sum(
-            1 for i in range(1, 11)
-            if existing_request.get(f"category_{i}")
-        )
-        st.markdown(f"""
-        <div style="background:white;border:1px solid #d0dae8;border-radius:8px;
-                    padding:1rem 1.2rem;margin-bottom:1.2rem;">
-          <p style="margin:0;font-size:0.95rem;">
-            You have a request in progress —
-            <b>{completed} of 10</b> categories complete.
-          </p>
-        </div>
-        """, unsafe_allow_html=True)
-
-        if st.button("Continue where you left off", use_container_width=True, key="ehc_continue"):
-            st.session_state["ehc_request_id"] = existing_request["id"]
-            st.session_state["ehc_request_data"] = existing_request
-            st.session_state["ehc_request_started"] = True
-            st.rerun()
-
-        if st.session_state.get("ehc_request_started"):
-            st.success("Welcome back — your progress has been loaded.")
-    else:
-        if st.button("Start my request", use_container_width=True, key="ehc_start"):
-            st.session_state["ehc_request_id"] = None
-            st.session_state["ehc_request_data"] = {}
-            st.session_state["ehc_request_started"] = True
-            st.rerun()
-
-        if st.session_state.get("ehc_request_started"):
-            st.success("Your request has been started and will save as you go.")
+    if st.session_state.get("ehc_request_started"):
+        st.success("Your request has been started and will save as you go.")
 
 def page_subscriber():
     st.markdown(f"""
