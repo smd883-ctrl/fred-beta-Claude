@@ -2255,6 +2255,7 @@ def init_state():
         "vault": {},
         "thread": [],
         "thread_context": "",
+        "ehc_request_started": False,
     }
     for k, v in defaults.items():
         if k not in st.session_state:
@@ -4690,19 +4691,23 @@ def page_ehc_request():
         </div>
         """, unsafe_allow_html=True)
 
-        col1, col2 = st.columns([1, 3])
-        with col1:
-            if st.button("Continue where you left off", use_container_width=True, key="ehc_continue"):
-                st.session_state["ehc_request_id"] = existing_request["id"]
-                st.session_state["ehc_request_data"] = existing_request
-                st.success("Welcome back — your progress has been loaded.")
+        if st.button("Continue where you left off", use_container_width=True, key="ehc_continue"):
+            st.session_state["ehc_request_id"] = existing_request["id"]
+            st.session_state["ehc_request_data"] = existing_request
+            st.session_state["ehc_request_started"] = True
+            st.rerun()
+
+        if st.session_state.get("ehc_request_started"):
+            st.success("Welcome back — your progress has been loaded.")
     else:
-        col1, col2 = st.columns([1, 3])
-        with col1:
-            if st.button("Start my request", use_container_width=True, key="ehc_start"):
-                st.session_state["ehc_request_id"] = None
-                st.session_state["ehc_request_data"] = {}
-                st.success("Your request has been started and will save as you go.")
+        if st.button("Start my request", use_container_width=True, key="ehc_start"):
+            st.session_state["ehc_request_id"] = None
+            st.session_state["ehc_request_data"] = {}
+            st.session_state["ehc_request_started"] = True
+            st.rerun()
+
+        if st.session_state.get("ehc_request_started"):
+            st.success("Your request has been started and will save as you go.")
 
 def page_subscriber():
     st.markdown(f"""
