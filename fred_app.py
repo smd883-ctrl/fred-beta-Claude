@@ -4720,8 +4720,33 @@ def page_ehc_request():
                 st.caption(f"Could not create request: {e}")
             st.rerun()
 
-    if st.session_state.get("ehc_request_started"):
-
+         if st.session_state.get("ehc_request_started"):
+             if st.session_state.get("ehc_journey_active"):
+                 page_ehc_journey()
+         else:
+            st.markdown("---")
+            st.markdown("## A few things before you start")
+            st.markdown(f"""
+            <div style="background:white;border:1px solid #d0dae8;border-radius:10px;
+                        padding:1.4rem 1.6rem;margin-bottom:1.5rem;">
+              <p style="margin:0 0 0.9rem;font-size:0.97rem;line-height:1.8;">
+                ① &nbsp; Answer in your own words — there is no right or wrong way to describe your child.
+              </p>
+              <p style="margin:0 0 0.9rem;font-size:0.97rem;line-height:1.8;">
+                ② &nbsp; Think about specific moments rather than general descriptions — the more concrete the better.
+              </p>
+              <p style="margin:0 0 0.9rem;font-size:0.97rem;line-height:1.8;">
+                ③ &nbsp; You do not need to complete everything in one sitting — your answers save automatically as you go.
+              </p>
+              <p style="margin:0;font-size:0.97rem;line-height:1.8;">
+                ④ &nbsp; You know your child better than anyone who will assess them — trust what you know.
+              </p>
+            </div>
+            """, unsafe_allow_html=True)
+            if st.button("Let's start", key="ehc_guide_start", use_container_width=False):
+                st.session_state["ehc_journey_active"] = True
+                st.session_state["ehc_current_category"] = 1
+                st.rerun()
 def page_subscriber():
     st.markdown(f"""
     <div style="background:{NAVY};border-radius:8px;padding:2rem;margin-bottom:1.5rem;">
