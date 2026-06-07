@@ -4699,7 +4699,13 @@ def page_ehc_request():
 
     else:
         if st.button("Start my request", use_container_width=False, key="ehc_start"):
-            if SUPABASE_AVAILABLE and supabase and user:
+            if not SUPABASE_AVAILABLE:
+                st.error("Supabase not available")
+            elif not supabase:
+                st.error("Supabase client is None")
+            elif not user:
+                st.error("No user in session state")
+            else:
                 try:
                     supabase.auth.set_session(
                         st.session_state["session"].access_token,
@@ -4709,12 +4715,15 @@ def page_ehc_request():
                         "user_id": str(user.id),
                         "status": "in_progress",
                     }).execute()
+                    st.write("Insert response:", new_row.data)
                     if new_row.data:
                         st.session_state["ehc_request_id"] = new_row.data[0]["id"]
                         st.session_state["ehc_request_data"] = new_row.data[0]
+                        st.session_state["ehc_request_started"] = True
+                    else:
+                        st.error("Insert returned no data")
                 except Exception as e:
-                    st.caption(f"Could not create request: {e}")
-            st.session_state["ehc_request_started"] = True
+                    st.error(f"Insert failed: {e}")
             st.rerun()
 
     if st.session_state.get("ehc_request_started"):
