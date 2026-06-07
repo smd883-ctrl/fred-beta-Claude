@@ -4721,9 +4721,9 @@ def page_ehc_request():
             st.rerun()
 
          if st.session_state.get("ehc_request_started"):
-             if st.session_state.get("ehc_journey_active"):
-                 page_ehc_journey()
-         else:
+        if st.session_state.get("ehc_journey_active"):
+            page_ehc_journey()
+        else:
             st.markdown("---")
             st.markdown("## A few things before you start")
             st.markdown(f"""
