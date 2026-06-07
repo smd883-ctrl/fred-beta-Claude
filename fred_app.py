@@ -4636,7 +4636,7 @@ Yours sincerely,
                 )
 
 def page_ehc_journey():
-    
+    pass
 def page_ehc_request():
     st.markdown("## Apply for an EHCP")
 
