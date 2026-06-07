@@ -4658,7 +4658,6 @@ def page_ehc_request():
     </div>
     """, unsafe_allow_html=True)
 
-    # ── Supabase status check ─────────────────────────────────────────────────
     user = st.session_state.get("user")
     existing_request = None
 
@@ -4680,7 +4679,6 @@ def page_ehc_request():
         except Exception as e:
             st.caption(f"Could not check for existing request: {e}")
 
-    # ── Button logic ──────────────────────────────────────────────────────────
     if existing_request:
         completed = sum(
             1 for i in range(1, 11)
@@ -4704,42 +4702,44 @@ def page_ehc_request():
 
     else:
         if st.button("Start my request", use_container_width=False, key="ehc_start"):
-            try:
-                supabase.auth.set_session(
-                    st.session_state["session"].access_token,
-                    st.session_state["session"].refresh_token
-                )
-                new_row = supabase.table("ehc_requests_v2").insert({
-                    "user_id": str(user.id),
-                    "status": "in_progress",
-                }).execute()
-                if new_row.data:
-                    st.session_state["ehc_request_id"] = new_row.data[0]["id"]
-                    st.session_state["ehc_request_data"] = new_row.data[0]
-            except Exception as e:
-                st.caption(f"Could not create request: {e}")
+            if SUPABASE_AVAILABLE and supabase and user:
+                try:
+                    supabase.auth.set_session(
+                        st.session_state["session"].access_token,
+                        st.session_state["session"].refresh_token
+                    )
+                    new_row = supabase.table("ehc_requests_v2").insert({
+                        "user_id": str(user.id),
+                        "status": "in_progress",
+                    }).execute()
+                    if new_row.data:
+                        st.session_state["ehc_request_id"] = new_row.data[0]["id"]
+                        st.session_state["ehc_request_data"] = new_row.data[0]
+                except Exception as e:
+                    st.caption(f"Could not create request: {e}")
+            st.session_state["ehc_request_started"] = True
             st.rerun()
 
-         if st.session_state.get("ehc_request_started"):
+    if st.session_state.get("ehc_request_started"):
         if st.session_state.get("ehc_journey_active"):
             page_ehc_journey()
         else:
             st.markdown("---")
             st.markdown("## A few things before you start")
-            st.markdown(f"""
+            st.markdown("""
             <div style="background:white;border:1px solid #d0dae8;border-radius:10px;
                         padding:1.4rem 1.6rem;margin-bottom:1.5rem;">
               <p style="margin:0 0 0.9rem;font-size:0.97rem;line-height:1.8;">
-                ① &nbsp; Answer in your own words — there is no right or wrong way to describe your child.
+                &#9312; &nbsp; Answer in your own words — there is no right or wrong way to describe your child.
               </p>
               <p style="margin:0 0 0.9rem;font-size:0.97rem;line-height:1.8;">
-                ② &nbsp; Think about specific moments rather than general descriptions — the more concrete the better.
+                &#9313; &nbsp; Think about specific moments rather than general descriptions — the more concrete the better.
               </p>
               <p style="margin:0 0 0.9rem;font-size:0.97rem;line-height:1.8;">
-                ③ &nbsp; You do not need to complete everything in one sitting — your answers save automatically as you go.
+                &#9314; &nbsp; You do not need to complete everything in one sitting — your answers save automatically as you go.
               </p>
               <p style="margin:0;font-size:0.97rem;line-height:1.8;">
-                ④ &nbsp; You know your child better than anyone who will assess them — trust what you know.
+                &#9315; &nbsp; You know your child better than anyone who will assess them — trust what you know.
               </p>
             </div>
             """, unsafe_allow_html=True)
@@ -4747,6 +4747,7 @@ def page_ehc_request():
                 st.session_state["ehc_journey_active"] = True
                 st.session_state["ehc_current_category"] = 1
                 st.rerun()
+                
 def page_subscriber():
     st.markdown(f"""
     <div style="background:{NAVY};border-radius:8px;padding:2rem;margin-bottom:1.5rem;">
