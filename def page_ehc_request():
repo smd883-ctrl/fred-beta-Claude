@@ -2256,6 +2256,10 @@ def init_state():
         "thread": [],
         "thread_context": "",
         "ehc_request_started": False,
+        "ehc_journey_active": False,
+        "ehc_current_category": 1,"ehc_request_started": False,
+        "ehc_journey_active": False,
+        "ehc_current_category": 1,
     }
     for k, v in defaults.items():
         if k not in st.session_state:
@@ -4630,7 +4634,10 @@ Yours sincerely,
                     file_name=f"FRED_draft_reply_{today.replace(' ','_')}.txt",
                     mime="text/plain",
                 )
-
+def page_ehc_journey():
+    st.markdown(f"### Category {st.session_state.get('ehc_current_category', 1)} of 10")
+    st.markdown("Questions coming in Block 2.")
+    
 def page_ehc_request():
     st.markdown("## Apply for an EHCP")
 
@@ -4716,10 +4723,6 @@ def page_ehc_request():
             st.rerun()
 
     if st.session_state.get("ehc_request_started"):
-        if existing_request:
-            st.success("Welcome back — your progress has been loaded.")
-        else:
-            st.success("Your request has been started and will save as you go.")
 
 def page_subscriber():
     st.markdown(f"""
