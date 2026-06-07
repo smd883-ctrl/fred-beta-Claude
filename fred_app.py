@@ -4635,6 +4635,9 @@ Yours sincerely,
                     mime="text/plain",
                 )
 
+def page_ehc_journey():
+    st.markdown(f"### Category {st.session_state.get('ehc_current_category', 1)} of 10")
+    st.markdown("Questions coming in Block 2.")  
     
 def page_ehc_request():
     st.markdown("## Apply for an EHCP")
