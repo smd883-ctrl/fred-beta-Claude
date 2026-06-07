@@ -4636,7 +4636,157 @@ Yours sincerely,
                 )
 
 def page_ehc_journey():
-    pass
+    EHC_CATEGORIES = [
+        {
+            "name": "Child Profile and Personal Identity",
+            "why": "This helps assessors understand your child as a whole person, not just their difficulties.",
+            "questions": [
+                {"q": "What are your child's strengths, interests, or the things they genuinely enjoy? Tell us whatever feels important — hobbies, skills, things that make them light up.", "hint": "Think about what your child chooses to do when given free time."},
+                {"q": "What matters most to your child day to day? This might be about friends, routines, particular activities, or things they find difficult to cope without.", "hint": "Routines and predictability often matter more than parents initially realise — include these if relevant."},
+                {"q": "How involved is your child in decisions about their own life, and how do they best let you know what they want or need?", "hint": "This includes non-verbal communication, behaviour, or indirect signals as well as spoken words."},
+            ],
+        },
+        {
+            "name": "Educational Functioning and Learning",
+            "why": "This helps assessors understand the impact of your child's needs on their education.",
+            "questions": [
+                {"q": "What does your child find hardest about school or learning? Think about lessons, keeping up, following instructions, or anything that regularly gets in the way.", "hint": "Specific subjects, times of day, or types of task are more useful than general statements."},
+                {"q": "How does your child learn best, and are there any approaches or adjustments that have made a real difference for them?", "hint": "Include anything the school does, or that you do at home, that genuinely helps."},
+                {"q": "How would you describe your child's progress at school overall — and how does that compare to where you think they should be?", "hint": "You do not need test scores — your own observations are valid here."},
+            ],
+        },
+        {
+            "name": "Communication and Social Development",
+            "why": "Communication needs affect every part of school life and are central to the assessment.",
+            "questions": [
+                {"q": "How does your child communicate — do they use spoken language, other methods, or a mix — and are there situations where being understood is a real struggle?", "hint": "Include situations at home as well as school if they are relevant."},
+                {"q": "How does your child get on with other children and adults? Are friendships, group situations, or social expectations something they find difficult?", "hint": "Think about playtimes, group work, unstructured time, and transitions between activities."},
+            ],
+        },
+        {
+            "name": "Emotional, Behavioural and Psychological Wellbeing",
+            "why": "Emotional and behavioural needs are legitimate needs — not behaviour problems.",
+            "questions": [
+                {"q": "How does your child manage their emotions day to day? Are there particular situations, changes, or demands that tend to lead to distress or difficult behaviour?", "hint": "Changes in routine, sensory environments, and transitions are common triggers — include these if relevant."},
+                {"q": "What does your child do when things feel overwhelming, and how long does it typically take them to recover after a difficult moment?", "hint": "Recovery time is useful information — include whether they need adult support to regulate."},
+            ],
+        },
+        {
+            "name": "Health, Physical Development and Daily Living",
+            "why": "Health and physical needs affect what support your child requires at school and beyond.",
+            "questions": [
+                {"q": "Does your child have any health conditions, physical needs, or sensory sensitivities that affect their daily life or their ability to take part in school?", "hint": "Include conditions that are managed or medicated as well as those that are not."},
+                {"q": "How much support does your child need with everyday tasks such as personal care, eating, moving around, or managing their own belongings?", "hint": "Compare to what other children their age typically manage independently."},
+            ],
+        },
+        {
+            "name": "Safety and Vulnerability",
+            "why": "Some children need levels of supervision or support that standard school provision does not cover.",
+            "questions": [
+                {"q": "Are there situations where your child's safety is a concern — for example, because they are unaware of danger, or because they need close supervision that other children their age would not need?", "hint": "Include road safety, wandering, impulsivity, or any situation where your child's safety has been at risk."},
+                {"q": "Are there any particular risks or vulnerabilities your child faces that you think the people assessing them need to understand?", "hint": "This can include emotional vulnerability, risk of exploitation, or difficulty recognising unsafe situations."},
+            ],
+        },
+        {
+            "name": "Support and Provision Requirements",
+            "why": "This helps assessors understand what is already in place and what gap the EHCP needs to fill.",
+            "questions": [
+                {"q": "What support is your child currently receiving at school or elsewhere, and how well do you feel it is working for them?", "hint": "Include any teaching assistant support, interventions, therapies, or outside agency involvement."},
+                {"q": "What additional support do you believe your child needs that they are not currently getting?", "hint": "Be as specific as you can — type of support, frequency, and who should deliver it if you know."},
+            ],
+        },
+        {
+            "name": "Family Context and Parent Perspectives",
+            "why": "You know your child better than anyone. Your perspective is evidence.",
+            "questions": [
+                {"q": "As the person who knows your child best, what would you most want the people carrying out this assessment to understand about them?", "hint": "This is your opportunity to say what the paperwork might not capture."},
+                {"q": "Is there anything about your family's circumstances, or the support available at home, that is relevant to understanding your child's needs?", "hint": "You do not need to share anything you are not comfortable with — only what you think is relevant."},
+            ],
+        },
+        {
+            "name": "Aspirations and Desired Outcomes",
+            "why": "The assessment process is outcomes-focused — your hopes matter.",
+            "questions": [
+                {"q": "What are your hopes for your child over the next few years — in school, in friendships, or in life more broadly?", "hint": "Think short term and longer term — both are relevant."},
+                {"q": "What would a good outcome from this assessment look like for your child and your family?", "hint": "This does not have to be about a specific placement or provision — it can be about quality of life."},
+            ],
+        },
+        {
+            "name": "Educational and Developmental History",
+            "why": "Context and history help assessors understand the journey your child has been on.",
+            "questions": [
+                {"q": "What schools has your child attended, and have there been any significant changes in placement, exclusions, or time out of school?", "hint": "Include nursery or early years settings if relevant."},
+                {"q": "When did you first notice that your child was struggling, and what assessments, referrals, or professional involvement have there been since then?", "hint": "A rough timeline is more useful than precise dates — do your best."},
+            ],
+        },
+    ]
+
+    current = st.session_state.get("ehc_current_category", 1) - 1
+    if current < 0 or current >= len(EHC_CATEGORIES):
+        current = 0
+    category = EHC_CATEGORIES[current]
+
+    st.markdown(f"""
+    <div style="background:#f0f4fa;border-radius:6px;padding:0.6rem 1rem;
+                margin-bottom:1.2rem;font-size:0.88rem;color:#555;">
+      Category {current + 1} of {len(EHC_CATEGORIES)}
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown(f"## {category['name']}")
+    st.markdown(f"""
+    <p style="font-size:0.95rem;color:#5a8a5a;margin-bottom:1.5rem;
+              font-style:italic;">{category['why']}</p>
+    """, unsafe_allow_html=True)
+
+    answers = {}
+    for i, item in enumerate(category["questions"]):
+        st.markdown(f"**{item['q']}**")
+        st.markdown(f"""
+        <p style="font-size:0.83rem;color:#888;margin:-0.4rem 0 0.4rem;">
+          {item['hint']}
+        </p>
+        """, unsafe_allow_html=True)
+        answer = st.text_area(
+            label=f"q{i+1}",
+            label_visibility="collapsed",
+            placeholder="Your answer here...",
+            height=120,
+            key=f"cat_{current+1}_q{i+1}",
+        )
+        answers[f"q{i+1}"] = answer
+        st.markdown("<br>", unsafe_allow_html=True)
+
+    st.markdown("---")
+    col1, col2, col3 = st.columns([2, 2, 4])
+    with col1:
+        if st.button("Save and continue", key="ehc_save_continue", use_container_width=True):
+            st.session_state["ehc_answers_pending"] = answers
+            st.session_state["ehc_action"] = "continue"
+            st.rerun()
+    with col2:
+        if st.button("Save and exit", key="ehc_save_exit", use_container_width=True):
+            st.session_state["ehc_answers_pending"] = answers
+            st.session_state["ehc_action"] = "exit"
+            st.rerun()
+
+    action = st.session_state.get("ehc_action")
+    if action == "continue":
+        st.session_state["ehc_action"] = None
+        next_cat = current + 2
+        if next_cat > len(EHC_CATEGORIES):
+            st.success("All categories complete.")
+        else:
+            st.session_state["ehc_current_category"] = next_cat
+            st.rerun()
+    elif action == "exit":
+        st.session_state["ehc_action"] = None
+        st.session_state["ehc_journey_active"] = False
+        st.session_state["ehc_request_started"] = False
+        st.session_state.stage = "landing"
+        st.rerun()
+
+        
 def page_ehc_request():
     st.markdown("## Apply for an EHCP")
 
