@@ -2353,6 +2353,554 @@ def render_traffic_light_explainer():
 
 # ── PAGES ─────────────────────────────────────────────────────────────────────
 
+def page_dashboard():
+    import json as _json
+
+    # ── CSS variables and dashboard styles ───────────────────────────────────
+    st.markdown("""
+    <style>
+    :root {
+        --dash-bg: #f0ede8;
+        --dash-surface: #faf8f5;
+        --dash-border: #e2ddd6;
+        --dash-text: #1a1714;
+        --dash-muted: #9e9892;
+        --dash-secondary: #6b6560;
+        --dash-accent: #2c5f3f;
+        --dash-accent-light: #e8f0eb;
+        --dash-amber: #c17f24;
+        --dash-amber-light: #fdf3e3;
+        --dash-red: #b83232;
+        --dash-red-light: #fdeaea;
+        --dash-blue: #2a4a7f;
+        --dash-blue-light: #e8edf7;
+        --dash-radius: 14px;
+        --dash-radius-sm: 8px;
+    }
+
+    .dash-child-header {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        background: var(--dash-surface);
+        border: 1px solid var(--dash-border);
+        border-radius: var(--dash-radius);
+        padding: 24px 28px;
+        margin-bottom: 24px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .dash-avatar {
+        width: 64px; height: 64px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #c8dfc8 0%, #a8c8a8 100%);
+        display: flex; align-items: center; justify-content: center;
+        font-family: 'DM Serif Display', serif;
+        font-size: 1.6rem; color: var(--dash-accent);
+        flex-shrink: 0;
+        border: 2px solid var(--dash-border);
+    }
+    .dash-child-name {
+        font-family: 'DM Serif Display', serif;
+        font-size: 1.7rem; color: var(--dash-text); line-height: 1.1;
+        margin-bottom: 4px;
+    }
+    .dash-child-sub { font-size: 13px; color: var(--dash-muted); }
+    .dash-pills { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; margin-left: auto; }
+    .dash-pill {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500;
+    }
+    .dash-pill.active { background: var(--dash-accent-light); color: var(--dash-accent); }
+    .dash-pill.pending { background: var(--dash-amber-light); color: var(--dash-amber); }
+    .dash-pill-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+    .dash-next-action {
+        background: var(--dash-accent);
+        color: white;
+        border-radius: var(--dash-radius);
+        padding: 18px 24px;
+        margin-bottom: 24px;
+        display: flex; align-items: center; justify-content: space-between;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    .dash-next-label {
+        font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+        text-transform: uppercase; opacity: 0.7; margin-bottom: 4px;
+    }
+    .dash-next-text { font-size: 15px; font-weight: 500; }
+
+    .dash-section-label {
+        font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+        text-transform: uppercase; color: var(--dash-muted);
+        margin: 8px 0 12px;
+    }
+
+    .dash-widget {
+        background: var(--dash-surface);
+        border: 1px solid var(--dash-border);
+        border-radius: var(--dash-radius);
+        padding: 20px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        cursor: pointer;
+        transition: box-shadow 0.2s, transform 0.2s;
+        height: 100%;
+        min-height: 160px;
+    }
+    .dash-widget:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        transform: translateY(-2px);
+    }
+    .dash-widget-title {
+        font-size: 11px; font-weight: 600; letter-spacing: 0.07em;
+        text-transform: uppercase; color: var(--dash-muted); margin-bottom: 12px;
+    }
+    .dash-widget-value {
+        font-family: 'DM Serif Display', serif;
+        font-size: 1.5rem; color: var(--dash-text); line-height: 1.1; margin-bottom: 6px;
+    }
+    .dash-widget-desc { font-size: 12px; color: var(--dash-muted); line-height: 1.4; }
+    .dash-widget-action {
+        margin-top: 14px; font-size: 12px; font-weight: 600; color: var(--dash-accent);
+    }
+    .dash-widget-action::after { content: ' →'; }
+
+    .dash-tag {
+        display: inline-block; font-size: 11px; font-weight: 500;
+        padding: 3px 8px; border-radius: 4px; margin-right: 4px;
+    }
+    .dash-tag-red   { background: var(--dash-red-light);    color: var(--dash-red);    }
+    .dash-tag-green { background: var(--dash-accent-light); color: var(--dash-accent); }
+    .dash-tag-amber { background: var(--dash-amber-light);  color: var(--dash-amber);  }
+
+    .dash-progress-track {
+        height: 6px; background: var(--dash-border); border-radius: 3px;
+        margin: 10px 0 6px; overflow: hidden;
+    }
+    .dash-progress-fill {
+        height: 100%; border-radius: 3px; background: var(--dash-accent); width: 30%;
+    }
+
+    .dash-event {
+        display: flex; gap: 12px; align-items: flex-start;
+        padding: 8px 10px; border-radius: var(--dash-radius-sm);
+        background: var(--dash-bg); border: 1px solid var(--dash-border);
+        margin-bottom: 7px;
+    }
+    .dash-event-day {
+        font-family: 'DM Serif Display', serif; font-size: 1.3rem;
+        line-height: 1; color: var(--dash-accent);
+    }
+    .dash-event-month {
+        font-size: 10px; font-weight: 600; text-transform: uppercase;
+        color: var(--dash-muted); letter-spacing: 0.05em;
+    }
+    .dash-event-title { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+    .dash-event-sub   { font-size: 11px; color: var(--dash-muted); }
+    .dash-badge {
+        font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 10px;
+        align-self: center; white-space: nowrap; margin-left: auto;
+    }
+    .dash-badge-urgent { background: var(--dash-red-light);    color: var(--dash-red);    }
+    .dash-badge-soon   { background: var(--dash-amber-light);  color: var(--dash-amber);  }
+    .dash-badge-ok     { background: var(--dash-accent-light); color: var(--dash-accent); }
+
+    .dash-glossary-pill {
+        display: inline-block; font-size: 11px; font-weight: 500;
+        padding: 4px 10px; border-radius: 20px;
+        background: var(--dash-bg); border: 1px solid var(--dash-border);
+        color: var(--dash-secondary); margin: 3px 3px 0 0;
+    }
+
+    .dash-doc-item {
+        display: flex; align-items: center; gap: 8px;
+        padding: 7px 10px; border-radius: var(--dash-radius-sm);
+        background: var(--dash-bg); border: 1px solid var(--dash-border);
+        margin-bottom: 6px;
+    }
+    .dash-doc-name { font-size: 12px; font-weight: 500; flex: 1; }
+    .dash-doc-type {
+        font-size: 10px; font-weight: 600; padding: 2px 6px;
+        border-radius: 4px; background: var(--dash-blue-light); color: var(--dash-blue);
+    }
+
+    .dash-email-item {
+        padding: 10px 12px; border-radius: var(--dash-radius-sm);
+        background: var(--dash-bg); border: 1px solid var(--dash-border);
+        margin-bottom: 8px;
+    }
+    .dash-email-meta { display: flex; justify-content: space-between; margin-bottom: 4px; }
+    .dash-email-from { font-size: 12px; font-weight: 600; }
+    .dash-email-date { font-size: 11px; color: var(--dash-muted); }
+    .dash-email-subject { font-size: 12px; color: var(--dash-secondary); margin-bottom: 6px; }
+    .dash-email-tag {
+        font-size: 11px; font-weight: 500; padding: 3px 8px;
+        border-radius: 4px; display: inline-block;
+    }
+    .dash-email-concern { background: var(--dash-red-light);    color: var(--dash-red);    }
+    .dash-email-ok      { background: var(--dash-accent-light); color: var(--dash-accent); }
+
+    .dash-timeline-item { display: flex; gap: 14px; padding-bottom: 14px; }
+    .dash-timeline-item:last-child { padding-bottom: 0; }
+    .dash-tl-left { display: flex; flex-direction: column; align-items: center; min-width: 28px; }
+    .dash-tl-dot {
+        width: 10px; height: 10px; border-radius: 50%;
+        border: 2px solid var(--dash-accent); background: var(--dash-surface); margin-top: 3px;
+    }
+    .dash-tl-dot-filled { background: var(--dash-accent); }
+    .dash-tl-line { width: 2px; flex: 1; background: var(--dash-border); margin-top: 4px; min-height: 20px; }
+    .dash-tl-title { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+    .dash-tl-date  { font-size: 11px; color: var(--dash-muted); }
+
+    .dash-thermo-score  { font-family: 'DM Serif Display', serif; font-size: 1.6rem; color: #b83232; line-height: 1; margin-bottom: 2px; }
+    .dash-thermo-status { font-size: 12px; font-weight: 600; color: #b83232; margin-bottom: 8px; }
+    .dash-thermo-narrative {
+        font-size: 11px; color: var(--dash-secondary); line-height: 1.5;
+        border-left: 2px solid var(--dash-border); padding-left: 8px; margin-bottom: 8px;
+    }
+    .dash-factor { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--dash-secondary); margin-bottom: 3px; }
+    .dash-factor-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+    .dash-theme-picker {
+        position: fixed; bottom: 24px; right: 24px;
+        background: var(--dash-surface); border: 1px solid var(--dash-border);
+        border-radius: var(--dash-radius); padding: 14px 16px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        display: flex; align-items: center; gap: 10px; z-index: 999;
+    }
+    .dash-theme-label {
+        font-size: 11px; font-weight: 600; color: var(--dash-muted);
+        text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .dash-swatch {
+        width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
+        border: 2px solid transparent; display: inline-block;
+        transition: transform 0.15s;
+    }
+    .dash-swatch:hover { transform: scale(1.15); }
+    </style>
+    """, unsafe_allow_html=True)
+
+    user = st.session_state.get("user")
+    child_name = st.session_state.get("child_name", "") or "Your child"
+    initial = child_name[0].upper() if child_name else "?"
+
+    # ── Zone 1: Child header ─────────────────────────────────────────────────
+    st.markdown(f"""
+    <div class="dash-child-header">
+        <div class="dash-avatar">{initial}</div>
+        <div>
+            <div class="dash-child-name">{child_name}</div>
+            <div class="dash-child-sub">Dashboard · Last updated today</div>
+        </div>
+        <div class="dash-pills">
+            <div class="dash-pill active"><div class="dash-pill-dot"></div> EHCP Active</div>
+            <div class="dash-pill pending"><div class="dash-pill-dot"></div> Review due in 6 weeks</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ── Zone 2: Next action banner ───────────────────────────────────────────
+    st.markdown("""
+    <div class="dash-next-action">
+        <div>
+            <div class="dash-next-label">Your next action</div>
+            <div class="dash-next-text">Check what Section F commits to before your next review</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    col_btn, _ = st.columns([1, 4])
+    with col_btn:
+        if st.button("Go to EHCP analyser →", key="dash_next_action_btn"):
+            st.session_state.stage = "upload"
+            st.rerun()
+
+    # ── Zone 3: Widget grid ──────────────────────────────────────────────────
+    st.markdown('<div class="dash-section-label">Your tools</div>', unsafe_allow_html=True)
+
+    has_findings = bool(st.session_state.get("findings"))
+    has_request  = bool(st.session_state.get("ehc_request_id"))
+
+    # Row 1
+    col1, col2, col3 = st.columns(3)
+
+    # Widget 1 — EHCP Analysis
+    with col1:
+        if has_findings:
+            findings = st.session_state.findings
+            red_n   = sum(1 for f in findings if f["tier"] == "red")
+            amber_n = sum(1 for f in findings if f["tier"] == "amber")
+            green_n = sum(1 for f in findings if f["tier"] == "green")
+            widget_html = f"""
+            <div class="dash-widget">
+                <div class="dash-widget-title">EHCP Analysis</div>
+                <div class="dash-widget-value">{len(findings)} findings</div>
+                <div style="margin:8px 0;">
+                    <span class="dash-tag dash-tag-red">{red_n} RED</span>
+                    <span class="dash-tag dash-tag-amber">{amber_n} AMBER</span>
+                    <span class="dash-tag dash-tag-green">{green_n} GREEN</span>
+                </div>
+                <div class="dash-widget-desc">Last analysed this session</div>
+                <div class="dash-widget-action">View full report</div>
+            </div>"""
+        else:
+            widget_html = """
+            <div class="dash-widget">
+                <div class="dash-widget-title">EHCP Analysis</div>
+                <div class="dash-widget-value" style="font-size:1rem;color:var(--dash-muted);">No EHCP uploaded yet</div>
+                <div class="dash-widget-desc" style="margin-top:8px;">Upload your child's EHCP and FRED will analyse it against the Children and Families Act 2014.</div>
+                <div class="dash-widget-action">Upload your EHCP</div>
+            </div>"""
+        st.markdown(widget_html, unsafe_allow_html=True)
+        if st.button("EHCP Analysis", key="dash_w1", use_container_width=True):
+            st.session_state.stage = "upload"
+            st.rerun()
+
+    # Widget 2 — EHCP Request
+    with col2:
+        if has_request:
+            widget_html = """
+            <div class="dash-widget">
+                <div class="dash-widget-title">EHCP Request</div>
+                <div class="dash-widget-value">In progress</div>
+                <div class="dash-progress-track"><div class="dash-progress-fill"></div></div>
+                <div class="dash-widget-desc">Continue where you left off</div>
+                <div class="dash-widget-action">Continue your request</div>
+            </div>"""
+        else:
+            widget_html = """
+            <div class="dash-widget">
+                <div class="dash-widget-title">EHCP Request</div>
+                <div class="dash-widget-value" style="font-size:1rem;color:var(--dash-muted);">Start your request</div>
+                <div class="dash-widget-desc" style="margin-top:8px;">Build a formal request for an EHC needs assessment — structured, evidence-led, and ready to send.</div>
+                <div class="dash-widget-action">Begin</div>
+            </div>"""
+        st.markdown(widget_html, unsafe_allow_html=True)
+        if st.button("EHCP Request", key="dash_w2", use_container_width=True):
+            st.session_state.stage = "ehc_request"
+            st.rerun()
+
+    # Widget 3 — Correspondence
+    with col3:
+        widget_html = """
+        <div class="dash-widget">
+            <div class="dash-widget-title">Correspondence</div>
+            <div class="dash-widget-value" style="font-size:1rem;color:var(--dash-muted);">No correspondence uploaded yet</div>
+            <div class="dash-widget-desc" style="margin-top:8px;">Upload emails or letters from school or the LA. FRED reads them for patterns, tone, and the right question to ask next.</div>
+            <div class="dash-widget-action">Upload correspondence</div>
+        </div>"""
+        st.markdown(widget_html, unsafe_allow_html=True)
+        if st.button("Correspondence", key="dash_w3", use_container_width=True):
+            st.session_state.stage = "correspondence"
+            st.rerun()
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # Row 2
+    col4, col5, col6 = st.columns(3)
+
+    # Widget 4 — School Engagement
+    with col4:
+        st.markdown("""
+        <div class="dash-widget">
+            <div class="dash-widget-title">School Engagement</div>
+            <div class="dash-thermo-score">3/10</div>
+            <div class="dash-thermo-status">Poor engagement</div>
+            <div class="dash-thermo-narrative">Upload correspondence to see your engagement score.</div>
+            <div class="dash-factor"><div class="dash-factor-dot" style="background:#b83232"></div>Based on correspondence patterns</div>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("School Engagement", key="dash_w4", use_container_width=True):
+            st.session_state.stage = "correspondence"
+            st.rerun()
+
+    # Widget 5 — Upcoming
+    with col5:
+        st.markdown("""
+        <div class="dash-widget">
+            <div class="dash-widget-title">Upcoming</div>
+            <div class="dash-event">
+                <div>
+                    <div class="dash-event-day">18</div>
+                    <div class="dash-event-month">Jun</div>
+                </div>
+                <div style="flex:1">
+                    <div class="dash-event-title">Annual Review Meeting</div>
+                    <div class="dash-event-sub">Freddie's school · 10:00am</div>
+                </div>
+                <div class="dash-badge dash-badge-urgent">6 wks</div>
+            </div>
+            <div class="dash-event">
+                <div>
+                    <div class="dash-event-day">30</div>
+                    <div class="dash-event-month">Jun</div>
+                </div>
+                <div style="flex:1">
+                    <div class="dash-event-title">LA Response Deadline</div>
+                    <div class="dash-event-sub">EHC needs assessment</div>
+                </div>
+                <div class="dash-badge dash-badge-soon">3 wks</div>
+            </div>
+            <div class="dash-event">
+                <div>
+                    <div class="dash-event-day">14</div>
+                    <div class="dash-event-month">Jul</div>
+                </div>
+                <div style="flex:1">
+                    <div class="dash-event-title">SENDIASS Appointment</div>
+                    <div class="dash-event-sub">Phone call · 2:00pm</div>
+                </div>
+                <div class="dash-badge dash-badge-ok">5 wks</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("+ Add event", key="dash_w5", use_container_width=True):
+            pass  # placeholder — not functional this session
+
+    # Widget 6 — Glossary
+    with col6:
+        st.markdown("""
+        <div class="dash-widget">
+            <div class="dash-widget-title">Glossary</div>
+            <div style="background:var(--dash-bg);border:1px solid var(--dash-border);border-radius:var(--dash-radius-sm);padding:8px 12px;margin-bottom:10px;font-size:12px;color:var(--dash-muted);">
+                ⌕ Search a term...
+            </div>
+            <div>
+                <span class="dash-glossary-pill">APDR</span>
+                <span class="dash-glossary-pill">Graduated approach</span>
+                <span class="dash-glossary-pill">Section F</span>
+                <span class="dash-glossary-pill">SENDIASS</span>
+                <span class="dash-glossary-pill">Tribunal</span>
+                <span class="dash-glossary-pill">Annual review</span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("Glossary", key="dash_w6", use_container_width=True):
+            pass  # placeholder — not functional this session
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # Row 3
+    col7, col8, col9 = st.columns(3)
+
+    # Widget 7 — Document Portal
+    with col7:
+        st.markdown("""
+        <div class="dash-widget">
+            <div class="dash-widget-title">Document Portal</div>
+            <div style="border:1.5px dashed var(--dash-border);border-radius:var(--dash-radius-sm);padding:14px;text-align:center;margin-bottom:10px;">
+                <div style="font-size:12px;color:var(--dash-muted);">Drop any document here<br>FRED will identify it</div>
+            </div>
+            <div class="dash-doc-item">
+                <div class="dash-doc-name">Freddie_EHCP_2025.pdf</div>
+                <div class="dash-doc-type">EHCP</div>
+            </div>
+            <div class="dash-doc-item">
+                <div class="dash-doc-name">EP_Report_Jan25.pdf</div>
+                <div class="dash-doc-type">EP Report</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("Document Portal", key="dash_w7", use_container_width=True):
+            st.session_state.stage = "upload"
+            st.rerun()
+
+    # Widget 8 — Email Analysis
+    with col8:
+        st.markdown("""
+        <div class="dash-widget">
+            <div class="dash-widget-title">Email Analysis</div>
+            <div class="dash-email-item">
+                <div class="dash-email-meta">
+                    <div class="dash-email-from">SENCO — Freddie's School</div>
+                    <div class="dash-email-date">2 Jun 2026</div>
+                </div>
+                <div class="dash-email-subject">Re: Freddie's support this term</div>
+                <span class="dash-email-tag dash-email-concern">⚠ Provision concern identified</span>
+            </div>
+            <div class="dash-email-item">
+                <div class="dash-email-meta">
+                    <div class="dash-email-from">Warwickshire SEND Team</div>
+                    <div class="dash-email-date">28 May 2026</div>
+                </div>
+                <div class="dash-email-subject">Annual review — next steps</div>
+                <span class="dash-email-tag dash-email-ok">✓ No concerns found</span>
+            </div>
+            <div class="dash-widget-action">Upload new email</div>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("Email Analysis", key="dash_w8", use_container_width=True):
+            st.session_state.stage = "correspondence"
+            st.rerun()
+
+    # Widget 9 — Journey timeline
+    with col9:
+        st.markdown("""
+        <div class="dash-widget">
+            <div class="dash-widget-title">Freddie's Journey</div>
+            <div>
+                <div class="dash-timeline-item">
+                    <div class="dash-tl-left">
+                        <div class="dash-tl-dot dash-tl-dot-filled"></div>
+                        <div class="dash-tl-line"></div>
+                    </div>
+                    <div>
+                        <div class="dash-tl-title">EHCP issued</div>
+                        <div class="dash-tl-date">March 2024 · Warwickshire LA</div>
+                    </div>
+                </div>
+                <div class="dash-timeline-item">
+                    <div class="dash-tl-left">
+                        <div class="dash-tl-dot dash-tl-dot-filled"></div>
+                        <div class="dash-tl-line"></div>
+                    </div>
+                    <div>
+                        <div class="dash-tl-title">First FRED analysis</div>
+                        <div class="dash-tl-date">4 findings · 2 RED identified</div>
+                    </div>
+                </div>
+                <div class="dash-timeline-item">
+                    <div class="dash-tl-left">
+                        <div class="dash-tl-dot dash-tl-dot-filled"></div>
+                        <div class="dash-tl-line"></div>
+                    </div>
+                    <div>
+                        <div class="dash-tl-title">Provision concern raised with school</div>
+                        <div class="dash-tl-date">May 2026 · Correspondence logged</div>
+                    </div>
+                </div>
+                <div class="dash-timeline-item">
+                    <div class="dash-tl-left">
+                        <div class="dash-tl-dot"></div>
+                    </div>
+                    <div>
+                        <div class="dash-tl-title" style="color:var(--dash-muted)">Annual review meeting</div>
+                        <div class="dash-tl-date">18 June 2026 · Upcoming</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("Freddie's Journey", key="dash_w9", use_container_width=True):
+            pass  # placeholder — not functional this session
+
+    # ── Zone 4: Theme picker ─────────────────────────────────────────────────
+    st.markdown("""
+    <div class="dash-theme-picker">
+        <span class="dash-theme-label">Theme</span>
+        <span class="dash-swatch" style="background:#2c5f3f;border-color:#2c5f3f;" title="Forest"
+            onclick="document.documentElement.style.setProperty('--dash-accent','#2c5f3f');document.documentElement.style.setProperty('--dash-accent-light','#e8f0eb')"></span>
+        <span class="dash-swatch" style="background:#2a4a7f;" title="Slate"
+            onclick="document.documentElement.style.setProperty('--dash-accent','#2a4a7f');document.documentElement.style.setProperty('--dash-accent-light','#e8edf7')"></span>
+        <span class="dash-swatch" style="background:#8b3a2a;" title="Terracotta"
+            onclick="document.documentElement.style.setProperty('--dash-accent','#8b3a2a');document.documentElement.style.setProperty('--dash-accent-light','#f5e8e5')"></span>
+        <span class="dash-swatch" style="background:#5c2d6e;" title="Plum"
+            onclick="document.documentElement.style.setProperty('--dash-accent','#5c2d6e');document.documentElement.style.setProperty('--dash-accent-light','#f0e8f5')"></span>
+        <span class="dash-swatch" style="background:#2a2a2a;" title="Charcoal"
+            onclick="document.documentElement.style.setProperty('--dash-accent','#2a2a2a');document.documentElement.style.setProperty('--dash-accent-light','#ebebeb')"></span>
+    </div>
+    """, unsafe_allow_html=True)
+
 def page_landing():
     st.markdown("""
     <div class="hero">
