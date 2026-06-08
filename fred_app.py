@@ -2606,15 +2606,16 @@ def page_dashboard():
             <div class="dash-next-label">Your next action</div>
             <div class="dash-next-text">Check what Section F commits to before your next review</div>
         </div>
+        <a href="javascript:void(0)" onclick="window.parent.document.querySelector('[data-testid=stApp]').dispatchEvent(new CustomEvent('dash_analyser'))"
+           style="background:white;color:#2c5f3f;border:none;padding:9px 20px;border-radius:20px;
+                  font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;
+                  margin-left:16px;text-decoration:none;font-family:'DM Sans',sans-serif;">
+            Review Section F →
+        </a>
     </div>
     """, unsafe_allow_html=True)
 
-    col_btn, _ = st.columns([1, 4])
-    with col_btn:
-        if st.button("Go to EHCP analyser →", key="dash_next_action_btn"):
-            st.session_state.stage = "upload"
-            st.rerun()
-
+   
     # ── Zone 3: Widget grid ──────────────────────────────────────────────────
     st.markdown('<div class="dash-section-label">Your tools</div>', unsafe_allow_html=True)
 
