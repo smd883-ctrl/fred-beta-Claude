@@ -5176,34 +5176,58 @@ def page_subscriber():
 # ── NAVIGATION ────────────────────────────────────────────────────────────────
 
 def render_nav():
-    # Scroll-to-top on nav: not reliably achievable in Streamlit Community Cloud
-    # due to iframe sandboxing. Parked at Session 12. Revisit if self-hosting on Render.
     user = st.session_state.get("user")
-    col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 1])
-    with col1:
+
+    st.markdown("""
+    <style>
+    div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] > div[data-testid="stVerticalBlock"] > div[data-testid="stButton"] > button {
+        background: transparent !important;
+        color: #444 !important;
+        border: none !important;
+        border-radius: 0 !important;
+        padding: 0.3rem 0.6rem !important;
+        font-size: 0.82rem !important;
+        font-weight: 500 !important;
+        box-shadow: none !important;
+        width: 100%;
+    }
+    div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] > div[data-testid="stVerticalBlock"] > div[data-testid="stButton"] > button:hover {
+        color: #2d4a2d !important;
+        background: transparent !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    cols = st.columns([1, 1, 1, 2, 1])
+
+    with cols[0]:
         if st.button("Home", key="nav_home", use_container_width=True):
             st.session_state.stage = "landing"
             st.rerun()
-    with col2:
+
+    with cols[1]:
         if st.button("My report", key="nav_report", use_container_width=True):
             if st.session_state.findings:
                 st.session_state.stage = "full_report"
                 st.rerun()
-    with col3:
+
+    with cols[2]:
         if st.button("Correspondence", key="nav_correspondence", use_container_width=True):
             if st.session_state.email_submitted:
                 st.session_state.stage = "correspondence"
             else:
                 st.session_state.stage = "sneak_peek"
             st.rerun()
-    with col4:
+
+    with cols[3]:
         if user:
             st.markdown(
-                f"<p style='font-size:0.78rem;color:#666;margin:0.4rem 0 0;text-align:center;'>"
+                f"<p style='font-size:0.78rem;color:#666;margin:0.5rem 0 0;text-align:center;'>"
                 f"{user.email}</p>",
                 unsafe_allow_html=True
             )
-    with col5:
+
+    with cols[4]:
         if st.button("Sign out", key="signout_btn", use_container_width=True):
             try:
                 if SUPABASE_AVAILABLE:
