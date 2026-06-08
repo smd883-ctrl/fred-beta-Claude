@@ -5179,6 +5179,8 @@ def render_nav():
     # Scroll-to-top on nav: not reliably achievable in Streamlit Community Cloud
     # due to iframe sandboxing. Parked at Session 12. Revisit if self-hosting on Render.
     user = st.session_state.get("user")
+    has_application = bool(st.session_state.get("ehc_request_id"))
+
     col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 1])
     with col1:
         if st.button("Home", key="nav_home", use_container_width=True):
@@ -5197,13 +5199,20 @@ def render_nav():
                 st.session_state.stage = "sneak_peek"
             st.rerun()
     with col4:
+        if has_application:
+            if st.button("My application", key="nav_my_application", use_container_width=True):
+                st.session_state.stage = "ehc_request"
+                st.rerun()
+    with col5:
         if user:
             st.markdown(
                 f"<p style='font-size:0.78rem;color:#666;margin:0.4rem 0 0;text-align:center;'>"
                 f"{user.email}</p>",
                 unsafe_allow_html=True
             )
-    with col5:
+
+    col_so, = st.columns([1])
+    with col_so:
         if st.button("Sign out", key="signout_btn", use_container_width=True):
             try:
                 if SUPABASE_AVAILABLE:
