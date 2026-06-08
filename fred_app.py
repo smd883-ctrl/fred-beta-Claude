@@ -2260,6 +2260,7 @@ def init_state():
         "ehc_current_category": 1,"ehc_request_started": False,
         "ehc_journey_active": False,
         "ehc_current_category": 1,
+        "ehc_current_question": 0,
     }
     for k, v in defaults.items():
         if k not in st.session_state:
@@ -4721,70 +4722,157 @@ def page_ehc_journey():
         },
     ]
 
-    current = st.session_state.get("ehc_current_category", 1) - 1
-    if current < 0 or current >= len(EHC_CATEGORIES):
-        current = 0
-    category = EHC_CATEGORIES[current]
+    # ── Build flat question list with category references ─────────────────────
+    flat_questions = []
+    for cat_idx, cat in enumerate(EHC_CATEGORIES):
+        for q_idx, item in enumerate(cat["questions"]):
+            flat_questions.append({
+                "cat_idx": cat_idx,
+                "cat_name": cat["name"],
+                "cat_why": cat["why"],
+                "q_idx": q_idx,
+                "q_total": len(cat["questions"]),
+                "q": item["q"],
+                "hint": item["hint"],
+            })
 
+    total_questions = len(flat_questions)
+
+    # ── Current position ──────────────────────────────────────────────────────
+    current_q = st.session_state.get("ehc_current_question", 0)
+    if current_q < 0 or current_q >= total_questions:
+        current_q = 0
+    item = flat_questions[current_q]
+
+    # ── Progress indicator ────────────────────────────────────────────────────
     st.markdown(f"""
-    <div style="background:#f0f4fa;border-radius:6px;padding:0.6rem 1rem;
-                margin-bottom:1.2rem;font-size:0.88rem;color:#555;">
-      Category {current + 1} of {len(EHC_CATEGORIES)}
+    <div style="background:#f0f4fa;border-radius:6px;padding:0.7rem 1rem;
+                margin-bottom:1.2rem;">
+      <p style="margin:0;font-size:0.88rem;color:#444;font-weight:600;">
+        Category {item['cat_idx'] + 1} of 10 — {item['cat_name']}
+      </p>
+      <p style="margin:0.2rem 0 0;font-size:0.82rem;color:#888;">
+        Question {item['q_idx'] + 1} of {item['q_total']}
+      </p>
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown(f"## {category['name']}")
+    # ── Why this matters ──────────────────────────────────────────────────────
+    if item['q_idx'] == 0:
+        st.markdown(f"""
+        <p style="font-size:0.92rem;color:#5a8a5a;margin-bottom:1.2rem;
+                  font-style:italic;">{item['cat_why']}</p>
+        """, unsafe_allow_html=True)
+
+    # ── Question and input ────────────────────────────────────────────────────
+    st.markdown(f"**{item['q']}**")
     st.markdown(f"""
-    <p style="font-size:0.95rem;color:#5a8a5a;margin-bottom:1.5rem;
-              font-style:italic;">{category['why']}</p>
+    <p style="font-size:0.83rem;color:#888;margin:0.2rem 0 0.6rem;">
+      {item['hint']}
+    </p>
     """, unsafe_allow_html=True)
 
-    answers = {}
-    for i, item in enumerate(category["questions"]):
-        st.markdown(f"**{item['q']}**")
-        st.markdown(f"""
-        <p style="font-size:0.83rem;color:#888;margin:-0.4rem 0 0.4rem;">
-          {item['hint']}
-        </p>
-        """, unsafe_allow_html=True)
-        answer = st.text_area(
-            label=f"q{i+1}",
-            label_visibility="collapsed",
-            placeholder="Your answer here...",
-            height=120,
-            key=f"cat_{current+1}_q{i+1}",
-        )
-        answers[f"q{i+1}"] = answer
-        st.markdown("<br>", unsafe_allow_html=True)
+    # Load saved answer if available
+    request_data = st.session_state.get("ehc_request_data", {})
+    saved_cat = request_data.get(f"category_{item['cat_idx'] + 1}")
+    if isinstance(saved_cat, str):
+        import json as _json
+        try:
+            saved_cat = _json.loads(saved_cat)
+        except Exception:
+            saved_cat = {}
+    if not isinstance(saved_cat, dict):
+        saved_cat = {}
+    saved_answer = saved_cat.get(f"q{item['q_idx'] + 1}", "")
 
+    answer = st.text_input(
+        label="Your answer",
+        label_visibility="collapsed",
+        placeholder="Type your answer here...",
+        value=saved_answer,
+        key=f"q_input_{current_q}",
+    )
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # ── Buttons ───────────────────────────────────────────────────────────────
     st.markdown("---")
     col1, col2, col3 = st.columns([2, 2, 4])
     with col1:
-        if st.button("Save and continue", key="ehc_save_continue", use_container_width=True):
-            st.session_state["ehc_answers_pending"] = answers
-            st.session_state["ehc_action"] = "continue"
+        next_label = "Next" if current_q < total_questions - 1 else "Finish"
+        if st.button(next_label, key="ehc_next", use_container_width=True):
+            st.session_state["ehc_pending_answer"] = answer
+            st.session_state["ehc_pending_q"] = current_q
+            st.session_state["ehc_action"] = "next"
             st.rerun()
     with col2:
         if st.button("Save and exit", key="ehc_save_exit", use_container_width=True):
-            st.session_state["ehc_answers_pending"] = answers
+            st.session_state["ehc_pending_answer"] = answer
+            st.session_state["ehc_pending_q"] = current_q
             st.session_state["ehc_action"] = "exit"
             st.rerun()
 
+    # ── Action handler ────────────────────────────────────────────────────────
     action = st.session_state.get("ehc_action")
-    if action == "continue":
+    if action in ("next", "exit"):
         st.session_state["ehc_action"] = None
-        next_cat = current + 2
-        if next_cat > len(EHC_CATEGORIES):
-            st.success("All categories complete.")
-        else:
-            st.session_state["ehc_current_category"] = next_cat
+        pending_answer = st.session_state.get("ehc_pending_answer", "")
+        pending_q = st.session_state.get("ehc_pending_q", 0)
+        pending_item = flat_questions[pending_q]
+        request_id = st.session_state.get("ehc_request_id")
+
+        # Load existing category data to merge answer in
+        existing_data = st.session_state.get("ehc_request_data", {})
+        cat_key = f"category_{pending_item['cat_idx'] + 1}"
+        existing_cat = existing_data.get(cat_key)
+        if isinstance(existing_cat, str):
+            import json as _json
+            try:
+                existing_cat = _json.loads(existing_cat)
+            except Exception:
+                existing_cat = {}
+        if not isinstance(existing_cat, dict):
+            existing_cat = {}
+
+        existing_cat[f"q{pending_item['q_idx'] + 1}"] = pending_answer
+
+        # Save to Supabase
+        if SUPABASE_AVAILABLE and supabase and request_id:
+            try:
+                import json as _json
+                supabase.auth.set_session(
+                    st.session_state["session"].access_token,
+                    st.session_state["session"].refresh_token
+                )
+                supabase.table("ehc_requests_v2").update({
+                    cat_key: _json.dumps(existing_cat),
+                    "updated_at": datetime.datetime.utcnow().isoformat(),
+                }).eq("id", request_id).execute()
+
+                # Update local session data so pre-population works
+                if "ehc_request_data" not in st.session_state:
+                    st.session_state["ehc_request_data"] = {}
+                st.session_state["ehc_request_data"][cat_key] = existing_cat
+
+            except Exception as e:
+                st.caption(f"Save failed: {e}")
+
+        if action == "next":
+            if pending_q + 1 >= total_questions:
+                st.success("All questions complete.")
+                st.session_state["ehc_journey_active"] = False
+                st.session_state["ehc_request_started"] = False
+                st.session_state.stage = "landing"
+                st.rerun()
+            else:
+                st.session_state["ehc_current_question"] = pending_q + 1
+                st.rerun()
+        elif action == "exit":
+            st.session_state["ehc_journey_active"] = False
+            st.session_state["ehc_request_started"] = False
+            st.session_state["ehc_current_question"] = pending_q
+            st.session_state.stage = "landing"
             st.rerun()
-    elif action == "exit":
-        st.session_state["ehc_action"] = None
-        st.session_state["ehc_journey_active"] = False
-        st.session_state["ehc_request_started"] = False
-        st.session_state.stage = "landing"
-        st.rerun()
 
         
 def page_ehc_request():
@@ -4849,6 +4937,8 @@ def page_ehc_request():
             st.session_state["ehc_request_id"] = existing_request["id"]
             st.session_state["ehc_request_data"] = existing_request
             st.session_state["ehc_request_started"] = True
+            st.session_state["ehc_journey_active"] = False
+            st.session_state["ehc_current_question"] = 0
             st.rerun()
 
     else:
