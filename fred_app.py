@@ -5248,7 +5248,7 @@ else:
     st.markdown("<hr style='margin:0 0 1.5rem;border-color: #d0dae8;'>", unsafe_allow_html=True)
     stage = st.session_state.stage
     if stage == "landing":
-        page_landing()
+        page_dashboard()
     elif stage == "explainer":
         page_explainer()
     elif stage == "upload":
