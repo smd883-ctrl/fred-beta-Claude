@@ -2670,8 +2670,8 @@ def page_dashboard():
             widget_html = """
             <div class="dash-widget">
                 <div class="dash-widget-title">EHCP Request</div>
-                <div class="dash-widget-value" style="font-size:1rem;color:var(--dash-muted);">Start your request</div>
-                <div class="dash-widget-desc" style="margin-top:8px;">Build a formal request for an EHC needs assessment — structured, evidence-led, and ready to send.</div>
+                <div class="dash-widget-value" style="font-size:1rem;color:var(--dash-muted);">Start your EHCP request</div>
+                <div class="dash-widget-desc" style="margin-top:8px;">We'll help you build a clear, structured request to send to your local authority.</div>
                 <div class="dash-widget-action">Begin</div>
             </div>"""
         
