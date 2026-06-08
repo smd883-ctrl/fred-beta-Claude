@@ -2582,12 +2582,12 @@ def page_dashboard():
 
     user = st.session_state.get("user")
     child_name = st.session_state.get("child_name", "") or "Your child"
-    initial = child_name[0].upper() if child_name else "?"
+    initial = child_name[0].upper() if child_name and child_name != "Your child" else "?"
 
     # ── Zone 1: Child header ─────────────────────────────────────────────────
     st.markdown(f"""
     <div class="dash-child-header">
-        <div class="dash-avatar">{initial}</div>
+        <div class="dash-avatar" style="background:linear-gradient(135deg,#c8dfc8 0%,#a8c8a8 100%);">{initial}</div>
         <div>
             <div class="dash-child-name">{child_name}</div>
             <div class="dash-child-sub">Dashboard · Last updated today</div>
