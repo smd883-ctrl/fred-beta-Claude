@@ -2652,9 +2652,7 @@ def page_dashboard():
                 <div class="dash-widget-action">Upload your EHCP</div>
             </div>"""
         st.markdown(widget_html, unsafe_allow_html=True)
-        if st.button("EHCP Analysis", key="dash_w1", use_container_width=True):
-            st.session_state.stage = "upload"
-            st.rerun()
+        
 
     # Widget 2 — EHCP Request
     with col2:
@@ -2675,10 +2673,7 @@ def page_dashboard():
                 <div class="dash-widget-desc" style="margin-top:8px;">Build a formal request for an EHC needs assessment — structured, evidence-led, and ready to send.</div>
                 <div class="dash-widget-action">Begin</div>
             </div>"""
-        st.markdown(widget_html, unsafe_allow_html=True)
-        if st.button("EHCP Request", key="dash_w2", use_container_width=True):
-            st.session_state.stage = "ehc_request"
-            st.rerun()
+        
 
     # Widget 3 — Correspondence
     with col3:
@@ -2690,9 +2685,7 @@ def page_dashboard():
             <div class="dash-widget-action">Upload correspondence</div>
         </div>"""
         st.markdown(widget_html, unsafe_allow_html=True)
-        if st.button("Correspondence", key="dash_w3", use_container_width=True):
-            st.session_state.stage = "correspondence"
-            st.rerun()
+        
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -2710,9 +2703,7 @@ def page_dashboard():
             <div class="dash-factor"><div class="dash-factor-dot" style="background:#b83232"></div>Based on correspondence patterns</div>
         </div>
         """, unsafe_allow_html=True)
-        if st.button("School Engagement", key="dash_w4", use_container_width=True):
-            st.session_state.stage = "correspondence"
-            st.rerun()
+        
 
     # Widget 5 — Upcoming
     with col5:
@@ -2754,8 +2745,7 @@ def page_dashboard():
             </div>
         </div>
         """, unsafe_allow_html=True)
-        if st.button("+ Add event", key="dash_w5", use_container_width=True):
-            pass  # placeholder — not functional this session
+        
 
     # Widget 6 — Glossary
     with col6:
@@ -2775,8 +2765,7 @@ def page_dashboard():
             </div>
         </div>
         """, unsafe_allow_html=True)
-        if st.button("Glossary", key="dash_w6", use_container_width=True):
-            pass  # placeholder — not functional this session
+        
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -2801,9 +2790,7 @@ def page_dashboard():
             </div>
         </div>
         """, unsafe_allow_html=True)
-        if st.button("Document Portal", key="dash_w7", use_container_width=True):
-            st.session_state.stage = "upload"
-            st.rerun()
+        
 
     # Widget 8 — Email Analysis
     with col8:
@@ -2829,9 +2816,7 @@ def page_dashboard():
             <div class="dash-widget-action">Upload new email</div>
         </div>
         """, unsafe_allow_html=True)
-        if st.button("Email Analysis", key="dash_w8", use_container_width=True):
-            st.session_state.stage = "correspondence"
-            st.rerun()
+        
 
     # Widget 9 — Journey timeline
     with col9:
@@ -2881,8 +2866,7 @@ def page_dashboard():
             </div>
         </div>
         """, unsafe_allow_html=True)
-        if st.button("Freddie's Journey", key="dash_w9", use_container_width=True):
-            pass  # placeholder — not functional this session
+        
 
     # ── Zone 4: Theme picker ─────────────────────────────────────────────────
     st.markdown("""
