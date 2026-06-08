@@ -2698,10 +2698,8 @@ def page_dashboard():
         st.markdown("""
         <div class="dash-widget">
             <div class="dash-widget-title">School Engagement</div>
-            <div class="dash-thermo-score">3/10</div>
-            <div class="dash-thermo-status">Poor engagement</div>
-            <div class="dash-thermo-narrative">Upload correspondence to see your engagement score.</div>
-            <div class="dash-factor"><div class="dash-factor-dot" style="background:#b83232"></div>Based on correspondence patterns</div>
+            <div style="height:4px;background:var(--dash-border);border-radius:2px;margin:12px 0 10px;"></div>
+            <div class="dash-widget-desc">Upload correspondence to see your engagement score.</div>
         </div>
         """, unsafe_allow_html=True)
         
