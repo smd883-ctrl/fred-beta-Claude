@@ -4785,11 +4785,12 @@ def page_ehc_journey():
         saved_cat = {}
     saved_answer = saved_cat.get(f"q{item['q_idx'] + 1}", "")
 
-    answer = st.text_input(
+    answer = st.text_area(
         label="Your answer",
         label_visibility="collapsed",
-        placeholder="Type your answer here...",
+        placeholder="Type your answer here — there is no right length, write as much or as little as feels right...",
         value=saved_answer,
+        height=180,
         key=f"q_input_{current_q}",
     )
 
