@@ -2649,7 +2649,7 @@ def page_dashboard():
             <div class="dash-widget">
                 <div class="dash-widget-title">EHCP Analysis</div>
                 <div class="dash-widget-value" style="font-size:1rem;color:var(--dash-muted);">No EHCP uploaded yet</div>
-                <div class="dash-widget-desc" style="margin-top:8px;">Upload your child's EHCP and FRED will analyse it against the Children and Families Act 2014.</div>
+                <div class="dash-widget-desc" style="margin-top:8px;">Upload your child's EHCP and FRED will tell you what it commits to and whether it is being delivered.</div>
                 <div class="dash-widget-action">Upload your EHCP</div>
             </div>"""
         st.markdown(widget_html, unsafe_allow_html=True)
