@@ -4902,10 +4902,12 @@ def page_ehc_request():
 
     if SUPABASE_AVAILABLE and supabase and user:
         try:
-            supabase.auth.set_session(
-                st.session_state["session"].access_token,
-                st.session_state["session"].refresh_token
-            )
+            session = st.session_state.get("session")
+            if session and session.access_token:
+                supabase.auth.set_session(
+                    session.access_token,
+                    session.refresh_token
+                )
             result = supabase.table("ehc_requests_v2") \
                 .select("*") \
                 .eq("user_id", str(user.id)) \
