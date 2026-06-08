@@ -5711,26 +5711,6 @@ def page_subscriber():
 def render_nav():
     user = st.session_state.get("user")
 
-    st.markdown("""
-    <style>
-    div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] > div[data-testid="stVerticalBlock"] > div[data-testid="stButton"] > button {
-        background: transparent !important;
-        color: #444 !important;
-        border: none !important;
-        border-radius: 0 !important;
-        padding: 0.3rem 0.6rem !important;
-        font-size: 0.82rem !important;
-        font-weight: 500 !important;
-        box-shadow: none !important;
-        width: 100%;
-    }
-    div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] > div[data-testid="stVerticalBlock"] > div[data-testid="stButton"] > button:hover {
-        color: #2d4a2d !important;
-        background: transparent !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
     cols = st.columns([1, 1, 1, 2, 1])
 
     with cols[0]:
@@ -5742,14 +5722,16 @@ def render_nav():
         if st.button("My report", key="nav_report", use_container_width=True):
             if st.session_state.findings:
                 st.session_state.stage = "full_report"
-                st.rerun()
+            else:
+                st.session_state.stage = "upload"
+            st.rerun()
 
     with cols[2]:
         if st.button("Correspondence", key="nav_correspondence", use_container_width=True):
             if st.session_state.email_submitted:
                 st.session_state.stage = "correspondence"
             else:
-                st.session_state.stage = "sneak_peek"
+                st.session_state.stage = "correspondence"
             st.rerun()
 
     with cols[3]:
