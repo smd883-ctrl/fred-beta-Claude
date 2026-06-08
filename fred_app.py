@@ -2582,7 +2582,7 @@ def page_dashboard():
 
     user = st.session_state.get("user")
     child_name = st.session_state.get("child_name", "") or "Your child"
-    initial = child_name[0].upper() if child_name and child_name != "Your child" else "?"
+    initial = child_name[0].upper() if child_name and child_name != "Your child" else "F"
 
     # ── Zone 1: Child header ─────────────────────────────────────────────────
     st.markdown(f"""
