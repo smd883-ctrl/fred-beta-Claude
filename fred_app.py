@@ -4791,7 +4791,7 @@ def page_ehc_journey():
         placeholder="Type your answer here — there is no right length, write as much or as little as feels right...",
         value=saved_answer,
         height=180,
-        key=f"q_input_{current_q}",
+        key=f"ta_input_{current_q}",
     )
 
     st.markdown("<br>", unsafe_allow_html=True)
