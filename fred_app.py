@@ -5715,7 +5715,7 @@ def render_nav():
 
     with cols[0]:
         if st.button("Home", key="nav_home", use_container_width=True):
-            st.session_state.stage = "landing"
+            st.session_state.stage = "dashboard"
             st.rerun()
 
     with cols[1]:
@@ -5763,6 +5763,8 @@ else:
     st.markdown("<hr style='margin:0 0 1.5rem;border-color: #d0dae8;'>", unsafe_allow_html=True)
     stage = st.session_state.stage
     if stage == "landing":
+        page_dashboard()
+    elif stage == "dashboard":
         page_dashboard()
     elif stage == "explainer":
         page_explainer()
