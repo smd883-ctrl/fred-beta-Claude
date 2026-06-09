@@ -2759,23 +2759,9 @@ def page_dashboard():
         st.markdown("""
         <div class="dash-widget">
             <div class="dash-widget-title">Email Analysis</div>
-            <div class="dash-email-item">
-                <div class="dash-email-meta">
-                    <div class="dash-email-from">SENCO — Freddie's School</div>
-                    <div class="dash-email-date">2 Jun 2026</div>
-                </div>
-                <div class="dash-email-subject">Re: Freddie's support this term</div>
-                <span class="dash-email-tag dash-email-concern">⚠ Provision concern identified</span>
-            </div>
-            <div class="dash-email-item">
-                <div class="dash-email-meta">
-                    <div class="dash-email-from">Warwickshire SEND Team</div>
-                    <div class="dash-email-date">28 May 2026</div>
-                </div>
-                <div class="dash-email-subject">Annual review — next steps</div>
-                <span class="dash-email-tag dash-email-ok">✓ No concerns found</span>
-            </div>
-            <div class="dash-widget-action">Upload new email</div>
+            <div class="dash-widget-value" style="font-size:1rem;color:var(--dash-muted);">No emails analysed yet</div>
+            <div class="dash-widget-desc" style="margin-top:8px;">Upload your first email or letter to get started.</div>
+            <div class="dash-widget-action">Upload correspondence</div>
         </div>
         """, unsafe_allow_html=True)
         
