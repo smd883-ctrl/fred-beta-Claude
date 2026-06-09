@@ -5104,10 +5104,11 @@ Yours sincerely,
         rec_colour = {"formal": "#C0392B", "collaborative": "#1E8449", "neutral": "#D4A017"}
         rec_bg    = {"formal": "#fdf4f3", "collaborative": "#f3faf5", "neutral": "#fdf9f0"}
         r = tone_rec.get("recommendation", "neutral")
-
+        _border_colour = rec_colour.get(r, "#888")
+        _bg_colour = rec_bg.get(r, "#f9f9f9")
         st.markdown(f"""
-        <div style="border-left:4px solid {rec_colour.get(r,'#888')};
-                    background:{rec_bg.get(r,'#f9f9f9')};
+        <div style="border-left:4px solid {_border_colour};
+                    background:{_bg_colour};
                     border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin-bottom:1rem;">
           <p style="font-weight:600;margin:0 0 0.3rem;font-size:0.95rem;">
             FRED recommends: {tone_rec.get('label', 'Measured response')}
