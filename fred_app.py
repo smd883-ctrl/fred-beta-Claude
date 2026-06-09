@@ -2638,10 +2638,7 @@ def page_dashboard():
             <div class="dash-widget-desc">Upload correspondence to see your engagement score.</div>
         </div>
         """, unsafe_allow_html=True)
-        if st.button("Upload correspondence", key="widget_engagement", use_container_width=True):
-            st.session_state.stage = "correspondence"
-            st.rerun()
-
+        
     # Widget 5 — Upcoming
     with col5:
         st.markdown("""
