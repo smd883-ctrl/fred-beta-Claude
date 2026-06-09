@@ -5668,6 +5668,10 @@ else:
         page_correspondence()
     elif stage == "ehc_request":
         page_ehc_request()
+    elif stage == "calendar":
+        st.info("Calendar coming soon.")
+    elif stage == "glossary":
+        st.info("Glossary coming soon.")
     else:
         page_landing()
 
