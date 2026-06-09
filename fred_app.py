@@ -2670,9 +2670,6 @@ def page_dashboard():
             </div>
         </div>
         """, unsafe_allow_html=True)
-        if st.button("Open glossary", key="widget_glossary", use_container_width=True):
-            st.session_state.stage = "glossary"
-            st.rerun()
 
     st.markdown("<br>", unsafe_allow_html=True)
 
