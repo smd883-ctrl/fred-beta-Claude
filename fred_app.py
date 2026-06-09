@@ -2749,14 +2749,7 @@ def page_dashboard():
             <div style="border:1.5px dashed var(--dash-border);border-radius:var(--dash-radius-sm);padding:14px;text-align:center;margin-bottom:10px;">
                 <div style="font-size:12px;color:var(--dash-muted);">Drop any document here<br>FRED will identify it</div>
             </div>
-            <div class="dash-doc-item">
-                <div class="dash-doc-name">Freddie_EHCP_2025.pdf</div>
-                <div class="dash-doc-type">EHCP</div>
-            </div>
-            <div class="dash-doc-item">
-                <div class="dash-doc-name">EP_Report_Jan25.pdf</div>
-                <div class="dash-doc-type">EP Report</div>
-            </div>
+            <div class="dash-widget-value" style="font-size:1rem;color:var(--dash-muted);">No documents uploaded yet</div>
         </div>
         """, unsafe_allow_html=True)
         
