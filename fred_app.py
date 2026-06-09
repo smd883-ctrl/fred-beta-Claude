@@ -5030,7 +5030,7 @@ def page_correspondence():
 
                 st.markdown(f"""
                 <div class="finding-red">
-                  <span class="badge-red">{len(confirmed_items)} factor{'s' if len(confirmed_items) > 1 else ''} confirmed — {environment}</span>
+                  <span class="badge-red">{len(confirmed_items)} factor{'s' if len(confirmed_items) > 1 else ''} confirmed - {environment}</span>
                   <p style="margin:0.5rem 0 0;font-size:0.95rem;">
                     These factors should be documented and cross-referenced against Section B and
                     Section F of the EHCP.
