@@ -4632,7 +4632,7 @@ def page_correspondence():
     st.markdown(f"""
     <div style="background:#f0f4fa;border-radius:8px;padding:1.2rem 1.5rem;margin-bottom:1.5rem;">
       <p style="margin:0;font-size:0.97rem;line-height:1.7;">
-        Upload a letter or email from school or the LA and FRED will read it for you —
+        Upload a letter or email from school or the LA and FRED will read it for you -
         identifying patterns, root causes, and the right question to ask next.
         This is different from your EHCP report: the EHCP report analyses the document,
         correspondence analysis reads the relationship.
