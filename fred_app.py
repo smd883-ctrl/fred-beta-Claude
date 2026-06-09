@@ -5109,23 +5109,21 @@ Yours sincerely,
         _tone_label = tone_rec.get("label", "Measured response")
         _tone_reasoning = tone_rec.get("reasoning", "")
         _tone_confidence = tone_rec.get("confidence", "").title()
-        st.markdown(f"""
-        <div style="border-left:4px solid {_border_colour};
-                    background:{_bg_colour};
-                    border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin-bottom:1rem;">
-          <p style="font-weight:600;margin:0 0 0.3rem;font-size:0.95rem;">
-            FRED recommends: {_tone_label}
-          </p>
-          <p style="margin:0;font-size:0.9rem;line-height:1.6;color: #444;">
-            {_tone_reasoning}
-          </p>
-          <p style="margin:0.6rem 0 0;font-size:0.78rem;color: #888;">
-            Confidence: {_tone_confidence} -
-            based on language patterns in this correspondence.
-            This is a recommendation, not an instruction.
-          </p>
-        </div>
-        """, unsafe_allow_html=True)
+        _tone_html = (
+            "<div style=\"border-left:4px solid " + _border_colour + ";"
+            "background:" + _bg_colour + ";"
+            "border-radius:0 8px 8px 0;padding:1rem 1.2rem;margin-bottom:1rem;\">"
+            "<p style=\"font-weight:600;margin:0 0 0.3rem;font-size:0.95rem;\">"
+            "FRED recommends: " + _tone_label + "</p>"
+            "<p style=\"margin:0;font-size:0.9rem;line-height:1.6;color:#444;\">"
+            + _tone_reasoning + "</p>"
+            "<p style=\"margin:0.6rem 0 0;font-size:0.78rem;color:#888;\">"
+            "Confidence: " + _tone_confidence + " - "
+            "based on language patterns in this correspondence. "
+            "This is a recommendation, not an instruction.</p>"
+            "</div>"
+        )
+        st.markdown(_tone_html, unsafe_allow_html=True)
 
         st.markdown("**Does this match your experience of the relationship?**")
         tone_confirm = st.radio(
