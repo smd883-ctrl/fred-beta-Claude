@@ -2697,6 +2697,7 @@ def page_dashboard():
                 <div class="dash-widget-desc" style="margin-top:8px;">We'll help you build a clear, structured request to send to your local authority.</div>
             </div>"""
         st.markdown(widget_html, unsafe_allow_html=True)
+    with col2:
         if st.button("Continue" if has_request else "Begin", key="widget_ehc_request", use_container_width=True):
             st.session_state.stage = "ehc_request"
             st.rerun()
