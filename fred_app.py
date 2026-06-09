@@ -3674,10 +3674,34 @@ def page_login():
                     )
                 except Exception as e:
                     st.error(f"Account creation failed: {e}")
+    if mode == "Sign in":
+        st.markdown("<div style='text-align:center;margin-top:0.8rem;'>", unsafe_allow_html=True)
+        if st.button("Forgot your password?", key="forgot_pw_btn"):
+            st.session_state["show_reset"] = True
+        st.markdown("</div>", unsafe_allow_html=True)
+
+        if st.session_state.get("show_reset"):
+            with st.form("reset_form"):
+                reset_email = st.text_input("Enter your email address", key="reset_email")
+                reset_submitted = st.form_submit_button("Send reset link", use_container_width=True)
+            if reset_submitted:
+                if not reset_email or "@" not in reset_email:
+                    st.error("Please enter a valid email address.")
+                elif not SUPABASE_AVAILABLE:
+                    st.error("Authentication unavailable. Please try again later.")
+                else:
+                    try:
+                        supabase.auth.reset_password_email(reset_email)
+                        st.success("Check your email for a reset link.")
+                        st.session_state["show_reset"] = False
+                    except Exception as e:
+                        st.error(f"Reset failed: {e}")
+
     st.markdown("""
     <p style="text-align:center;font-size:0.8rem;color:#999;margin-top:1.2rem;font-weight:300;">
       Free during beta · No card required · Built by a parent
     </p>
+    """, unsafe_allow_html=True)
     """, unsafe_allow_html=True)
 
 def page_survey():
