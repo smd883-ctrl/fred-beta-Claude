@@ -2537,6 +2537,19 @@ def page_dashboard():
             <div class="dash-next-label">Your next action</div>
             <div class="dash-next-text">Check what Section F commits to before your next review</div>
         </div>
+        <span style="
+            background:white;
+            color:#2c5f3f;
+            padding:9px 20px;
+            border-radius:20px;
+            font-size:13px;
+            font-weight:600;
+            white-space:nowrap;
+            flex-shrink:0;
+            margin-left:16px;
+            font-family:'DM Sans',sans-serif;
+            cursor:default;
+        ">Review Section F →</span>
     </div>
     """, unsafe_allow_html=True)
 
