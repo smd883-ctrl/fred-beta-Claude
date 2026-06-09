@@ -2651,7 +2651,9 @@ def page_dashboard():
                 <div class="dash-widget-desc" style="margin-top:8px;">Upload your child's EHCP and FRED will tell you what it commits to and whether it is being delivered.</div>
             </div>"""
         st.markdown(widget_html, unsafe_allow_html=True)
-        if st.button("Upload now →" if not has_findings else "View full report →", key="widget_ehcp", use_container_width=True):
+        if st.button("View report" if has_findings else "Upload", key="widget_ehcp", use_container_width=True):
+            st.session_state.stage = "upload"
+            st.rerun()
             st.session_state.stage = "upload"
             st.rerun()
         
