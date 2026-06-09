@@ -2700,7 +2700,7 @@ def page_dashboard():
             <div class="dash-widget-desc" style="margin-top:8px;">Upload your first email or letter to get started.</div>
         </div>
         """, unsafe_allow_html=True)
-        if st.button("Upload", key="widget_email", use_container_width=True):
+        if st.button("Upload correspondence →", key="widget_email", use_container_width=True):
             st.session_state.stage = "correspondence"
             st.rerun()
 
