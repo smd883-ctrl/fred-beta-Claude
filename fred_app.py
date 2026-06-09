@@ -2679,32 +2679,27 @@ def page_dashboard():
             </div>"""
         
 
-    # Widget 3 — Correspondence
-    with col3:
-        widget_html = """
-        <div class="dash-widget">
-            <div class="dash-widget-title">Correspondence</div>
-            <div class="dash-widget-value" style="font-size:1rem;color:var(--dash-muted);">No correspondence uploaded yet</div>
-            <div class="dash-widget-desc" style="margin-top:8px;">Upload emails or letters from school or the LA. FRED reads them for patterns, tone, and the right question to ask next.</div>
-            <div class="dash-widget-action">Upload correspondence</div>
-        </div>"""
+    # Widget 2 — EHCP Request
+    with col2:
+        if has_request:
+            widget_html = """
+            <div class="dash-widget">
+                <div class="dash-widget-title">EHCP Request</div>
+                <div class="dash-widget-value">In progress</div>
+                <div class="dash-progress-track"><div class="dash-progress-fill"></div></div>
+                <div class="dash-widget-desc">Continue where you left off</div>
+            </div>"""
+        else:
+            widget_html = """
+            <div class="dash-widget">
+                <div class="dash-widget-title">EHCP Request</div>
+                <div class="dash-widget-value" style="font-size:1rem;color:var(--dash-muted);">Start your EHCP request</div>
+                <div class="dash-widget-desc" style="margin-top:8px;">We'll help you build a clear, structured request to send to your local authority.</div>
+            </div>"""
         st.markdown(widget_html, unsafe_allow_html=True)
-        
-
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    # Row 2
-    col4, col5, col6 = st.columns(3)
-
-    # Widget 4 — School Engagement
-    with col4:
-        st.markdown("""
-        <div class="dash-widget">
-            <div class="dash-widget-title">School Engagement</div>
-            <div style="height:4px;background:var(--dash-border);border-radius:2px;margin:12px 0 10px;"></div>
-            <div class="dash-widget-desc">Upload correspondence to see your engagement score.</div>
-        </div>
-        """, unsafe_allow_html=True)
+        if st.button("Continue" if has_request else "Begin", key="widget_ehc_request", use_container_width=True):
+            st.session_state.stage = "ehc_request"
+            st.rerun()
         
 
     # Widget 5 — Upcoming
