@@ -5428,11 +5428,54 @@ def page_ehc_request():
         """, unsafe_allow_html=True)
 
         if st.button("Continue where you left off", use_container_width=False, key="ehc_continue"):
-            st.session_state["ehc_request_id"] = existing_request["id"]
-            st.session_state["ehc_request_data"] = existing_request
+            # Re-fetch fresh from Supabase so progress is current
+            fresh_row = existing_request
+            if SUPABASE_AVAILABLE and supabase:
+                try:
+                    supabase.auth.set_session(
+                        st.session_state["session"].access_token,
+                        st.session_state["session"].refresh_token
+                    )
+                    fresh_result = supabase.table("ehc_requests_v2") \
+                        .select("*") \
+                        .eq("id", existing_request["id"]) \
+                        .limit(1) \
+                        .execute()
+                    if fresh_result.data:
+                        fresh_row = fresh_result.data[0]
+                except Exception:
+                    fresh_row = existing_request
+
+            # Calculate which question to resume from
+            import json as _json
+            resume_q = 0
+            EHC_LENGTHS = [3, 3, 2, 2, 2, 2, 2, 2, 2, 2]
+            flat_idx = 0
+            for cat_idx, q_count in enumerate(EHC_LENGTHS):
+                cat_key = f"category_{cat_idx + 1}"
+                cat_data = fresh_row.get(cat_key)
+                if isinstance(cat_data, str):
+                    try:
+                        cat_data = _json.loads(cat_data)
+                    except Exception:
+                        cat_data = {}
+                if not isinstance(cat_data, dict):
+                    cat_data = {}
+                for q_idx in range(q_count):
+                    answer = cat_data.get(f"q{q_idx + 1}", "").strip()
+                    if answer:
+                        resume_q = flat_idx + 1
+                    flat_idx += 1
+
+            # Cap at last question
+            total_questions = sum(EHC_LENGTHS)
+            resume_q = min(resume_q, total_questions - 1)
+
+            st.session_state["ehc_request_id"] = fresh_row["id"]
+            st.session_state["ehc_request_data"] = fresh_row
             st.session_state["ehc_request_started"] = True
-            st.session_state["ehc_journey_active"] = False
-            st.session_state["ehc_current_question"] = 0
+            st.session_state["ehc_journey_active"] = True
+            st.session_state["ehc_current_question"] = resume_q
             st.rerun()
 
     else:
