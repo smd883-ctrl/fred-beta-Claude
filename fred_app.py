@@ -5045,7 +5045,7 @@ def page_correspondence():
                 if st.session_state.get("show_amendment"):
                     draft = f"""Dear [SENCO name],
 
-I am writing to request a formal amendment to [child's name]'s Education, Health and Care Plan — specifically to Sections B and F — following observations in the {environment} on {today}.
+I am writing to request a formal amendment to [child's name]'s Education, Health and Care Plan - specifically to Sections B and F - following observations in the {environment} on {today}.
 
 The following has been identified:
 
