@@ -3617,7 +3617,7 @@ def page_login():
         with st.form("signin_form"):
             email = st.text_input("Email address", key="login_email")
             password = st.text_input("Password", type="password", key="login_password")
-            submitted = st.form_submit_button("Sign in", use_container_width=True)
+            submitted = st.form_submit_button("Sign in", use_container_width=True, type="primary")
         if submitted:
             if not email or not password:
                 st.error("Please enter your email and password.")
