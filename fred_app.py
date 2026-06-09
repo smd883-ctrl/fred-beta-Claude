@@ -2643,13 +2643,61 @@ def page_dashboard():
     # Widget 2 — EHCP Request
     with col2:
         if has_request:
-            widget_html = """
-            <div class="dash-widget">
-                <div class="dash-widget-title">EHCP Request</div>
-                <div class="dash-widget-value">In progress</div>
-                <div class="dash-progress-track"><div class="dash-progress-fill"></div></div>
-                <div class="dash-widget-desc">Continue where you left off</div>
-            </div>"""
+            # Count completed categories from the existing request row
+            ehc_completed = 0
+            ehc_started_date = ""
+            ehc_status = "in_progress"
+            if SUPABASE_AVAILABLE and supabase and user:
+                try:
+                    supabase.auth.set_session(
+                        st.session_state["session"].access_token,
+                        st.session_state["session"].refresh_token
+                    )
+                    ehc_result = supabase.table("ehc_requests_v2") \
+                        .select("*") \
+                        .eq("user_id", str(user.id)) \
+                        .order("updated_at", desc=True) \
+                        .limit(1) \
+                        .execute()
+                    if ehc_result.data:
+                        row = ehc_result.data[0]
+                        ehc_status = row.get("status", "in_progress")
+                        ehc_completed = sum(
+                            1 for i in range(1, 11)
+                            if row.get(f"category_{i}")
+                        )
+                        raw_date = row.get("created_at", "")
+                        if raw_date:
+                            try:
+                                import datetime as _dt
+                                parsed = _dt.datetime.fromisoformat(raw_date[:10])
+                                ehc_started_date = parsed.strftime("%d %b %Y")
+                            except Exception:
+                                ehc_started_date = ""
+                except Exception:
+                    ehc_completed = 0
+
+            fill_pct = int((ehc_completed / 10) * 100)
+
+            if ehc_status == "complete":
+                widget_html = f"""
+                <div class="dash-widget">
+                    <div class="dash-widget-title">EHCP Request</div>
+                    <div class="dash-widget-value">Request complete</div>
+                    <div class="dash-widget-desc" style="margin-top:6px;">{"Submitted " + ehc_started_date if ehc_started_date else "Submitted"}</div>
+                </div>"""
+                ehc_button_label = "View your request"
+            else:
+                widget_html = f"""
+                <div class="dash-widget">
+                    <div class="dash-widget-title">EHCP Request</div>
+                    <div class="dash-widget-value">{ehc_completed} of 10</div>
+                    <div class="dash-progress-track">
+                        <div class="dash-progress-fill" style="width:{fill_pct}%;"></div>
+                    </div>
+                    <div class="dash-widget-desc">Categories complete{"· Started " + ehc_started_date if ehc_started_date else ""}</div>
+                </div>"""
+                ehc_button_label = "Continue your request"
         else:
             widget_html = """
             <div class="dash-widget">
@@ -2657,8 +2705,10 @@ def page_dashboard():
                 <div class="dash-widget-value" style="font-size:1rem;color:var(--dash-muted);">Start your EHCP request</div>
                 <div class="dash-widget-desc" style="margin-top:8px;">We'll help you build a clear, structured request to send to your local authority.</div>
             </div>"""
+            ehc_button_label = "Begin"
+
         st.markdown(widget_html, unsafe_allow_html=True)
-        if st.button("Continue" if has_request else "Begin", key="widget_ehc_request", use_container_width=True):
+        if st.button(ehc_button_label, key="widget_ehc_request", use_container_width=True):
             st.session_state.stage = "ehc_request"
             st.rerun()
 
