@@ -2709,39 +2709,9 @@ def page_dashboard():
         st.markdown("""
         <div class="dash-widget">
             <div class="dash-widget-title">Upcoming</div>
-            <div class="dash-event">
-                <div>
-                    <div class="dash-event-day">18</div>
-                    <div class="dash-event-month">Jun</div>
-                </div>
-                <div style="flex:1">
-                    <div class="dash-event-title">Annual Review Meeting</div>
-                    <div class="dash-event-sub">Freddie's school · 10:00am</div>
-                </div>
-                <div class="dash-badge dash-badge-urgent">6 wks</div>
-            </div>
-            <div class="dash-event">
-                <div>
-                    <div class="dash-event-day">30</div>
-                    <div class="dash-event-month">Jun</div>
-                </div>
-                <div style="flex:1">
-                    <div class="dash-event-title">LA Response Deadline</div>
-                    <div class="dash-event-sub">EHC needs assessment</div>
-                </div>
-                <div class="dash-badge dash-badge-soon">3 wks</div>
-            </div>
-            <div class="dash-event">
-                <div>
-                    <div class="dash-event-day">14</div>
-                    <div class="dash-event-month">Jul</div>
-                </div>
-                <div style="flex:1">
-                    <div class="dash-event-title">SENDIASS Appointment</div>
-                    <div class="dash-event-sub">Phone call · 2:00pm</div>
-                </div>
-                <div class="dash-badge dash-badge-ok">5 wks</div>
-            </div>
+            <div class="dash-widget-value" style="font-size:1rem;color:var(--dash-muted);">No events yet</div>
+            <div class="dash-widget-desc" style="margin-top:8px;">Add your first meeting, deadline, or review date.</div>
+            <div class="dash-widget-action">+ Add event</div>
         </div>
         """, unsafe_allow_html=True)
         
