@@ -2768,7 +2768,6 @@ def page_dashboard():
 
     # Widget 9 — Journey timeline
     with col9:
-        st.markdown("""
         import datetime as _dt
         _today = _dt.datetime.now().strftime("%d %B %Y")
         st.markdown(f"""
