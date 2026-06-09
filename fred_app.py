@@ -2769,46 +2769,19 @@ def page_dashboard():
     # Widget 9 — Journey timeline
     with col9:
         st.markdown("""
+        import datetime as _dt
+        _today = _dt.datetime.now().strftime("%d %B %Y")
+        st.markdown(f"""
         <div class="dash-widget">
             <div class="dash-widget-title">Freddie's Journey</div>
             <div>
                 <div class="dash-timeline-item">
                     <div class="dash-tl-left">
                         <div class="dash-tl-dot dash-tl-dot-filled"></div>
-                        <div class="dash-tl-line"></div>
                     </div>
                     <div>
-                        <div class="dash-tl-title">EHCP issued</div>
-                        <div class="dash-tl-date">March 2024 · Warwickshire LA</div>
-                    </div>
-                </div>
-                <div class="dash-timeline-item">
-                    <div class="dash-tl-left">
-                        <div class="dash-tl-dot dash-tl-dot-filled"></div>
-                        <div class="dash-tl-line"></div>
-                    </div>
-                    <div>
-                        <div class="dash-tl-title">First FRED analysis</div>
-                        <div class="dash-tl-date">4 findings · 2 RED identified</div>
-                    </div>
-                </div>
-                <div class="dash-timeline-item">
-                    <div class="dash-tl-left">
-                        <div class="dash-tl-dot dash-tl-dot-filled"></div>
-                        <div class="dash-tl-line"></div>
-                    </div>
-                    <div>
-                        <div class="dash-tl-title">Provision concern raised with school</div>
-                        <div class="dash-tl-date">May 2026 · Correspondence logged</div>
-                    </div>
-                </div>
-                <div class="dash-timeline-item">
-                    <div class="dash-tl-left">
-                        <div class="dash-tl-dot"></div>
-                    </div>
-                    <div>
-                        <div class="dash-tl-title" style="color:var(--dash-muted)">Annual review meeting</div>
-                        <div class="dash-tl-date">18 June 2026 · Upcoming</div>
+                        <div class="dash-tl-title">Account created</div>
+                        <div class="dash-tl-date">{_today}</div>
                     </div>
                 </div>
             </div>
