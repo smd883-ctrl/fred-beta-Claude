@@ -5630,7 +5630,26 @@ def page_subscriber():
 def render_nav():
     user = st.session_state.get("user")
 
-    cols = st.columns([1, 1, 1, 2, 1])
+    has_application = False
+    if SUPABASE_AVAILABLE and supabase and user:
+        try:
+            supabase.auth.set_session(
+                st.session_state["session"].access_token,
+                st.session_state["session"].refresh_token
+            )
+            result = supabase.table("ehc_requests_v2") \
+                .select("id") \
+                .eq("user_id", str(user.id)) \
+                .limit(1) \
+                .execute()
+            has_application = bool(result.data)
+        except Exception:
+            has_application = False
+
+    if has_application:
+        cols = st.columns([1, 1, 1, 1, 2, 1])
+    else:
+        cols = st.columns([1, 1, 1, 2, 1])
 
     with cols[0]:
         if st.button("Home", key="nav_home", use_container_width=True):
@@ -5647,30 +5666,49 @@ def render_nav():
 
     with cols[2]:
         if st.button("Correspondence", key="nav_correspondence", use_container_width=True):
-            if st.session_state.email_submitted:
-                st.session_state.stage = "correspondence"
-            else:
-                st.session_state.stage = "correspondence"
+            st.session_state.stage = "correspondence"
             st.rerun()
 
-    with cols[3]:
-        if user:
-            st.markdown(
-                f"<p style='font-size:0.78rem;color:#666;margin:0.5rem 0 0;text-align:center;'>"
-                f"{user.email}</p>",
-                unsafe_allow_html=True
-            )
-
-    with cols[4]:
-        if st.button("Sign out", key="signout_btn", use_container_width=True):
-            try:
-                if SUPABASE_AVAILABLE:
-                    supabase.auth.sign_out()
-            except Exception:
-                pass
-            for key in list(st.session_state.keys()):
-                del st.session_state[key]
-            st.rerun()
+    if has_application:
+        with cols[3]:
+            if st.button("My application", key="nav_application", use_container_width=True):
+                st.session_state.stage = "ehc_request"
+                st.rerun()
+        with cols[4]:
+            if user:
+                st.markdown(
+                    f"<p style='font-size:0.78rem;color:#666;margin:0.5rem 0 0;text-align:center;'>"
+                    f"{user.email}</p>",
+                    unsafe_allow_html=True
+                )
+        with cols[5]:
+            if st.button("Sign out", key="signout_btn", use_container_width=True):
+                try:
+                    if SUPABASE_AVAILABLE:
+                        supabase.auth.sign_out()
+                except Exception:
+                    pass
+                for key in list(st.session_state.keys()):
+                    del st.session_state[key]
+                st.rerun()
+    else:
+        with cols[3]:
+            if user:
+                st.markdown(
+                    f"<p style='font-size:0.78rem;color:#666;margin:0.5rem 0 0;text-align:center;'>"
+                    f"{user.email}</p>",
+                    unsafe_allow_html=True
+                )
+        with cols[4]:
+            if st.button("Sign out", key="signout_btn", use_container_width=True):
+                try:
+                    if SUPABASE_AVAILABLE:
+                        supabase.auth.sign_out()
+                except Exception:
+                    pass
+                for key in list(st.session_state.keys()):
+                    del st.session_state[key]
+                st.rerun()
 
 
 # ── ROUTER ────────────────────────────────────────────────────────────────────
