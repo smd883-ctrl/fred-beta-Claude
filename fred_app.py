@@ -3613,11 +3613,12 @@ def page_login():
         key="login_mode"
     )
 
-    email = st.text_input("Email address", key="login_email")
-    password = st.text_input("Password", type="password", key="login_password")
-
     if mode == "Sign in":
-        if st.button("Sign in", key="signin_btn", use_container_width=True):
+        with st.form("signin_form"):
+            email = st.text_input("Email address", key="login_email")
+            password = st.text_input("Password", type="password", key="login_password")
+            submitted = st.form_submit_button("Sign in", use_container_width=True)
+        if submitted:
             if not email or not password:
                 st.error("Please enter your email and password.")
             elif not SUPABASE_AVAILABLE:
@@ -3639,7 +3640,11 @@ def page_login():
             "<p style='font-size:0.88rem;color:#666;'>Free during beta — no card required.</p>",
             unsafe_allow_html=True
         )
-        if st.button("Create account", key="signup_btn", use_container_width=True):
+        with st.form("signup_form"):
+            email = st.text_input("Email address", key="login_email_su")
+            password = st.text_input("Password", type="password", key="login_password_su")
+            submitted = st.form_submit_button("Create account", use_container_width=True)
+        if submitted:
             if not email or not password:
                 st.error("Please enter your email and password.")
             elif len(password) < 6:
@@ -3660,7 +3665,6 @@ def page_login():
                     )
                 except Exception as e:
                     st.error(f"Account creation failed: {e}")
-
     st.markdown("""
     <p style="text-align:center;font-size:0.8rem;color:#999;margin-top:1.2rem;font-weight:300;">
       Free during beta · No card required · Built by a parent
