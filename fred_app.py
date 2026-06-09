@@ -2577,15 +2577,66 @@ def page_dashboard():
                 </div>
                 <div class="dash-widget-desc">Last analysed this session</div>
             </div>"""
+            show_ehcp_button = "View report"
         else:
-            widget_html = """
-            <div class="dash-widget">
-                <div class="dash-widget-title">EHCP Analysis</div>
-                <div class="dash-widget-value" style="font-size:1rem;color:var(--dash-muted);">No EHCP uploaded yet</div>
-                <div class="dash-widget-desc" style="margin-top:8px;">Upload your child's EHCP and FRED will tell you what it commits to and whether it is being delivered.</div>
-            </div>"""
+            supabase_red_n = 0
+            supabase_amber_n = 0
+            supabase_green_n = 0
+            supabase_total = 0
+            supabase_date = ""
+            supabase_row_found = False
+            if SUPABASE_AVAILABLE and supabase and user:
+                try:
+                    supabase.auth.set_session(
+                        st.session_state["session"].access_token,
+                        st.session_state["session"].refresh_token
+                    )
+                    af_result = supabase.table("analysis_findings") \
+                        .select("red_findings_count, vague_terms_count, commitments_count, created_at") \
+                        .eq("user_id", str(user.id)) \
+                        .order("created_at", desc=True) \
+                        .limit(1) \
+                        .execute()
+                    if af_result.data:
+                        row = af_result.data[0]
+                        supabase_red_n = row.get("red_findings_count", 0) or 0
+                        supabase_amber_n = row.get("vague_terms_count", 0) or 0
+                        supabase_total = supabase_red_n + supabase_amber_n
+                        raw_date = row.get("created_at", "")
+                        if raw_date:
+                            try:
+                                import datetime as _dt
+                                parsed = _dt.datetime.fromisoformat(raw_date[:10])
+                                supabase_date = parsed.strftime("%d %b %Y")
+                            except Exception:
+                                supabase_date = ""
+                        supabase_row_found = True
+                except Exception:
+                    supabase_row_found = False
+
+            if supabase_row_found:
+                widget_html = f"""
+                <div class="dash-widget">
+                    <div class="dash-widget-title">EHCP Analysis</div>
+                    <div class="dash-widget-value">{supabase_total} findings</div>
+                    <div style="margin:8px 0;">
+                        <span class="dash-tag dash-tag-red">{supabase_red_n} RED</span>
+                        <span class="dash-tag dash-tag-amber">{supabase_amber_n} AMBER</span>
+                    </div>
+                    <div class="dash-widget-desc">{"Analysed " + supabase_date if supabase_date else "Previously analysed"}</div>
+                </div>"""
+                show_ehcp_button = "View report"
+            else:
+                widget_html = """
+                <div class="dash-widget">
+                    <div class="dash-widget-title">EHCP Analysis</div>
+                    <div class="dash-widget-value" style="font-size:1rem;color:var(--dash-muted);">No EHCP uploaded yet</div>
+                    <div class="dash-widget-desc" style="margin-top:8px;">Upload your child's EHCP and FRED will tell you what it commits to and whether it is being delivered.</div>
+                </div>"""
+                show_ehcp_button = "Upload"
+
         st.markdown(widget_html, unsafe_allow_html=True)
-        if st.button("View report" if has_findings else "Upload", key="widget_ehcp", use_container_width=True):
+        if st.button(show_ehcp_button, key="widget_ehcp", use_container_width=True):
             st.session_state.stage = "upload"
             st.rerun()
 
