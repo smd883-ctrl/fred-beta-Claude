@@ -5285,11 +5285,9 @@ def page_ehc_journey():
         key=f"ta_input_{current_q}",
     )
 
-    st.markdown("<br>", unsafe_allow_html=True)
-
     # ── Buttons ───────────────────────────────────────────────────────────────
     st.markdown("---")
-    col1, col2, col3 = st.columns([2, 2, 4])
+    col1, col2, col3, col4 = st.columns([2, 2, 2, 2])
     with col1:
         next_label = "Next" if current_q < total_questions - 1 else "Finish"
         if st.button(next_label, key="ehc_next", use_container_width=True):
@@ -5298,6 +5296,13 @@ def page_ehc_journey():
             st.session_state["ehc_action"] = "next"
             st.rerun()
     with col2:
+        if current_q > 0:
+            if st.button("← Previous", key="ehc_prev", use_container_width=True):
+                st.session_state["ehc_pending_answer"] = answer
+                st.session_state["ehc_pending_q"] = current_q
+                st.session_state["ehc_action"] = "prev"
+                st.rerun()
+    with col3:
         if st.button("Save and exit", key="ehc_save_exit", use_container_width=True):
             st.session_state["ehc_pending_answer"] = answer
             st.session_state["ehc_pending_q"] = current_q
@@ -5306,7 +5311,7 @@ def page_ehc_journey():
 
     # ── Action handler ────────────────────────────────────────────────────────
     action = st.session_state.get("ehc_action")
-    if action in ("next", "exit"):
+    if action in ("next", "exit", "prev"):
         st.session_state["ehc_action"] = None
         pending_answer = st.session_state.get("ehc_pending_answer", "")
         pending_q = st.session_state.get("ehc_pending_q", 0)
@@ -5359,6 +5364,9 @@ def page_ehc_journey():
             else:
                 st.session_state["ehc_current_question"] = pending_q + 1
                 st.rerun()
+        elif action == "prev":
+            st.session_state["ehc_current_question"] = max(0, pending_q - 1)
+            st.rerun()
         elif action == "exit":
             st.session_state["ehc_journey_active"] = False
             st.session_state["ehc_request_started"] = False
