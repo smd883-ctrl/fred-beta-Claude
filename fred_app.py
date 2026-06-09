@@ -2642,7 +2642,6 @@ def page_dashboard():
                     <span class="dash-tag dash-tag-green">{green_n} GREEN</span>
                 </div>
                 <div class="dash-widget-desc">Last analysed this session</div>
-                <div class="dash-widget-action">View full report</div>
             </div>"""
         else:
             widget_html = """
@@ -2650,9 +2649,11 @@ def page_dashboard():
                 <div class="dash-widget-title">EHCP Analysis</div>
                 <div class="dash-widget-value" style="font-size:1rem;color:var(--dash-muted);">No EHCP uploaded yet</div>
                 <div class="dash-widget-desc" style="margin-top:8px;">Upload your child's EHCP and FRED will tell you what it commits to and whether it is being delivered.</div>
-                <div class="dash-widget-action">Upload your EHCP</div>
             </div>"""
         st.markdown(widget_html, unsafe_allow_html=True)
+        if st.button("Upload now →" if not has_findings else "View full report →", key="widget_ehcp", use_container_width=True):
+            st.session_state.stage = "upload"
+            st.rerun()
         
 
     # Widget 2 — EHCP Request
