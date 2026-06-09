@@ -2356,7 +2356,6 @@ def render_traffic_light_explainer():
 def page_dashboard():
     import json as _json
 
-    # ── CSS variables and dashboard styles ───────────────────────────────────
     st.markdown("""
     <style>
     :root {
@@ -2441,14 +2440,8 @@ def page_dashboard():
         border-radius: var(--dash-radius);
         padding: 20px;
         box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-        cursor: pointer;
-        transition: box-shadow 0.2s, transform 0.2s;
         height: 100%;
-        min-height: 160px;
-    }
-    .dash-widget:hover {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        transform: translateY(-2px);
+        min-height: 140px;
     }
     .dash-widget-title {
         font-size: 11px; font-weight: 600; letter-spacing: 0.07em;
@@ -2459,10 +2452,6 @@ def page_dashboard():
         font-size: 1.5rem; color: var(--dash-text); line-height: 1.1; margin-bottom: 6px;
     }
     .dash-widget-desc { font-size: 12px; color: var(--dash-muted); line-height: 1.4; }
-    .dash-widget-action {
-        margin-top: 14px; font-size: 12px; font-weight: 600; color: var(--dash-accent);
-    }
-    .dash-widget-action::after { content: ' →'; }
 
     .dash-tag {
         display: inline-block; font-size: 11px; font-weight: 500;
@@ -2480,64 +2469,12 @@ def page_dashboard():
         height: 100%; border-radius: 3px; background: var(--dash-accent); width: 30%;
     }
 
-    .dash-event {
-        display: flex; gap: 12px; align-items: flex-start;
-        padding: 8px 10px; border-radius: var(--dash-radius-sm);
-        background: var(--dash-bg); border: 1px solid var(--dash-border);
-        margin-bottom: 7px;
-    }
-    .dash-event-day {
-        font-family: 'DM Serif Display', serif; font-size: 1.3rem;
-        line-height: 1; color: var(--dash-accent);
-    }
-    .dash-event-month {
-        font-size: 10px; font-weight: 600; text-transform: uppercase;
-        color: var(--dash-muted); letter-spacing: 0.05em;
-    }
-    .dash-event-title { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
-    .dash-event-sub   { font-size: 11px; color: var(--dash-muted); }
-    .dash-badge {
-        font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 10px;
-        align-self: center; white-space: nowrap; margin-left: auto;
-    }
-    .dash-badge-urgent { background: var(--dash-red-light);    color: var(--dash-red);    }
-    .dash-badge-soon   { background: var(--dash-amber-light);  color: var(--dash-amber);  }
-    .dash-badge-ok     { background: var(--dash-accent-light); color: var(--dash-accent); }
-
     .dash-glossary-pill {
         display: inline-block; font-size: 11px; font-weight: 500;
         padding: 4px 10px; border-radius: 20px;
         background: var(--dash-bg); border: 1px solid var(--dash-border);
         color: var(--dash-secondary); margin: 3px 3px 0 0;
     }
-
-    .dash-doc-item {
-        display: flex; align-items: center; gap: 8px;
-        padding: 7px 10px; border-radius: var(--dash-radius-sm);
-        background: var(--dash-bg); border: 1px solid var(--dash-border);
-        margin-bottom: 6px;
-    }
-    .dash-doc-name { font-size: 12px; font-weight: 500; flex: 1; }
-    .dash-doc-type {
-        font-size: 10px; font-weight: 600; padding: 2px 6px;
-        border-radius: 4px; background: var(--dash-blue-light); color: var(--dash-blue);
-    }
-
-    .dash-email-item {
-        padding: 10px 12px; border-radius: var(--dash-radius-sm);
-        background: var(--dash-bg); border: 1px solid var(--dash-border);
-        margin-bottom: 8px;
-    }
-    .dash-email-meta { display: flex; justify-content: space-between; margin-bottom: 4px; }
-    .dash-email-from { font-size: 12px; font-weight: 600; }
-    .dash-email-date { font-size: 11px; color: var(--dash-muted); }
-    .dash-email-subject { font-size: 12px; color: var(--dash-secondary); margin-bottom: 6px; }
-    .dash-email-tag {
-        font-size: 11px; font-weight: 500; padding: 3px 8px;
-        border-radius: 4px; display: inline-block;
-    }
-    .dash-email-concern { background: var(--dash-red-light);    color: var(--dash-red);    }
-    .dash-email-ok      { background: var(--dash-accent-light); color: var(--dash-accent); }
 
     .dash-timeline-item { display: flex; gap: 14px; padding-bottom: 14px; }
     .dash-timeline-item:last-child { padding-bottom: 0; }
@@ -2550,15 +2487,6 @@ def page_dashboard():
     .dash-tl-line { width: 2px; flex: 1; background: var(--dash-border); margin-top: 4px; min-height: 20px; }
     .dash-tl-title { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
     .dash-tl-date  { font-size: 11px; color: var(--dash-muted); }
-
-    .dash-thermo-score  { font-family: 'DM Serif Display', serif; font-size: 1.6rem; color: #b83232; line-height: 1; margin-bottom: 2px; }
-    .dash-thermo-status { font-size: 12px; font-weight: 600; color: #b83232; margin-bottom: 8px; }
-    .dash-thermo-narrative {
-        font-size: 11px; color: var(--dash-secondary); line-height: 1.5;
-        border-left: 2px solid var(--dash-border); padding-left: 8px; margin-bottom: 8px;
-    }
-    .dash-factor { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--dash-secondary); margin-bottom: 3px; }
-    .dash-factor-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
 
     .dash-theme-picker {
         position: fixed; bottom: 24px; right: 24px;
@@ -2584,10 +2512,13 @@ def page_dashboard():
     child_name = st.session_state.get("child_name", "") or "Your child"
     initial = child_name[0].upper() if child_name and child_name != "Your child" else "F"
 
+    has_findings = bool(st.session_state.get("findings"))
+    has_request  = bool(st.session_state.get("ehc_request_id"))
+
     # ── Zone 1: Child header ─────────────────────────────────────────────────
     st.markdown(f"""
     <div class="dash-child-header">
-        <div class="dash-avatar" style="background:linear-gradient(135deg,#c8dfc8 0%,#a8c8a8 100%);">{initial}</div>
+        <div class="dash-avatar">{initial}</div>
         <div>
             <div class="dash-child-name">{child_name}</div>
             <div class="dash-child-sub">Dashboard · Last updated today</div>
@@ -2606,21 +2537,11 @@ def page_dashboard():
             <div class="dash-next-label">Your next action</div>
             <div class="dash-next-text">Check what Section F commits to before your next review</div>
         </div>
-        <a href="javascript:void(0)" onclick="window.parent.document.querySelector('[data-testid=stApp]').dispatchEvent(new CustomEvent('dash_analyser'))"
-           style="background:white;color:#2c5f3f;border:none;padding:9px 20px;border-radius:20px;
-                  font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;
-                  margin-left:16px;text-decoration:none;font-family:'DM Sans',sans-serif;">
-            Review Section F →
-        </a>
     </div>
     """, unsafe_allow_html=True)
 
-   
     # ── Zone 3: Widget grid ──────────────────────────────────────────────────
     st.markdown('<div class="dash-section-label">Your tools</div>', unsafe_allow_html=True)
-
-    has_findings = bool(st.session_state.get("findings"))
-    has_request  = bool(st.session_state.get("ehc_request_id"))
 
     # Row 1
     col1, col2, col3 = st.columns(3)
@@ -2654,30 +2575,6 @@ def page_dashboard():
         if st.button("View report" if has_findings else "Upload", key="widget_ehcp", use_container_width=True):
             st.session_state.stage = "upload"
             st.rerun()
-            st.session_state.stage = "upload"
-            st.rerun()
-        
-
-    # Widget 2 — EHCP Request
-    with col2:
-        if has_request:
-            widget_html = """
-            <div class="dash-widget">
-                <div class="dash-widget-title">EHCP Request</div>
-                <div class="dash-widget-value">In progress</div>
-                <div class="dash-progress-track"><div class="dash-progress-fill"></div></div>
-                <div class="dash-widget-desc">Continue where you left off</div>
-                <div class="dash-widget-action">Continue your request</div>
-            </div>"""
-        else:
-            widget_html = """
-            <div class="dash-widget">
-                <div class="dash-widget-title">EHCP Request</div>
-                <div class="dash-widget-value" style="font-size:1rem;color:var(--dash-muted);">Start your EHCP request</div>
-                <div class="dash-widget-desc" style="margin-top:8px;">We'll help you build a clear, structured request to send to your local authority.</div>
-                <div class="dash-widget-action">Begin</div>
-            </div>"""
-        
 
     # Widget 2 — EHCP Request
     with col2:
@@ -2697,11 +2594,40 @@ def page_dashboard():
                 <div class="dash-widget-desc" style="margin-top:8px;">We'll help you build a clear, structured request to send to your local authority.</div>
             </div>"""
         st.markdown(widget_html, unsafe_allow_html=True)
-    with col2:
         if st.button("Continue" if has_request else "Begin", key="widget_ehc_request", use_container_width=True):
             st.session_state.stage = "ehc_request"
             st.rerun()
-        
+
+    # Widget 3 — Correspondence
+    with col3:
+        st.markdown("""
+        <div class="dash-widget">
+            <div class="dash-widget-title">Correspondence</div>
+            <div class="dash-widget-value" style="font-size:1rem;color:var(--dash-muted);">No correspondence uploaded yet</div>
+            <div class="dash-widget-desc" style="margin-top:8px;">Upload emails or letters from school or the LA. FRED reads them for patterns, tone, and the right question to ask next.</div>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("Upload", key="widget_correspondence", use_container_width=True):
+            st.session_state.stage = "correspondence"
+            st.rerun()
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # Row 2
+    col4, col5, col6 = st.columns(3)
+
+    # Widget 4 — School Engagement
+    with col4:
+        st.markdown("""
+        <div class="dash-widget">
+            <div class="dash-widget-title">School Engagement</div>
+            <div style="height:4px;background:var(--dash-border);border-radius:2px;margin:12px 0 10px;"></div>
+            <div class="dash-widget-desc">Upload correspondence to see your engagement score.</div>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("Upload correspondence", key="widget_engagement", use_container_width=True):
+            st.session_state.stage = "correspondence"
+            st.rerun()
 
     # Widget 5 — Upcoming
     with col5:
@@ -2710,10 +2636,11 @@ def page_dashboard():
             <div class="dash-widget-title">Upcoming</div>
             <div class="dash-widget-value" style="font-size:1rem;color:var(--dash-muted);">No events yet</div>
             <div class="dash-widget-desc" style="margin-top:8px;">Add your first meeting, deadline, or review date.</div>
-            <div class="dash-widget-action">+ Add event</div>
         </div>
         """, unsafe_allow_html=True)
-        
+        if st.button("Add event", key="widget_upcoming", use_container_width=True):
+            st.session_state.stage = "calendar"
+            st.rerun()
 
     # Widget 6 — Glossary
     with col6:
@@ -2733,7 +2660,9 @@ def page_dashboard():
             </div>
         </div>
         """, unsafe_allow_html=True)
-        
+        if st.button("Open glossary", key="widget_glossary", use_container_width=True):
+            st.session_state.stage = "glossary"
+            st.rerun()
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -2748,10 +2677,12 @@ def page_dashboard():
             <div style="border:1.5px dashed var(--dash-border);border-radius:var(--dash-radius-sm);padding:14px;text-align:center;margin-bottom:10px;">
                 <div style="font-size:12px;color:var(--dash-muted);">Drop any document here<br>FRED will identify it</div>
             </div>
-            <div class="dash-widget-value" style="font-size:1rem;color:var(--dash-muted);">No documents uploaded yet</div>
+            <div class="dash-widget-desc">No documents uploaded yet</div>
         </div>
         """, unsafe_allow_html=True)
-        
+        if st.button("Upload", key="widget_documents", use_container_width=True):
+            st.session_state.stage = "upload"
+            st.rerun()
 
     # Widget 8 — Email Analysis
     with col8:
@@ -2760,12 +2691,13 @@ def page_dashboard():
             <div class="dash-widget-title">Email Analysis</div>
             <div class="dash-widget-value" style="font-size:1rem;color:var(--dash-muted);">No emails analysed yet</div>
             <div class="dash-widget-desc" style="margin-top:8px;">Upload your first email or letter to get started.</div>
-            <div class="dash-widget-action">Upload correspondence</div>
         </div>
         """, unsafe_allow_html=True)
-        
+        if st.button("Upload", key="widget_email", use_container_width=True):
+            st.session_state.stage = "correspondence"
+            st.rerun()
 
-    # Widget 9 — Journey timeline
+    # Widget 9 — Freddie's Journey
     with col9:
         import datetime as _dt
         _today = _dt.datetime.now().strftime("%d %B %Y")
@@ -2783,9 +2715,9 @@ def page_dashboard():
                     </div>
                 </div>
             </div>
+            <div style="font-size:11px;color:var(--dash-muted);margin-top:14px;">Full timeline coming soon</div>
         </div>
         """, unsafe_allow_html=True)
-        
 
     # ── Zone 4: Theme picker ─────────────────────────────────────────────────
     st.markdown("""
