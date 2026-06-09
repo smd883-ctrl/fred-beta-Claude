@@ -5606,12 +5606,7 @@ def render_nav():
                 st.session_state.stage = "ehc_request"
                 st.rerun()
         with cols[4]:
-            if user:
-                st.markdown(
-                    f"<p style='font-size:0.78rem;color:#666;margin:0.5rem 0 0;text-align:center;'>"
-                    f"{user.email}</p>",
-                    unsafe_allow_html=True
-                )
+            pass
         with cols[5]:
             if st.button("Sign out", key="signout_btn", use_container_width=True):
                 try:
@@ -5624,12 +5619,7 @@ def render_nav():
                 st.rerun()
     else:
         with cols[3]:
-            if user:
-                st.markdown(
-                    f"<p style='font-size:0.78rem;color:#666;margin:0.5rem 0 0;text-align:center;'>"
-                    f"{user.email}</p>",
-                    unsafe_allow_html=True
-                )
+            pass
         with cols[4]:
             if st.button("Sign out", key="signout_btn", use_container_width=True):
                 try:
