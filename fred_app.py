@@ -2516,6 +2516,11 @@ def page_dashboard():
     has_request  = bool(st.session_state.get("ehc_request_id"))
 
     # ── Zone 1: Child header ─────────────────────────────────────────────────
+    if _ehcp_active:
+        _active_pill = "<div class=\"dash-pill active\"><div class=\"dash-pill-dot\"></div> EHCP Active</div>"
+    else:
+        _active_pill = ""
+
     st.markdown(f"""
     <div class="dash-child-header">
         <div class="dash-avatar">{initial}</div>
