@@ -3123,6 +3123,24 @@ def page_upload():
     with col_a:
         if st.button("Clear vault — start again", key="clear_vault"):
             st.session_state.vault = {}
+            st.session_state.findings = []
+            st.session_state.full_text = ""
+            st.session_state.parse_meta = {}
+            st.session_state.provision_inventory = {}
+            st.session_state.child_name = ""
+            st.session_state.la_name = ""
+            if SUPABASE_AVAILABLE and supabase and st.session_state.get("user"):
+                try:
+                    user = st.session_state["user"]
+                    supabase.auth.set_session(
+                        st.session_state["session"].access_token,
+                        st.session_state["session"].refresh_token
+                    )
+                    supabase.table("analysis_findings").delete().eq(
+                        "user_id", str(user.id)
+                    ).execute()
+                except Exception as e:
+                    st.warning(f"Could not clear saved analysis: {e}")
             st.rerun()
     with col_b:
         if vault:
