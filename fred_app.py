@@ -2524,8 +2524,8 @@ def page_dashboard():
             <div class="dash-child-sub">Dashboard · Last updated today</div>
         </div>
         <div class="dash-pills">
-            <div class="dash-pill active"><div class="dash-pill-dot"></div> EHCP Active</div>
-            <div class="dash-pill pending"><div class="dash-pill-dot"></div> Review due in 6 weeks</div>
+            {_active_pill}
+            <div class="dash-pill pending"><div class="dash-pill-dot"></div> Review date active after beta</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
