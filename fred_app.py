@@ -2515,6 +2515,27 @@ def page_dashboard():
     has_findings = bool(st.session_state.get("findings"))
     has_request  = bool(st.session_state.get("ehc_request_id"))
 
+    _ehcp_active = has_findings
+    if not _ehcp_active and SUPABASE_AVAILABLE and supabase and user:
+        try:
+            supabase.auth.set_session(
+                st.session_state["session"].access_token,
+                st.session_state["session"].refresh_token
+            )
+            _pill_check = supabase.table("analysis_findings") \
+                .select("id") \
+                .eq("user_id", str(user.id)) \
+                .limit(1) \
+                .execute()
+            _ehcp_active = bool(_pill_check.data)
+        except Exception:
+            _ehcp_active = False
+
+    if _ehcp_active:
+        _active_pill = "<div class=\"dash-pill active\"><div class=\"dash-pill-dot\"></div> EHCP Active</div>"
+    else:
+        _active_pill = ""
+
     # ── Zone 1: Child header ─────────────────────────────────────────────────
     if _ehcp_active:
         _active_pill = "<div class=\"dash-pill active\"><div class=\"dash-pill-dot\"></div> EHCP Active</div>"
