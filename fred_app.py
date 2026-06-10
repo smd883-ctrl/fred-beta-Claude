@@ -3123,12 +3123,11 @@ def page_upload():
     with col_a:
         if st.button("Clear vault — start again", key="clear_vault"):
             st.session_state.vault = {}
-            st.session_state.findings = []
-            st.session_state.full_text = ""
-            st.session_state.parse_meta = {}
-            st.session_state.provision_inventory = {}
-            st.session_state.child_name = ""
-            st.session_state.la_name = ""
+            if "findings" in st.session_state:
+                del st.session_state["findings"]
+            for _k in ["full_text", "parse_meta", "provision_inventory", "child_name", "la_name"]:
+                if _k in st.session_state:
+                    del st.session_state[_k]
             if SUPABASE_AVAILABLE and supabase and st.session_state.get("user"):
                 try:
                     user = st.session_state["user"]
