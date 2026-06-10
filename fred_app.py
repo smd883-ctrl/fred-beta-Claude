@@ -3122,12 +3122,10 @@ def page_upload():
     col_a, col_b = st.columns([1, 4])
     with col_a:
         if st.button("Clear vault — start again", key="clear_vault"):
-            st.session_state.vault = {}
-            if "findings" in st.session_state:
-                del st.session_state["findings"]
-            for _k in ["full_text", "parse_meta", "provision_inventory", "child_name", "la_name"]:
+            for _k in ["findings", "full_text", "parse_meta", "provision_inventory", "child_name", "la_name"]:
                 if _k in st.session_state:
                     del st.session_state[_k]
+            st.session_state.vault = {}
             if SUPABASE_AVAILABLE and supabase and st.session_state.get("user"):
                 try:
                     user = st.session_state["user"]
@@ -3138,18 +3136,16 @@ def page_upload():
                     supabase.table("analysis_findings").delete().eq(
                         "user_id", str(user.id)
                     ).execute()
+                    supabase.table("document_logs").delete().eq(
+                        "user_id", str(user.id)
+                    ).execute()
                 except Exception as e:
                     st.warning(f"Could not clear saved analysis: {e}")
+            st.session_state["vault_cleared"] = True
+
+        if st.session_state.get("vault_cleared"):
+            st.session_state["vault_cleared"] = False
             st.rerun()
-    with col_b:
-        if vault:
-            st.markdown(
-                "<p style='font-size:0.82rem;color: #888;padding-top:0.4rem;'>"
-                "To add more documents, upload them above. To replace a document, "
-                "upload a new version — it will overwrite the previous one."
-                "</p>",
-                unsafe_allow_html=True
-            )
 
     analyse_clicked = st.button("Analyse my documents", use_container_width=False, key="analyse_top") or st.session_state.get("analyse_clicked_top", False)
     st.session_state["analyse_clicked_top"] = False
